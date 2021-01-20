@@ -7,13 +7,45 @@ static constexpr auto empty_puml =
 "@startuml \
 @enduml";
 
-static constexpr auto elements_puml = 
+TEST_CASE( "empty diagram is parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(empty_puml);
+
+    REQUIRE(r.elements.empty());
+}
+
+static constexpr auto single_element_puml = 
 "@startuml\
 abstract        abstract\
-class           class\
 @enduml";
 
-/*static constexpr auto elements_puml = 
+TEST_CASE( "diagram with one element is parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(single_element_puml);
+
+    REQUIRE(r.elements.size() == 1);
+}
+
+static constexpr auto all_simple_elements_puml = 
+"@startuml\
+abstract        abstract\
+annotation      annotation\
+circle          circle\
+class           class\
+diamond         diamond\
+entity          entity\
+enum            enum\
+interface       interface\
+@enduml";
+
+TEST_CASE( "diagram with all simple elements is parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(all_simple_elements_puml);
+
+    REQUIRE(r.elements.size() == 8);
+}
+
+static constexpr auto all_elements_puml = 
 "@startuml\
 abstract        abstract\
 abstract class  abstract_class\
@@ -26,18 +58,25 @@ diamond         diamond\
 entity          entity\
 enum            enum\
 interface       interface\
-@enduml";*/
-
-TEST_CASE( "empty diagram is parsed", "[Parser]" ) {
-    Parser parser;
-    PlantUML r = parser.parse(empty_puml);
-
-    REQUIRE(r.elements.empty());
-}
+@enduml";
 
 TEST_CASE( "diagram with all elements is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(elements_puml);
+    PlantUML r = parser.parse(all_elements_puml);
 
-    REQUIRE(r.elements.size() == 2);
+    REQUIRE(r.elements.size() == 11);
+}
+
+static constexpr auto entity_with_body_puml = 
+"@startuml\
+entity test {\
+    variable : var\
+}\
+@enduml";
+
+TEST_CASE( "entity with body is parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(entity_with_body_puml);
+
+    REQUIRE(r.elements.size() == 1);
 }

@@ -19,7 +19,11 @@ Parser::Parser(/* args */)
     g["Entity"] << "'entity' Identifier" >> [](auto e, auto& p) { p.elements.push_back(PlantUML::Element{PlantUML::Element::Type::Entity, e[0].string()}); };
     g["Enum"] << "'enum' Identifier" >> [](auto e, auto& p) { p.elements.push_back(PlantUML::Element{PlantUML::Element::Type::Enum, e[0].string()}); };
     g["Interface"] << "'interface' Identifier" >> [](auto e, auto& p) { p.elements.push_back(PlantUML::Element{PlantUML::Element::Type::Interface, e[0].string()}); };
-    g["Element"] << "Abstract | Annotation | Circle | Class | Diamond | Entity | Enum | Interface";
+
+    g["ClassWithBody"] << "Class '{' (VariableDef | MethodDef)* '}'";
+    g["EntityWithBody"] << "Entity '{' VariableDef* '}'";
+
+    g["Element"] << "Abstract | Annotation | Circle | Class | Diamond | Entity | Enum | Interface | ClassWithBody | EntityWithBody";
 
     g["VariableDef"] << "Identifier Identifier | '{field}' Identifier+ | Identifier ':' Identifier";
 
@@ -27,22 +31,22 @@ Parser::Parser(/* args */)
 
     g["MethodDef"] << "Identifier Identifier ParamList | '{method}' Identifier+ | Identifier ParamList ':' Identifier";
 
-    g["ClassWithBody"] << "Class '{' (VariableDef | MethodDef)* '}'";
-    g["EntityWithBody"] << "Entity '{' VariableDef* '}'";
-
     g["ExtensionLeft"] << "Identifier '<|-' '-'? Identifier";
-    g["ExtensionRight"] << "Identifier '-'? '-|>' Identifier";
-
     g["CompositionLeft"] << "Identifier '*-' '-'? Identifier";
-    g["CompositionRight"] << "Identifier '-'? '-*' Identifier";
-
     g["AggregationLeft"] << "Identifier 'o-' '-'? Identifier";
+    g["RelationshipLeft"] << "ExtensionLeft | CompositionLeft | AggregationLeft";
+
+    g["ExtensionRight"] << "Identifier '-'? '-|>' Identifier";
+    g["CompositionRight"] << "Identifier '-'? '-*' Identifier";
     g["AggregationRight"] << "Identifier '-'? '-o' Identifier";
+    g["RelationshipRight"] << "ExtensionRight | CompositionRight | AggregationRight";
+
+    g["Body"] << "(Element | RelationshipLeft | RelationshipRight)*";
 
     // diagram
     g["Start"] << "'@startuml'";
     g["End"] << "'@enduml'";
-    g["Diagram"] << "Start Element* End";
+    g["Diagram"] << "Start Body End";
     
     g.setStart(g["Diagram"]);
 }
