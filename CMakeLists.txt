@@ -21,8 +21,7 @@ CPMAddPackage(
   VERSION 2.0
   GIT_REPOSITORY https://github.com/TheLartians/PEGParser.git
 )
-link_directories(${PROJECT_BINARY_DIR}/_deps/pegparser-build)
-include_directories(${PROJECT_BINARY_DIR}/_deps/pegparser-src/include)
+include_directories(${PEGParser_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC PEGParser)
 
 add_subdirectory(test)
