@@ -52,7 +52,7 @@ TEST_CASE( "diagram with all simple elements is parsed", "[Parser]" ) {
 static constexpr auto all_elements_puml = 
 R"(@startuml
 abstract        abstract
-abstract class  abstract_class
+abstract class  "abstract class"
 annotation      annotation
 circle          circle
 ()              circle_short_form
@@ -110,4 +110,76 @@ TEST_CASE( "entity with two variables is parsed", "[Parser]" ) {
     PlantUML r = parser.parse(entity_with_single_var_puml);
 
     REQUIRE(r.elements.size() == 1);
+}
+
+static constexpr auto relationships_left_puml = 
+R"(@startuml
+Class01 <|-- Class02
+Class03 *-- Class04
+Class05 o-- Class06
+@enduml)";
+
+TEST_CASE( "relationships left are parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(relationships_left_puml);
+
+    REQUIRE(r.elements.size() == 0);
+}
+
+static constexpr auto relationships_right_puml = 
+R"(@startuml
+Class01 --|> Class02
+Class03 --* Class04
+Class05 --o Class06
+@enduml)";
+
+TEST_CASE( "relationships right are parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(relationships_right_puml);
+
+    REQUIRE(r.elements.size() == 0);
+}
+
+static constexpr auto relationships_up_puml = 
+R"(@startuml
+Class01 <|- Class02
+Class03 *- Class04
+Class05 o- Class06
+@enduml)";
+
+TEST_CASE( "relationships up are parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(relationships_up_puml);
+
+    REQUIRE(r.elements.size() == 0);
+}
+
+static constexpr auto relationships_down_puml = 
+R"(@startuml
+Class01 -|> Class02
+Class03 -* Class04
+Class05 -o Class06
+@enduml)";
+
+TEST_CASE( "relationships down are parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(relationships_down_puml);
+
+    REQUIRE(r.elements.size() == 0);
+}
+
+static constexpr auto labels_on_relations_puml = 
+R"(@startuml
+Class01 "1" *-- "many" Class02 : contains
+
+Class03 o-- Class04 : aggregation
+
+Class05 --|> "1" Class06
+@enduml)";
+
+TEST_CASE( "labels on relationships are parsed", "[Parser]" ) {
+    Parser parser;
+    PlantUML r = parser.parse(labels_on_relations_puml);
+
+    REQUIRE(r.elements.size() == 0);
 }
