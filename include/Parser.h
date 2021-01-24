@@ -2,7 +2,7 @@
 
 #include <peg_parser/generator.h>
 
-#include "PlantUML.h"
+#include "Visitor.h"
 
 class Parser
 {
@@ -13,5 +13,5 @@ public:
     PlantUML parse(const std::string& input);
 
 private:
-    peg_parser::ParserGenerator<void, PlantUML&> g;
+    peg_parser::ParserGenerator<void, Visitor&> g;
 };

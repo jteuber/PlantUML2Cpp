@@ -4,22 +4,10 @@
 #include <vector>
 #include <map>
 
-struct EnumValue {
+struct PlantUML {
     std::string name;
-};
-
-struct Field {
-    std::string name;
-    std::string type;
-};
-
-struct Method {
-    std::string name;
-    std::string returnType;
-    std::vector<Field> parameters;
-};
-
-struct Container {
+    std::string valueType; // empty for most, return/var type for methods and fields
+    std::string modifier; // stereotypes
     enum class Type {
         Abstract,
         Annotation,
@@ -28,18 +16,30 @@ struct Container {
         Diamond,
         Entity,
         Enum,
-        Interface
+        Interface,
+        Namespace,
+        Diagram,
+        Method,
+        Field,
+        EnumValue,
+        Empty
     } type;
-    std::string name;
-
-    std::vector<EnumValue> enumValues;
-    std::vector<Field> fields;
-    std::vector<Method> methods;
-};
-
-struct PlantUML {
-    std::string name;
     
-    std::vector<Container> containers;
-    std::vector<PlantUML> namespaces;
+    std::vector<PlantUML> subData;
+    PlantUML* parent = nullptr;
+
+    PlantUML() 
+        : type(Type::Empty)
+    {}
+
+    PlantUML(Type type, PlantUML* parent) 
+        : type(type)
+        , parent(parent)
+    {}
+
+    PlantUML(const std::string& name, Type type, PlantUML* parent) 
+        : name(name)
+        , type(type)
+        , parent(parent)
+    {}
 };

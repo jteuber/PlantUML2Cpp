@@ -11,7 +11,7 @@ TEST_CASE( "empty diagram is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(empty_puml);
 
-    REQUIRE(r.containers.empty());
+    REQUIRE(r.subData.empty());
 }
 
 static constexpr auto single_element_puml = 
@@ -23,7 +23,7 @@ TEST_CASE( "diagram with one element is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(single_element_puml);
 
-    REQUIRE(r.containers.size() == 1);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto all_simple_containers_puml = 
@@ -42,10 +42,10 @@ TEST_CASE( "diagram with all simple containers is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(all_simple_containers_puml);
 
-    REQUIRE(r.containers.size() == 8);
+    REQUIRE(r.subData.size() == 8);
     for (int i=0; i<8; ++i)
     {
-        REQUIRE(r.containers[i].type == static_cast<Container::Type>(i));
+        REQUIRE(r.subData[i].type == static_cast<PlantUML::Type>(i));
     }
 }
 
@@ -68,7 +68,7 @@ TEST_CASE( "diagram with all containers is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(all_containers_puml);
 
-    REQUIRE(r.containers.size() == 11);
+    REQUIRE(r.subData.size() == 11);
 }
 
 static constexpr auto entity_with_empty_body_puml = 
@@ -80,7 +80,7 @@ TEST_CASE( "entity with empty body is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(entity_with_empty_body_puml);
 
-    REQUIRE(r.containers.size() == 1);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto entity_with_single_var_puml = 
@@ -94,7 +94,7 @@ TEST_CASE( "entity with single variable is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(entity_with_single_var_puml);
 
-    REQUIRE(r.containers.size() == 1);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto entity_with_two_var_puml = 
@@ -109,7 +109,7 @@ TEST_CASE( "entity with two variables is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(entity_with_single_var_puml);
 
-    REQUIRE(r.containers.size() == 1);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto class_with_two_methods_puml = 
@@ -124,7 +124,7 @@ TEST_CASE( "class with two methods is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(class_with_two_methods_puml);
 
-    REQUIRE(r.containers.size() == 1);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto relationships_left_puml = 
@@ -138,7 +138,7 @@ TEST_CASE( "relationships left are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(relationships_left_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto relationships_right_puml = 
@@ -152,7 +152,7 @@ TEST_CASE( "relationships right are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(relationships_right_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto relationships_up_puml = 
@@ -166,7 +166,7 @@ TEST_CASE( "relationships up are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(relationships_up_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto relationships_down_puml = 
@@ -180,7 +180,7 @@ TEST_CASE( "relationships down are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(relationships_down_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto labels_on_relations_puml = 
@@ -196,7 +196,7 @@ TEST_CASE( "labels on relationships are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(labels_on_relations_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto comments_puml = 
@@ -209,7 +209,7 @@ TEST_CASE( "comments are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(comments_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto methods_external_puml = 
@@ -225,7 +225,7 @@ TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(methods_external_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto packages_puml = 
@@ -244,7 +244,9 @@ TEST_CASE( "packages are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(packages_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 2);
+    REQUIRE(r.subData[0].name == "Classic Collections");
+    REQUIRE(r.subData[1].name == "net.sourceforge.plantuml");
 }
 
 static constexpr auto include_puml = 
@@ -256,7 +258,7 @@ TEST_CASE( "include in diagram is ignored", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(include_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto enum_with_body_puml = 
@@ -273,7 +275,7 @@ TEST_CASE( "enum with body is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(enum_with_body_puml);
 
-    REQUIRE(r.containers.size() == 1);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto class_with_stereotype_and_spot_puml = 
@@ -282,7 +284,8 @@ R"(@startuml
 class System << (S,#FF7700) Singleton >>
 class Date << (D,orchid) >>
 
-entity test << Template >> {
+entity test << (T,white) Template >>
+{
     test : var
 }
 
@@ -292,7 +295,7 @@ TEST_CASE( "class with stereotype and custom spot is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(class_with_stereotype_and_spot_puml);
 
-    REQUIRE(r.containers.size() == 3);
+    REQUIRE(r.subData.size() == 3);
 }
 
 static constexpr auto hidden_relationships_puml = 
@@ -307,7 +310,7 @@ TEST_CASE( "hidden relationships are parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(hidden_relationships_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }
 
 static constexpr auto real_live_example_part_1_puml = 
@@ -318,7 +321,8 @@ R"(@startuml
 '~~~~~~~~~~~~~~~~~~~~
 ' data entities
 '~~~~~~~~~~~~~~~~~~~~
-package "data" {
+package "data" 
+{
     entity World
 
     entity Scene {
@@ -341,23 +345,23 @@ package "data" {
     entity Texture
     entity AudioFile
 
-    entity ScriptableValue << (T,white) Template >>
+    entity ScriptableValue << (T,white) Template >> 
     {
         value : T
         call : std::string
     }
 
-    entity SceneFolder
+    entity SceneFolder 
     {
         occurances : std::filesystem::path[]
     }
-    entity FileStack
+    entity FileStack 
     {
         base : std::filesystem::path
         patches : std::filesystem::path[]
         appends : std::filesystem::path[]
     }
-    entity StackedFile
+    entity StackedFile 
     {
         contents : std::string
         loaded : bool
@@ -369,10 +373,9 @@ TEST_CASE( "real live example part 1 is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(real_live_example_part_1_puml);
 
-    REQUIRE(r.containers.size() == 0);
-    REQUIRE(r.namespaces.size() == 1);
-    REQUIRE(r.namespaces[0].name == "data");
-    REQUIRE(r.namespaces[0].containers.size() == 13);
+    REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData[0].name == "data");
+    REQUIRE(r.subData[0].subData.size() == 13);
 }
 
 static constexpr auto real_live_example_part_2_puml = 
@@ -438,10 +441,9 @@ TEST_CASE( "real live example part 2 is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(real_live_example_part_2_puml);
 
-    REQUIRE(r.containers.size() == 0);
-    REQUIRE(r.namespaces.size() == 1);
-    REQUIRE(r.namespaces[0].name == "algorithms");
-    REQUIRE(r.namespaces[0].containers.size() == 11);
+    REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData[0].name == "algorithms");
+    REQUIRE(r.subData[0].subData.size() == 11);
 }
 
 static constexpr auto real_live_example_part_3_puml = 
@@ -519,5 +521,5 @@ TEST_CASE( "real live example part 3 is parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(real_live_example_part_3_puml);
 
-    REQUIRE(r.containers.size() == 0);
+    REQUIRE(r.subData.size() == 0);
 }

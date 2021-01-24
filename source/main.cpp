@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     Parser parser;
     PlantUML result = parser.parse(input);
 
-    for (auto& element : result.containers)
+    for (auto& element : result.subData)
     {
         std::cout << TYPE2STRING[static_cast<int>(element.type)] << " " << element.name << std::endl;
     }
