@@ -16,6 +16,8 @@ public:
     void visitContainer(Expression e, PlantUML::Type type);
     void visitOpeningBracket();
     void visitClosingBracket();
+    void visitField(Expression valueType, Expression name);
+    void visitExternalField(Expression container, Expression field);
     void visitName(Expression name);
 
 private:

@@ -43,10 +43,23 @@ TEST_CASE( "diagram with all simple containers is parsed", "[Parser]" ) {
     PlantUML r = parser.parse(all_simple_containers_puml);
 
     REQUIRE(r.subData.size() == 8);
-    for (int i=0; i<8; ++i)
-    {
-        REQUIRE(r.subData[i].type == static_cast<PlantUML::Type>(i));
-    }
+
+    REQUIRE(r.subData[0].type == PlantUML::Type::Abstract);
+    REQUIRE(r.subData[0].name == "abstract");
+    REQUIRE(r.subData[1].type == PlantUML::Type::Annotation);
+    REQUIRE(r.subData[1].name == "annotation");
+    REQUIRE(r.subData[2].type == PlantUML::Type::Circle);
+    REQUIRE(r.subData[2].name == "circle");
+    REQUIRE(r.subData[3].type == PlantUML::Type::Class);
+    REQUIRE(r.subData[3].name == "class");
+    REQUIRE(r.subData[4].type == PlantUML::Type::Diamond);
+    REQUIRE(r.subData[4].name == "diamond");
+    REQUIRE(r.subData[5].type == PlantUML::Type::Entity);
+    REQUIRE(r.subData[5].name == "entity");
+    REQUIRE(r.subData[6].type == PlantUML::Type::Enum);
+    REQUIRE(r.subData[6].name == "enum");
+    REQUIRE(r.subData[7].type == PlantUML::Type::Interface);
+    REQUIRE(r.subData[7].name == "interface");
 }
 
 static constexpr auto all_containers_puml = 
@@ -69,6 +82,29 @@ TEST_CASE( "diagram with all containers is parsed", "[Parser]" ) {
     PlantUML r = parser.parse(all_containers_puml);
 
     REQUIRE(r.subData.size() == 11);
+
+    REQUIRE(r.subData[0].type == PlantUML::Type::Abstract);
+    REQUIRE(r.subData[0].name == "abstract");
+    REQUIRE(r.subData[1].type == PlantUML::Type::Abstract);
+    REQUIRE(r.subData[1].name == "abstract class");
+    REQUIRE(r.subData[2].type == PlantUML::Type::Annotation);
+    REQUIRE(r.subData[2].name == "annotation");
+    REQUIRE(r.subData[3].type == PlantUML::Type::Circle);
+    REQUIRE(r.subData[3].name == "circle");
+    REQUIRE(r.subData[4].type == PlantUML::Type::Circle);
+    REQUIRE(r.subData[4].name == "circle_short_form");
+    REQUIRE(r.subData[5].type == PlantUML::Type::Class);
+    REQUIRE(r.subData[5].name == "class");
+    REQUIRE(r.subData[6].type == PlantUML::Type::Diamond);
+    REQUIRE(r.subData[6].name == "diamond");
+    REQUIRE(r.subData[7].type == PlantUML::Type::Diamond);
+    REQUIRE(r.subData[7].name == "diamond_short_form");
+    REQUIRE(r.subData[8].type == PlantUML::Type::Entity);
+    REQUIRE(r.subData[8].name == "entity");
+    REQUIRE(r.subData[9].type == PlantUML::Type::Enum);
+    REQUIRE(r.subData[9].name == "enum");
+    REQUIRE(r.subData[10].type == PlantUML::Type::Interface);
+    REQUIRE(r.subData[10].name == "interface");
 }
 
 static constexpr auto entity_with_empty_body_puml = 
@@ -81,6 +117,8 @@ TEST_CASE( "entity with empty body is parsed", "[Parser]" ) {
     PlantUML r = parser.parse(entity_with_empty_body_puml);
 
     REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData[0].type == PlantUML::Type::Entity);
+    REQUIRE(r.subData[0].name == "test");
 }
 
 static constexpr auto entity_with_single_var_puml = 
@@ -95,6 +133,13 @@ TEST_CASE( "entity with single variable is parsed", "[Parser]" ) {
     PlantUML r = parser.parse(entity_with_single_var_puml);
 
     REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData[0].type == PlantUML::Type::Entity);
+    REQUIRE(r.subData[0].name == "test");
+
+    REQUIRE(r.subData[0].subData.size() == 1);
+    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Field);
+    REQUIRE(r.subData[0].subData[0].name == "variable");
+    REQUIRE(r.subData[0].subData[0].valueType == "var");
 }
 
 static constexpr auto entity_with_two_var_puml = 
@@ -225,7 +270,7 @@ TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(methods_external_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r.subData.size() == 1);
 }
 
 static constexpr auto packages_puml = 

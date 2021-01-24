@@ -16,8 +16,8 @@ Parser::Parser(/* args */)
     g["Color"]  << "'#' (!(' ' | ')' | '\n') .)* | Identifier";
 
     g["Endl"] << "'\n'";
-    g["OpenBrackets"]     << "Endl? '{'" >> [] (auto e, auto& v) { v.visitOpeningBracket(); };
-    g["CloseBrackets"]     << "'}'" >> [] (auto e, auto& v) { v.visitClosingBracket(); };
+    g["OpenBrackets"]  << "Endl? '{'" >> [] (auto e, auto& v) { v.visitOpeningBracket(); };
+    g["CloseBrackets"] << "'}'" >> [] (auto e, auto& v) { v.visitClosingBracket(); };
 
     // ========= COMMENTS =========
     g["Comment"] << "'\\'' (!'\n' .)*";
@@ -27,12 +27,18 @@ Parser::Parser(/* args */)
 
     // ========= ELEMENTS =========
     // fields, parameters and methods
-    g["FieldDef"] << "'{field}' Identifier+ | Identifier ':' FieldTypename | FieldTypename Identifier?";
-    g["ParamList"]   << "'(' (FieldDef (',' FieldDef)*)? ')'";
-    g["MethodDef"]   << "'{method}' Identifier+ | Identifier ParamList ':' FieldTypename | FieldTypename Identifier? ParamList";
+    g["FieldDefExplicit"] << "'{field}' Identifier+"        >> [] (auto e, auto& v) {};
+    g["FieldDefColon"]    << "Identifier ':' FieldTypename" >> [] (auto e, auto& v) { v.visitField(e[1], e[0]); };
+    g["FieldDefImplicit"] << "FieldTypename Identifier"     >> [] (auto e, auto& v) { v.visitField(e[0], e[1]); };
+    g["FieldDefTypeOnly"] << "FieldTypename"                >> [] (auto e, auto& v) { v.visitField(e[0], e[0]); };
+    g["FieldDef"] << "FieldDefExplicit | FieldDefColon | FieldDefImplicit | FieldDefTypeOnly";
+
+
+    g["ParamList"] << "'(' (FieldDef (',' FieldDef)*)? ')'";
+    g["MethodDef"] << "'{method}' Identifier+ | Identifier ParamList (':' FieldTypename)? | FieldTypename Identifier ParamList";
 
     // external fields and methods
-    g["ExtFieldDef"] << "Identifier ':' FieldDef";
+    g["ExtFieldDef"] << "Identifier ':' FieldDef" >> [] (auto e, auto& v) { v.visitExternalField(e[0], e[1]); };
     g["ExtMethodDef"] << "Identifier ':' MethodDef";
     g["ExternalDefinitions"] << "ExtMethodDef | ExtFieldDef";
 

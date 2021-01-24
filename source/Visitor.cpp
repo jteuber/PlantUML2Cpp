@@ -1,4 +1,7 @@
 #include "Visitor.h"
+
+#include <algorithm>
+
 PlantUML Visitor::getResult() 
 {
     return root;
@@ -33,6 +36,31 @@ void Visitor::visitClosingBracket()
 {
     if (currentContainer->parent)
         currentContainer = currentContainer->parent;
+}
+
+void Visitor::visitField(Expression valueType, Expression name) 
+{
+    currentContainer->subData.emplace_back(PlantUML::Type::Field, currentContainer);
+    auto& field = currentContainer->subData.back();
+
+    field.name = name.string();
+    field.valueType = valueType.string();
+}
+
+void Visitor::visitExternalField(Expression container, Expression field) 
+{
+    auto containerName = container.string();
+    auto containerIt = std::ranges::find(currentContainer->subData, containerName, &PlantUML::name);
+
+    if (containerIt == currentContainer->subData.end()) {
+        currentContainer = &currentContainer->subData.emplace_back(PlantUML::Type::Class, currentContainer);
+        currentContainer->name = containerName;
+    } else {
+        currentContainer = &(*containerIt);
+    }
+
+    field.evaluate(*this);
+    currentContainer = currentContainer->parent;
 }
 
 void Visitor::visitName(Expression name) 
