@@ -152,16 +152,26 @@ entity test {
 
 TEST_CASE( "entity with two variables is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(entity_with_single_var_puml);
+    PlantUML r = parser.parse(entity_with_two_var_puml);
 
     REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData[0].type == PlantUML::Type::Entity);
+    REQUIRE(r.subData[0].name == "test");
+
+    REQUIRE(r.subData[0].subData.size() == 2);
+    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Field);
+    REQUIRE(r.subData[0].subData[0].name == "variable");
+    REQUIRE(r.subData[0].subData[0].valueType == "var");
+    REQUIRE(r.subData[0].subData[1].type == PlantUML::Type::Field);
+    REQUIRE(r.subData[0].subData[1].name == "variable2");
+    REQUIRE(r.subData[0].subData[1].valueType == "var");
 }
 
 static constexpr auto class_with_two_methods_puml = 
 R"(@startuml
 class test {
-    variable() : var
-    variable2(input : bool) : var
+    method() : var
+    method2(input : bool) : var
 }
 @enduml)";
 
@@ -170,6 +180,20 @@ TEST_CASE( "class with two methods is parsed", "[Parser]" ) {
     PlantUML r = parser.parse(class_with_two_methods_puml);
 
     REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData[0].type == PlantUML::Type::Class);
+    REQUIRE(r.subData[0].name == "test");
+
+    REQUIRE(r.subData[0].subData.size() == 2);
+    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Method);
+    REQUIRE(r.subData[0].subData[0].name == "method");
+    REQUIRE(r.subData[0].subData[0].valueType == "var");
+    REQUIRE(r.subData[0].subData[0].subData.empty());
+    REQUIRE(r.subData[0].subData[1].type == PlantUML::Type::Method);
+    REQUIRE(r.subData[0].subData[1].name == "method2");
+    REQUIRE(r.subData[0].subData[1].valueType == "var");
+    REQUIRE(r.subData[0].subData[1].subData.size() == 1);
+    REQUIRE(r.subData[0].subData[1].subData[0].name == "input");
+    REQUIRE(r.subData[0].subData[1].subData[0].valueType == "bool");
 }
 
 static constexpr auto relationships_left_puml = 
@@ -263,14 +287,31 @@ Object <|-- ArrayList
 
 Object : equals()
 ArrayList : Object[] elementData
-ArrayList : size()
+ArrayList : size() : int
 @enduml)";
 
 TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
     Parser parser;
     PlantUML r = parser.parse(methods_external_puml);
 
-    REQUIRE(r.subData.size() == 1);
+    REQUIRE(r.subData.size() == 2);
+    REQUIRE(r.subData[0].type == PlantUML::Type::Class);
+    REQUIRE(r.subData[0].name == "Object");
+    REQUIRE(r.subData[1].type == PlantUML::Type::Class);
+    REQUIRE(r.subData[1].name == "ArrayList");
+
+    REQUIRE(r.subData[0].subData.size() == 1);
+    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Method);
+    REQUIRE(r.subData[0].subData[0].name == "equals");
+    REQUIRE(r.subData[0].subData[0].valueType == "void");
+
+    REQUIRE(r.subData[1].subData.size() == 2);
+    REQUIRE(r.subData[1].subData[0].type == PlantUML::Type::Field);
+    REQUIRE(r.subData[1].subData[0].name == "elementData");
+    REQUIRE(r.subData[1].subData[0].valueType == "Object[]");
+    REQUIRE(r.subData[1].subData[1].type == PlantUML::Type::Method);
+    REQUIRE(r.subData[1].subData[1].name == "size");
+    REQUIRE(r.subData[1].subData[1].valueType == "int");
 }
 
 static constexpr auto packages_puml = 

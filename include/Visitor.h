@@ -18,6 +18,9 @@ public:
     void visitClosingBracket();
     void visitField(Expression valueType, Expression name);
     void visitExternalField(Expression container, Expression field);
+    void visitMethod(Expression valueType, Expression name, Expression parameters);
+    void visitVoidMethod(Expression name, Expression parameters);
+    void visitExternalMethod(Expression container, Expression method);
     void visitName(Expression name);
 
 private:

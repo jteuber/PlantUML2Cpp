@@ -26,20 +26,26 @@ Parser::Parser(/* args */)
     g["Ignored"] << "Comment | Include";
 
     // ========= ELEMENTS =========
-    // fields, parameters and methods
+    // fields
     g["FieldDefExplicit"] << "'{field}' Identifier+"        >> [] (auto e, auto& v) {};
     g["FieldDefColon"]    << "Identifier ':' FieldTypename" >> [] (auto e, auto& v) { v.visitField(e[1], e[0]); };
     g["FieldDefImplicit"] << "FieldTypename Identifier"     >> [] (auto e, auto& v) { v.visitField(e[0], e[1]); };
     g["FieldDefTypeOnly"] << "FieldTypename"                >> [] (auto e, auto& v) { v.visitField(e[0], e[0]); };
     g["FieldDef"] << "FieldDefExplicit | FieldDefColon | FieldDefImplicit | FieldDefTypeOnly";
 
-
+    // parameter list
     g["ParamList"] << "'(' (FieldDef (',' FieldDef)*)? ')'";
-    g["MethodDef"] << "'{method}' Identifier+ | Identifier ParamList (':' FieldTypename)? | FieldTypename Identifier ParamList";
+
+    // methods
+    g["MethodDefExplicit"] << "'{method}' Identifier+";
+    g["MethodDefTrailingReturn"] << "Identifier ParamList ':' FieldTypename" >> [] (auto e, auto& v) { v.visitMethod(e[2], e[0], e[1]); };
+    g["MethodDefLeadingReturn"] << "FieldTypename Identifier ParamList"      >> [] (auto e, auto& v) { v.visitMethod(e[0], e[1], e[2]); };
+    g["MethodDefNoReturn"] << "Identifier ParamList"                         >> [] (auto e, auto& v) { v.visitVoidMethod(e[0], e[1]); };
+    g["MethodDef"] << "MethodDefExplicit | MethodDefTrailingReturn | MethodDefLeadingReturn | MethodDefNoReturn";
 
     // external fields and methods
     g["ExtFieldDef"] << "Identifier ':' FieldDef" >> [] (auto e, auto& v) { v.visitExternalField(e[0], e[1]); };
-    g["ExtMethodDef"] << "Identifier ':' MethodDef";
+    g["ExtMethodDef"] << "Identifier ':' MethodDef" >> [] (auto e, auto& v) { v.visitExternalMethod(e[0], e[1]); };
     g["ExternalDefinitions"] << "ExtMethodDef | ExtFieldDef";
 
 

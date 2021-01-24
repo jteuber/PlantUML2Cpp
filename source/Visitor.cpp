@@ -63,6 +63,46 @@ void Visitor::visitExternalField(Expression container, Expression field)
     currentContainer = currentContainer->parent;
 }
 
+void Visitor::visitMethod(Expression valueType, Expression name, Expression parameters) 
+{
+    currentContainer->subData.emplace_back(PlantUML::Type::Method, currentContainer);
+    currentContainer = &currentContainer->subData.back();
+    currentContainer->name = name.string();
+    currentContainer->valueType = valueType.string();
+
+    parameters.evaluate(*this);
+
+    currentContainer = currentContainer->parent;
+}
+
+void Visitor::visitVoidMethod(Expression name, Expression parameters) 
+{
+    currentContainer->subData.emplace_back(PlantUML::Type::Method, currentContainer);
+    currentContainer = &currentContainer->subData.back();
+    currentContainer->name = name.string();
+    currentContainer->valueType = "void";
+
+    parameters.evaluate(*this);
+
+    currentContainer = currentContainer->parent;
+}
+
+void Visitor::visitExternalMethod(Expression container, Expression method) 
+{
+    auto containerName = container.string();
+    auto containerIt = std::ranges::find(currentContainer->subData, containerName, &PlantUML::name);
+
+    if (containerIt == currentContainer->subData.end()) {
+        currentContainer = &currentContainer->subData.emplace_back(PlantUML::Type::Class, currentContainer);
+        currentContainer->name = containerName;
+    } else {
+        currentContainer = &(*containerIt);
+    }
+
+    method.evaluate(*this);
+    currentContainer = currentContainer->parent;
+}
+
 void Visitor::visitName(Expression name) 
 {
     auto strName = name.string();
