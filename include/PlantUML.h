@@ -7,7 +7,7 @@
 struct PlantUML {
     std::string name;
     std::string valueType; // empty for most, return/var type for methods and fields
-    std::string modifier; // stereotypes
+    std::string modifier; // stereotypes, annotations
     enum class Type {
         Abstract,
         Annotation,
@@ -22,7 +22,8 @@ struct PlantUML {
         Method,
         Field,
         EnumValue,
-        Empty
+        Composition,
+        Aggregation
     } type;
     
     std::vector<PlantUML> subData;

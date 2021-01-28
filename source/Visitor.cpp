@@ -103,6 +103,37 @@ void Visitor::visitExternalMethod(Expression container, Expression method)
     currentContainer = currentContainer->parent;
 }
 
+void Visitor::visitExtension(Expression parent, Expression child) 
+{
+    currentContainer->findOrCreateChild(parent[0].string());
+    auto childClass = currentContainer->findOrCreateChild(child[0].string());
+
+    childClass->valueType = parent[0].string();
+}
+
+void Visitor::visitComposition(Expression owner, Expression type) 
+{
+    auto ownerClass = currentContainer->findOrCreateChild(owner[0].string());
+    currentContainer->findOrCreateChild(type[0].string());
+
+    auto field = ownerClass->createChild(PlantUML::Type::Composition);
+    field->valueType = type[0].string();
+}
+
+void Visitor::visitAggregation(Expression user, Expression type) 
+{
+    auto userClass = currentContainer->findOrCreateChild(user[0].string());
+    currentContainer->findOrCreateChild(type[0].string());
+
+    auto field = userClass->createChild(PlantUML::Type::Aggregation);
+    field->valueType = type[0].string();
+}
+
+void Visitor::visitUsage(Expression client, Expression server) 
+{
+    
+}
+
 void Visitor::visitName(Expression name) 
 {
     auto strName = name.string();

@@ -21,6 +21,7 @@ public:
     void visitMethod(Expression valueType, Expression name, Expression parameters);
     void visitVoidMethod(Expression name, Expression parameters);
     void visitExternalMethod(Expression container, Expression method);
+    void visitAggregation(Expression user, Expression type);
     void visitName(Expression name);
 
 private:

@@ -61,16 +61,29 @@ Parser::Parser(/* args */)
 
     g["RelationshipLabel"] << "':' '<'? (!('>' | '\n') .)* '>'?";
 
-    g["ExtensionLeft"]    << "Identifier QuotedName? TriangleLeft Line QuotedName? Identifier RelationshipLabel?";
-    g["CompositionLeft"]  << "Identifier QuotedName? Composition Line QuotedName? Identifier RelationshipLabel?";
-    g["AggregationLeft"]  << "Identifier QuotedName? Aggregation Line QuotedName? Identifier RelationshipLabel?";
-    g["UsageLeft"]        << "Identifier QuotedName? OpenTriLeft Line QuotedName? Identifier RelationshipLabel?";
+    g["RelationshipStart"] << "Identifier QuotedName?";
+    g["RelationshipEnd"] << "Identifier RelationshipLabel?";
+
+    g["ExtensionLeftCore"]    << "TriangleLeft Line QuotedName?";
+    g["CompositionLeftCore"]  << "Composition Line QuotedName?";
+    g["AggregationLeftCore"]  << "Aggregation Line QuotedName?";
+    g["UsageLeftCore"]        << "OpenTriLeft Line QuotedName?";
+
+    g["ExtensionRightCore"]    << "Line TriangleRight QuotedName?";
+    g["CompositionRightCore"]  << "Line Composition QuotedName?";
+    g["AggregationRightCore"]  << "Line Aggregation QuotedName?";
+    g["UsageRightCore"]        << "Line OpenTriRight QuotedName?";
+
+    g["ExtensionLeft"]    << "RelationshipStart ExtensionLeftCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitExtension(e[0], e[2]); };
+    g["CompositionLeft"]  << "RelationshipStart CompositionLeftCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitComposition(e[0], e[2]); };
+    g["AggregationLeft"]  << "RelationshipStart AggregationLeftCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitAggregation(e[0], e[2]); };
+    g["UsageLeft"]        << "RelationshipStart UsageLeftCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitUsage(e[0], e[2]); };
     g["RelationshipLeft"] << "ExtensionLeft | CompositionLeft | AggregationLeft | UsageLeft";
 
-    g["ExtensionRight"]    << "Identifier QuotedName? Line TriangleRight QuotedName? Identifier RelationshipLabel?";
-    g["CompositionRight"]  << "Identifier QuotedName? Line Composition QuotedName? Identifier RelationshipLabel?";
-    g["AggregationRight"]  << "Identifier QuotedName? Line Aggregation QuotedName? Identifier RelationshipLabel?";
-    g["UsageRight"]        << "Identifier QuotedName? Line OpenTriRight QuotedName? Identifier RelationshipLabel?";
+    g["ExtensionRight"]    << "RelationshipStart ExtensionRightCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitExtension(e[2], e[0]); };
+    g["CompositionRight"]  << "RelationshipStart CompositionRightCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitComposition(e[2], e[0]); };
+    g["AggregationRight"]  << "RelationshipStart AggregationRightCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitAggregation(e[2], e[0]); };
+    g["UsageRight"]        << "RelationshipStart UsageRightCore RelationshipEnd" >> [] (auto e, auto& v) { v.visitUsage(e[2], e[0]); };
     g["RelationshipRight"] << "ExtensionRight | CompositionRight | AggregationRight | UsageRight";
 
     g["Relationship"] << "RelationshipLeft | RelationshipRight";
