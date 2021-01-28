@@ -129,9 +129,9 @@ Parser::Parser(/* args */)
 
 
     // ========= DIAGRAM =========
-    g["Start"] << "'@startuml' Name? '\n'";
+    g["Start"] << "'@startuml' Name? '\n'" >> [] (auto e, auto& v) { v.visitStart(e); };
     g["End"] << "'@enduml' '\n'?";
-    g["Diagram"] << "Start Body End" >> [] (auto e, auto& v) { v.visitDiagram(e[0], e[1]); };
+    g["Diagram"] << "Start Body End";
     
     g.setStart(g["Diagram"]);
 }
@@ -140,7 +140,7 @@ Parser::~Parser()
 {
 }
 
-PlantUML Parser::parse(const std::string& input) 
+PlantUMLPtr Parser::parse(const std::string& input) 
 {
     Visitor visitor;
     g.run(input, visitor);

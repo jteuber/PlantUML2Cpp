@@ -10,7 +10,7 @@ public:
     Parser(/* args */);
     ~Parser();
 
-    PlantUML parse(const std::string& input);
+    PlantUMLPtr parse(const std::string& input);
 
 private:
     peg_parser::ParserGenerator<void, Visitor&> g;

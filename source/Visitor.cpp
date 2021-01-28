@@ -2,23 +2,20 @@
 
 #include <algorithm>
 
-PlantUML Visitor::getResult() 
+PlantUMLPtr Visitor::getResult() 
 {
     return root;
 }
 
-void Visitor::visitDiagram(Expression start, Expression body) 
+void Visitor::visitStart(Expression e) 
 {
-    root.type = PlantUML::Type::Diagram;
-
-    start.evaluate(*this);
-    body.evaluate(*this);
+    if (e.size() > 1)
+        root->name = e[1].string();
 }
 
 void Visitor::visitContainer(Expression e, PlantUML::Type type) 
 {
-    currentContainer->subData.emplace_back(type, currentContainer);
-    currentContainer = &currentContainer->subData.back();
+    currentContainer = currentContainer->createChild(type);
 
     for (auto s : e)
         s.evaluate(*this);
@@ -28,8 +25,8 @@ void Visitor::visitContainer(Expression e, PlantUML::Type type)
 
 void Visitor::visitOpeningBracket() 
 {
-    if (!currentContainer->subData.empty())
-        currentContainer = &currentContainer->subData.back();
+    if (currentContainer->getLastChild())
+        currentContainer = currentContainer->getLastChild();
 }
 
 void Visitor::visitClosingBracket() 
@@ -40,34 +37,20 @@ void Visitor::visitClosingBracket()
 
 void Visitor::visitField(Expression valueType, Expression name) 
 {
-    currentContainer->subData.emplace_back(PlantUML::Type::Field, currentContainer);
-    auto& field = currentContainer->subData.back();
-
-    field.name = name.string();
-    field.valueType = valueType.string();
+    auto field = currentContainer->findOrCreateChild(name.string(), PlantUML::Type::Field);
+    field->valueType = valueType.string();
 }
 
 void Visitor::visitExternalField(Expression container, Expression field) 
 {
-    auto containerName = container.string();
-    auto containerIt = std::ranges::find(currentContainer->subData, containerName, &PlantUML::name);
-
-    if (containerIt == currentContainer->subData.end()) {
-        currentContainer = &currentContainer->subData.emplace_back(PlantUML::Type::Class, currentContainer);
-        currentContainer->name = containerName;
-    } else {
-        currentContainer = &(*containerIt);
-    }
-
+    currentContainer = currentContainer->findOrCreateChild(container.string());
     field.evaluate(*this);
     currentContainer = currentContainer->parent;
 }
 
 void Visitor::visitMethod(Expression valueType, Expression name, Expression parameters) 
 {
-    currentContainer->subData.emplace_back(PlantUML::Type::Method, currentContainer);
-    currentContainer = &currentContainer->subData.back();
-    currentContainer->name = name.string();
+    currentContainer = currentContainer->findOrCreateChild(name.string(), PlantUML::Type::Method);
     currentContainer->valueType = valueType.string();
 
     parameters.evaluate(*this);
@@ -77,9 +60,7 @@ void Visitor::visitMethod(Expression valueType, Expression name, Expression para
 
 void Visitor::visitVoidMethod(Expression name, Expression parameters) 
 {
-    currentContainer->subData.emplace_back(PlantUML::Type::Method, currentContainer);
-    currentContainer = &currentContainer->subData.back();
-    currentContainer->name = name.string();
+    currentContainer = currentContainer->findOrCreateChild(name.string(), PlantUML::Type::Method);
     currentContainer->valueType = "void";
 
     parameters.evaluate(*this);
@@ -89,16 +70,7 @@ void Visitor::visitVoidMethod(Expression name, Expression parameters)
 
 void Visitor::visitExternalMethod(Expression container, Expression method) 
 {
-    auto containerName = container.string();
-    auto containerIt = std::ranges::find(currentContainer->subData, containerName, &PlantUML::name);
-
-    if (containerIt == currentContainer->subData.end()) {
-        currentContainer = &currentContainer->subData.emplace_back(PlantUML::Type::Class, currentContainer);
-        currentContainer->name = containerName;
-    } else {
-        currentContainer = &(*containerIt);
-    }
-
+    currentContainer = currentContainer->findOrCreateChild(container.string());
     method.evaluate(*this);
     currentContainer = currentContainer->parent;
 }
@@ -136,6 +108,11 @@ void Visitor::visitUsage(Expression client, Expression server)
 
 void Visitor::visitName(Expression name) 
 {
+    currentContainer->name = prepareNameString(name);
+}
+
+std::string Visitor::prepareNameString(Expression name) 
+{
     auto strName = name.string();
     auto firstQuote = strName.find_first_of('"');
     if (firstQuote < strName.size()) {
@@ -143,5 +120,5 @@ void Visitor::visitName(Expression name)
         strName.erase(strName.find_last_of('"'));
     }
     strName.erase(strName.find_last_not_of(' ')+1);
-    currentContainer->name = strName;
+    return strName;
 }

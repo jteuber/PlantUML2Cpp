@@ -42,10 +42,10 @@ int main(int argc, char** argv)
 
     // parse the input
     Parser parser;
-    PlantUML result = parser.parse(input);
+    PlantUMLPtr result = parser.parse(input);
 
-    for (auto& element : result.subData)
+    for (auto element : result->subData)
     {
-        std::cout << TYPE2STRING[static_cast<int>(element.type)] << " " << element.name << std::endl;
+        std::cout << TYPE2STRING[static_cast<int>(element->type)] << " " << element->name << std::endl;
     }
 }

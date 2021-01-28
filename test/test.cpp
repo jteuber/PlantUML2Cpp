@@ -9,9 +9,9 @@ R"(@startuml
 
 TEST_CASE( "empty diagram is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(empty_puml);
+    PlantUMLPtr r = parser.parse(empty_puml);
 
-    REQUIRE(r.subData.empty());
+    REQUIRE(r->subData.empty());
 }
 
 static constexpr auto single_element_puml = 
@@ -21,9 +21,11 @@ abstract        abstract
 
 TEST_CASE( "diagram with one element is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(single_element_puml);
+    PlantUMLPtr r = parser.parse(single_element_puml);
 
-    REQUIRE(r.subData.size() == 1);
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Abstract);
+    REQUIRE(r->subData[0]->name == "abstract");
 }
 
 static constexpr auto all_simple_containers_puml = 
@@ -40,26 +42,26 @@ interface       interface
 
 TEST_CASE( "diagram with all simple containers is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(all_simple_containers_puml);
+    PlantUMLPtr r = parser.parse(all_simple_containers_puml);
 
-    REQUIRE(r.subData.size() == 8);
+    REQUIRE(r->subData.size() == 8);
 
-    REQUIRE(r.subData[0].type == PlantUML::Type::Abstract);
-    REQUIRE(r.subData[0].name == "abstract");
-    REQUIRE(r.subData[1].type == PlantUML::Type::Annotation);
-    REQUIRE(r.subData[1].name == "annotation");
-    REQUIRE(r.subData[2].type == PlantUML::Type::Circle);
-    REQUIRE(r.subData[2].name == "circle");
-    REQUIRE(r.subData[3].type == PlantUML::Type::Class);
-    REQUIRE(r.subData[3].name == "class");
-    REQUIRE(r.subData[4].type == PlantUML::Type::Diamond);
-    REQUIRE(r.subData[4].name == "diamond");
-    REQUIRE(r.subData[5].type == PlantUML::Type::Entity);
-    REQUIRE(r.subData[5].name == "entity");
-    REQUIRE(r.subData[6].type == PlantUML::Type::Enum);
-    REQUIRE(r.subData[6].name == "enum");
-    REQUIRE(r.subData[7].type == PlantUML::Type::Interface);
-    REQUIRE(r.subData[7].name == "interface");
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Abstract);
+    REQUIRE(r->subData[0]->name == "abstract");
+    REQUIRE(r->subData[1]->type == PlantUML::Type::Annotation);
+    REQUIRE(r->subData[1]->name == "annotation");
+    REQUIRE(r->subData[2]->type == PlantUML::Type::Circle);
+    REQUIRE(r->subData[2]->name == "circle");
+    REQUIRE(r->subData[3]->type == PlantUML::Type::Class);
+    REQUIRE(r->subData[3]->name == "class");
+    REQUIRE(r->subData[4]->type == PlantUML::Type::Diamond);
+    REQUIRE(r->subData[4]->name == "diamond");
+    REQUIRE(r->subData[5]->type == PlantUML::Type::Entity);
+    REQUIRE(r->subData[5]->name == "entity");
+    REQUIRE(r->subData[6]->type == PlantUML::Type::Enum);
+    REQUIRE(r->subData[6]->name == "enum");
+    REQUIRE(r->subData[7]->type == PlantUML::Type::Interface);
+    REQUIRE(r->subData[7]->name == "interface");
 }
 
 static constexpr auto all_containers_puml = 
@@ -79,32 +81,32 @@ interface       interface
 
 TEST_CASE( "diagram with all containers is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(all_containers_puml);
+    PlantUMLPtr r = parser.parse(all_containers_puml);
 
-    REQUIRE(r.subData.size() == 11);
+    REQUIRE(r->subData.size() == 11);
 
-    REQUIRE(r.subData[0].type == PlantUML::Type::Abstract);
-    REQUIRE(r.subData[0].name == "abstract");
-    REQUIRE(r.subData[1].type == PlantUML::Type::Abstract);
-    REQUIRE(r.subData[1].name == "abstract class");
-    REQUIRE(r.subData[2].type == PlantUML::Type::Annotation);
-    REQUIRE(r.subData[2].name == "annotation");
-    REQUIRE(r.subData[3].type == PlantUML::Type::Circle);
-    REQUIRE(r.subData[3].name == "circle");
-    REQUIRE(r.subData[4].type == PlantUML::Type::Circle);
-    REQUIRE(r.subData[4].name == "circle_short_form");
-    REQUIRE(r.subData[5].type == PlantUML::Type::Class);
-    REQUIRE(r.subData[5].name == "class");
-    REQUIRE(r.subData[6].type == PlantUML::Type::Diamond);
-    REQUIRE(r.subData[6].name == "diamond");
-    REQUIRE(r.subData[7].type == PlantUML::Type::Diamond);
-    REQUIRE(r.subData[7].name == "diamond_short_form");
-    REQUIRE(r.subData[8].type == PlantUML::Type::Entity);
-    REQUIRE(r.subData[8].name == "entity");
-    REQUIRE(r.subData[9].type == PlantUML::Type::Enum);
-    REQUIRE(r.subData[9].name == "enum");
-    REQUIRE(r.subData[10].type == PlantUML::Type::Interface);
-    REQUIRE(r.subData[10].name == "interface");
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Abstract);
+    REQUIRE(r->subData[0]->name == "abstract");
+    REQUIRE(r->subData[1]->type == PlantUML::Type::Abstract);
+    REQUIRE(r->subData[1]->name == "abstract class");
+    REQUIRE(r->subData[2]->type == PlantUML::Type::Annotation);
+    REQUIRE(r->subData[2]->name == "annotation");
+    REQUIRE(r->subData[3]->type == PlantUML::Type::Circle);
+    REQUIRE(r->subData[3]->name == "circle");
+    REQUIRE(r->subData[4]->type == PlantUML::Type::Circle);
+    REQUIRE(r->subData[4]->name == "circle_short_form");
+    REQUIRE(r->subData[5]->type == PlantUML::Type::Class);
+    REQUIRE(r->subData[5]->name == "class");
+    REQUIRE(r->subData[6]->type == PlantUML::Type::Diamond);
+    REQUIRE(r->subData[6]->name == "diamond");
+    REQUIRE(r->subData[7]->type == PlantUML::Type::Diamond);
+    REQUIRE(r->subData[7]->name == "diamond_short_form");
+    REQUIRE(r->subData[8]->type == PlantUML::Type::Entity);
+    REQUIRE(r->subData[8]->name == "entity");
+    REQUIRE(r->subData[9]->type == PlantUML::Type::Enum);
+    REQUIRE(r->subData[9]->name == "enum");
+    REQUIRE(r->subData[10]->type == PlantUML::Type::Interface);
+    REQUIRE(r->subData[10]->name == "interface");
 }
 
 static constexpr auto entity_with_empty_body_puml = 
@@ -114,11 +116,11 @@ entity test { }
 
 TEST_CASE( "entity with empty body is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(entity_with_empty_body_puml);
+    PlantUMLPtr r = parser.parse(entity_with_empty_body_puml);
 
-    REQUIRE(r.subData.size() == 1);
-    REQUIRE(r.subData[0].type == PlantUML::Type::Entity);
-    REQUIRE(r.subData[0].name == "test");
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Entity);
+    REQUIRE(r->subData[0]->name == "test");
 }
 
 static constexpr auto entity_with_single_var_puml = 
@@ -130,16 +132,16 @@ entity test {
 
 TEST_CASE( "entity with single variable is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(entity_with_single_var_puml);
+    PlantUMLPtr r = parser.parse(entity_with_single_var_puml);
 
-    REQUIRE(r.subData.size() == 1);
-    REQUIRE(r.subData[0].type == PlantUML::Type::Entity);
-    REQUIRE(r.subData[0].name == "test");
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Entity);
+    REQUIRE(r->subData[0]->name == "test");
 
-    REQUIRE(r.subData[0].subData.size() == 1);
-    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Field);
-    REQUIRE(r.subData[0].subData[0].name == "variable");
-    REQUIRE(r.subData[0].subData[0].valueType == "var");
+    REQUIRE(r->subData[0]->subData.size() == 1);
+    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Field);
+    REQUIRE(r->subData[0]->subData[0]->name == "variable");
+    REQUIRE(r->subData[0]->subData[0]->valueType == "var");
 }
 
 static constexpr auto entity_with_two_var_puml = 
@@ -152,19 +154,19 @@ entity test {
 
 TEST_CASE( "entity with two variables is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(entity_with_two_var_puml);
+    PlantUMLPtr r = parser.parse(entity_with_two_var_puml);
 
-    REQUIRE(r.subData.size() == 1);
-    REQUIRE(r.subData[0].type == PlantUML::Type::Entity);
-    REQUIRE(r.subData[0].name == "test");
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Entity);
+    REQUIRE(r->subData[0]->name == "test");
 
-    REQUIRE(r.subData[0].subData.size() == 2);
-    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Field);
-    REQUIRE(r.subData[0].subData[0].name == "variable");
-    REQUIRE(r.subData[0].subData[0].valueType == "var");
-    REQUIRE(r.subData[0].subData[1].type == PlantUML::Type::Field);
-    REQUIRE(r.subData[0].subData[1].name == "variable2");
-    REQUIRE(r.subData[0].subData[1].valueType == "var");
+    REQUIRE(r->subData[0]->subData.size() == 2);
+    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Field);
+    REQUIRE(r->subData[0]->subData[0]->name == "variable");
+    REQUIRE(r->subData[0]->subData[0]->valueType == "var");
+    REQUIRE(r->subData[0]->subData[1]->type == PlantUML::Type::Field);
+    REQUIRE(r->subData[0]->subData[1]->name == "variable2");
+    REQUIRE(r->subData[0]->subData[1]->valueType == "var");
 }
 
 static constexpr auto class_with_two_methods_puml = 
@@ -177,23 +179,23 @@ class test {
 
 TEST_CASE( "class with two methods is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(class_with_two_methods_puml);
+    PlantUMLPtr r = parser.parse(class_with_two_methods_puml);
 
-    REQUIRE(r.subData.size() == 1);
-    REQUIRE(r.subData[0].type == PlantUML::Type::Class);
-    REQUIRE(r.subData[0].name == "test");
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Class);
+    REQUIRE(r->subData[0]->name == "test");
 
-    REQUIRE(r.subData[0].subData.size() == 2);
-    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Method);
-    REQUIRE(r.subData[0].subData[0].name == "method");
-    REQUIRE(r.subData[0].subData[0].valueType == "var");
-    REQUIRE(r.subData[0].subData[0].subData.empty());
-    REQUIRE(r.subData[0].subData[1].type == PlantUML::Type::Method);
-    REQUIRE(r.subData[0].subData[1].name == "method2");
-    REQUIRE(r.subData[0].subData[1].valueType == "var");
-    REQUIRE(r.subData[0].subData[1].subData.size() == 1);
-    REQUIRE(r.subData[0].subData[1].subData[0].name == "input");
-    REQUIRE(r.subData[0].subData[1].subData[0].valueType == "bool");
+    REQUIRE(r->subData[0]->subData.size() == 2);
+    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Method);
+    REQUIRE(r->subData[0]->subData[0]->name == "method");
+    REQUIRE(r->subData[0]->subData[0]->valueType == "var");
+    REQUIRE(r->subData[0]->subData[0]->subData.empty());
+    REQUIRE(r->subData[0]->subData[1]->type == PlantUML::Type::Method);
+    REQUIRE(r->subData[0]->subData[1]->name == "method2");
+    REQUIRE(r->subData[0]->subData[1]->valueType == "var");
+    REQUIRE(r->subData[0]->subData[1]->subData.size() == 1);
+    REQUIRE(r->subData[0]->subData[1]->subData[0]->name == "input");
+    REQUIRE(r->subData[0]->subData[1]->subData[0]->valueType == "bool");
 }
 
 static constexpr auto relationships_left_puml = 
@@ -205,9 +207,31 @@ Class05 o-- Class06
 
 TEST_CASE( "relationships left are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(relationships_left_puml);
+    PlantUMLPtr r = parser.parse(relationships_left_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 6);
+    for (auto c : r->subData)
+        REQUIRE(c->type == PlantUML::Type::Class);
+    
+    // Class02 extends Class01
+    REQUIRE(r->subData[0]->name == "Class01");
+    REQUIRE(r->subData[1]->name == "Class02");
+    REQUIRE(r->subData[1]->valueType == "Class01");
+
+    // Class03 has a data member of type Class04 as composition
+    REQUIRE(r->subData[2]->name == "Class03");
+    REQUIRE(r->subData[3]->name == "Class04");
+    REQUIRE(r->subData[2]->subData.size() == 1);
+    REQUIRE(r->subData[2]->subData[0]->type == PlantUML::Type::Composition);
+    REQUIRE(r->subData[2]->subData[0]->valueType == "Class04");
+    // no requirement on the name
+
+    // Class05 has a data member of type Class06 as aggregation
+    REQUIRE(r->subData[4]->name == "Class05");
+    REQUIRE(r->subData[5]->name == "Class06");
+    REQUIRE(r->subData[4]->subData.size() == 1);
+    REQUIRE(r->subData[4]->subData[0]->type == PlantUML::Type::Aggregation);
+    REQUIRE(r->subData[4]->subData[0]->valueType == "Class06");
 }
 
 static constexpr auto relationships_right_puml = 
@@ -219,9 +243,31 @@ Class05 --o Class06
 
 TEST_CASE( "relationships right are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(relationships_right_puml);
+    PlantUMLPtr r = parser.parse(relationships_right_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 6);
+    for (auto c : r->subData)
+        REQUIRE(c->type == PlantUML::Type::Class);
+    
+    // Class01 extends Class02
+    REQUIRE(r->subData[0]->name == "Class02");
+    REQUIRE(r->subData[1]->name == "Class01");
+    REQUIRE(r->subData[1]->valueType == "Class02");
+
+    // Class04 has a data member of type Class03 as composition
+    REQUIRE(r->subData[3]->name == "Class03");
+    REQUIRE(r->subData[2]->name == "Class04");
+    REQUIRE(r->subData[2]->subData.size() == 1);
+    REQUIRE(r->subData[2]->subData[0]->type == PlantUML::Type::Composition);
+    REQUIRE(r->subData[2]->subData[0]->valueType == "Class03");
+    // no requirement on the name
+
+    // Class06 has a data member of type Class05 as aggregation
+    REQUIRE(r->subData[5]->name == "Class05");
+    REQUIRE(r->subData[4]->name == "Class06");
+    REQUIRE(r->subData[4]->subData.size() == 1);
+    REQUIRE(r->subData[4]->subData[0]->type == PlantUML::Type::Aggregation);
+    REQUIRE(r->subData[4]->subData[0]->valueType == "Class05");
 }
 
 static constexpr auto relationships_up_puml = 
@@ -233,9 +279,31 @@ Class05 o- Class06
 
 TEST_CASE( "relationships up are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(relationships_up_puml);
+    PlantUMLPtr r = parser.parse(relationships_up_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 6);
+    for (auto c : r->subData)
+        REQUIRE(c->type == PlantUML::Type::Class);
+    
+    // Class02 extends Class01
+    REQUIRE(r->subData[0]->name == "Class01");
+    REQUIRE(r->subData[1]->name == "Class02");
+    REQUIRE(r->subData[1]->valueType == "Class01");
+
+    // Class03 has a data member of type Class04 as composition
+    REQUIRE(r->subData[2]->name == "Class03");
+    REQUIRE(r->subData[3]->name == "Class04");
+    REQUIRE(r->subData[2]->subData.size() == 1);
+    REQUIRE(r->subData[2]->subData[0]->type == PlantUML::Type::Composition);
+    REQUIRE(r->subData[2]->subData[0]->valueType == "Class04");
+    // no requirement on the name
+
+    // Class05 has a data member of type Class06 as aggregation
+    REQUIRE(r->subData[4]->name == "Class05");
+    REQUIRE(r->subData[5]->name == "Class06");
+    REQUIRE(r->subData[4]->subData.size() == 1);
+    REQUIRE(r->subData[4]->subData[0]->type == PlantUML::Type::Aggregation);
+    REQUIRE(r->subData[4]->subData[0]->valueType == "Class06");
 }
 
 static constexpr auto relationships_down_puml = 
@@ -247,9 +315,31 @@ Class05 -o Class06
 
 TEST_CASE( "relationships down are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(relationships_down_puml);
+    PlantUMLPtr r = parser.parse(relationships_down_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 6);
+    for (auto c : r->subData)
+        REQUIRE(c->type == PlantUML::Type::Class);
+    
+    // Class01 extends Class02
+    REQUIRE(r->subData[0]->name == "Class02");
+    REQUIRE(r->subData[1]->name == "Class01");
+    REQUIRE(r->subData[1]->valueType == "Class02");
+
+    // Class04 has a data member of type Class03 as composition
+    REQUIRE(r->subData[3]->name == "Class03");
+    REQUIRE(r->subData[2]->name == "Class04");
+    REQUIRE(r->subData[2]->subData.size() == 1);
+    REQUIRE(r->subData[2]->subData[0]->type == PlantUML::Type::Composition);
+    REQUIRE(r->subData[2]->subData[0]->valueType == "Class03");
+    // no requirement on the name
+
+    // Class06 has a data member of type Class05 as aggregation
+    REQUIRE(r->subData[5]->name == "Class05");
+    REQUIRE(r->subData[4]->name == "Class06");
+    REQUIRE(r->subData[4]->subData.size() == 1);
+    REQUIRE(r->subData[4]->subData[0]->type == PlantUML::Type::Aggregation);
+    REQUIRE(r->subData[4]->subData[0]->valueType == "Class05");
 }
 
 static constexpr auto labels_on_relations_puml = 
@@ -263,9 +353,33 @@ Class05 --|> "1" Class06
 
 TEST_CASE( "labels on relationships are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(labels_on_relations_puml);
+    PlantUMLPtr r = parser.parse(labels_on_relations_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 6);
+    for (auto c : r->subData)
+        REQUIRE(c->type == PlantUML::Type::Class);
+
+    // Class01 has a data member of type Class02 as composition
+    REQUIRE(r->subData[0]->name == "Class01");
+    REQUIRE(r->subData[1]->name == "Class02");
+    REQUIRE(r->subData[0]->subData.size() == 1);
+    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Composition);
+    REQUIRE(r->subData[0]->subData[0]->valueType == "Class02");
+    REQUIRE(r->subData[0]->subData[0]->modifier == "many");
+    REQUIRE(r->subData[0]->subData[0]->name == "contains");
+
+    // Class03 has a data member of type Class04 as aggregation
+    REQUIRE(r->subData[2]->name == "Class03");
+    REQUIRE(r->subData[3]->name == "Class04");
+    REQUIRE(r->subData[2]->subData.size() == 1);
+    REQUIRE(r->subData[2]->subData[0]->type == PlantUML::Type::Aggregation);
+    REQUIRE(r->subData[2]->subData[0]->valueType == "Class04");
+    REQUIRE(r->subData[2]->subData[0]->name == "aggregation");
+
+    // Class05 extends Class06
+    REQUIRE(r->subData[0]->name == "Class06");
+    REQUIRE(r->subData[1]->name == "Class05");
+    REQUIRE(r->subData[1]->valueType == "Class06");
 }
 
 static constexpr auto comments_puml = 
@@ -276,9 +390,9 @@ R"(@startuml
 
 TEST_CASE( "comments are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(comments_puml);
+    PlantUMLPtr r = parser.parse(comments_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 0);
 }
 
 static constexpr auto methods_external_puml = 
@@ -292,26 +406,26 @@ ArrayList : size() : int
 
 TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(methods_external_puml);
+    PlantUMLPtr r = parser.parse(methods_external_puml);
 
-    REQUIRE(r.subData.size() == 2);
-    REQUIRE(r.subData[0].type == PlantUML::Type::Class);
-    REQUIRE(r.subData[0].name == "Object");
-    REQUIRE(r.subData[1].type == PlantUML::Type::Class);
-    REQUIRE(r.subData[1].name == "ArrayList");
+    REQUIRE(r->subData.size() == 2);
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Class);
+    REQUIRE(r->subData[0]->name == "Object");
+    REQUIRE(r->subData[1]->type == PlantUML::Type::Class);
+    REQUIRE(r->subData[1]->name == "ArrayList");
 
-    REQUIRE(r.subData[0].subData.size() == 1);
-    REQUIRE(r.subData[0].subData[0].type == PlantUML::Type::Method);
-    REQUIRE(r.subData[0].subData[0].name == "equals");
-    REQUIRE(r.subData[0].subData[0].valueType == "void");
+    REQUIRE(r->subData[0]->subData.size() == 1);
+    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Method);
+    REQUIRE(r->subData[0]->subData[0]->name == "equals");
+    REQUIRE(r->subData[0]->subData[0]->valueType == "void");
 
-    REQUIRE(r.subData[1].subData.size() == 2);
-    REQUIRE(r.subData[1].subData[0].type == PlantUML::Type::Field);
-    REQUIRE(r.subData[1].subData[0].name == "elementData");
-    REQUIRE(r.subData[1].subData[0].valueType == "Object[]");
-    REQUIRE(r.subData[1].subData[1].type == PlantUML::Type::Method);
-    REQUIRE(r.subData[1].subData[1].name == "size");
-    REQUIRE(r.subData[1].subData[1].valueType == "int");
+    REQUIRE(r->subData[1]->subData.size() == 2);
+    REQUIRE(r->subData[1]->subData[0]->type == PlantUML::Type::Field);
+    REQUIRE(r->subData[1]->subData[0]->name == "elementData");
+    REQUIRE(r->subData[1]->subData[0]->valueType == "Object[]");
+    REQUIRE(r->subData[1]->subData[1]->type == PlantUML::Type::Method);
+    REQUIRE(r->subData[1]->subData[1]->name == "size");
+    REQUIRE(r->subData[1]->subData[1]->valueType == "int");
 }
 
 static constexpr auto packages_puml = 
@@ -328,11 +442,11 @@ package net.sourceforge.plantuml {
 
 TEST_CASE( "packages are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(packages_puml);
+    PlantUMLPtr r = parser.parse(packages_puml);
 
-    REQUIRE(r.subData.size() == 2);
-    REQUIRE(r.subData[0].name == "Classic Collections");
-    REQUIRE(r.subData[1].name == "net.sourceforge.plantuml");
+    REQUIRE(r->subData.size() == 2);
+    REQUIRE(r->subData[0]->name == "Classic Collections");
+    REQUIRE(r->subData[1]->name == "net.sourceforge.plantuml");
 }
 
 static constexpr auto include_puml = 
@@ -342,9 +456,9 @@ R"(@startuml
 
 TEST_CASE( "include in diagram is ignored", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(include_puml);
+    PlantUMLPtr r = parser.parse(include_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 0);
 }
 
 static constexpr auto enum_with_body_puml = 
@@ -359,9 +473,9 @@ enum TimeUnit {
 
 TEST_CASE( "enum with body is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(enum_with_body_puml);
+    PlantUMLPtr r = parser.parse(enum_with_body_puml);
 
-    REQUIRE(r.subData.size() == 1);
+    REQUIRE(r->subData.size() == 1);
 }
 
 static constexpr auto class_with_stereotype_and_spot_puml = 
@@ -379,9 +493,9 @@ entity test << (T,white) Template >>
 
 TEST_CASE( "class with stereotype and custom spot is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(class_with_stereotype_and_spot_puml);
+    PlantUMLPtr r = parser.parse(class_with_stereotype_and_spot_puml);
 
-    REQUIRE(r.subData.size() == 3);
+    REQUIRE(r->subData.size() == 3);
 }
 
 static constexpr auto hidden_relationships_puml = 
@@ -394,9 +508,9 @@ Bar1 -[hidden]> Bar2
 
 TEST_CASE( "hidden relationships are parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(hidden_relationships_puml);
+    PlantUMLPtr r = parser.parse(hidden_relationships_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 0);
 }
 
 static constexpr auto real_live_example_part_1_puml = 
@@ -457,11 +571,11 @@ package "data"
 
 TEST_CASE( "real live example part 1 is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(real_live_example_part_1_puml);
+    PlantUMLPtr r = parser.parse(real_live_example_part_1_puml);
 
-    REQUIRE(r.subData.size() == 1);
-    REQUIRE(r.subData[0].name == "data");
-    REQUIRE(r.subData[0].subData.size() == 13);
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->name == "data");
+    REQUIRE(r->subData[0]->subData.size() == 13);
 }
 
 static constexpr auto real_live_example_part_2_puml = 
@@ -525,11 +639,11 @@ package "algorithms" {
 
 TEST_CASE( "real live example part 2 is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(real_live_example_part_2_puml);
+    PlantUMLPtr r = parser.parse(real_live_example_part_2_puml);
 
-    REQUIRE(r.subData.size() == 1);
-    REQUIRE(r.subData[0].name == "algorithms");
-    REQUIRE(r.subData[0].subData.size() == 11);
+    REQUIRE(r->subData.size() == 1);
+    REQUIRE(r->subData[0]->name == "algorithms");
+    REQUIRE(r->subData[0]->subData.size() == 11);
 }
 
 static constexpr auto real_live_example_part_3_puml = 
@@ -605,7 +719,7 @@ WorldLoader -[hidden]> SceneFinisher
 
 TEST_CASE( "real live example part 3 is parsed", "[Parser]" ) {
     Parser parser;
-    PlantUML r = parser.parse(real_live_example_part_3_puml);
+    PlantUMLPtr r = parser.parse(real_live_example_part_3_puml);
 
-    REQUIRE(r.subData.size() == 0);
+    REQUIRE(r->subData.size() == 24);
 }
