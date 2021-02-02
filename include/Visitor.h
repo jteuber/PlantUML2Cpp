@@ -25,10 +25,16 @@ public:
     void visitVoidMethod(Expression name, Expression parameters);
     void visitExternalMethod(Expression container, Expression method);
 
-    void visitExtension(Expression parent, Expression child);
-    void visitComposition(Expression owner, Expression type);
-    void visitAggregation(Expression user, Expression type);
-    void visitUsage(Expression client, Expression server);
+    void visitRelationship(Expression subject, Expression objectPart);
+    void visitRelationshipFull(Expression subject, Expression objectPart, Expression label);
+    void visitObject(Expression object);
+    void visitCardinality(Expression e);
+    void visitRelationshipLabel(Expression e);
+
+    void visitExtension(Expression object);
+    void visitComposition(Expression object);
+    void visitAggregation(Expression object);
+    void visitUsage(Expression object);
 
     void visitName(Expression name);
 
@@ -38,4 +44,5 @@ private:
 private:
     PlantUMLPtr root = std::make_shared<PlantUML>(PlantUML::Type::Diagram, nullptr);
     PlantUMLPtr currentContainer = root;
+    PlantUMLPtr currentElement = root;
 };

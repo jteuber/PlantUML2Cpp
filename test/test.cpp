@@ -214,9 +214,9 @@ TEST_CASE( "relationships left are parsed", "[Parser]" ) {
         REQUIRE(c->type == PlantUML::Type::Class);
     
     // Class02 extends Class01
-    REQUIRE(r->subData[0]->name == "Class01");
-    REQUIRE(r->subData[1]->name == "Class02");
-    REQUIRE(r->subData[1]->valueType == "Class01");
+    REQUIRE(r->subData[0]->name == "Class02");
+    REQUIRE(r->subData[1]->name == "Class01");
+    REQUIRE(r->subData[0]->valueType == "Class01");
 
     // Class03 has a data member of type Class04 as composition
     REQUIRE(r->subData[2]->name == "Class03");
@@ -250,9 +250,9 @@ TEST_CASE( "relationships right are parsed", "[Parser]" ) {
         REQUIRE(c->type == PlantUML::Type::Class);
     
     // Class01 extends Class02
-    REQUIRE(r->subData[0]->name == "Class02");
-    REQUIRE(r->subData[1]->name == "Class01");
-    REQUIRE(r->subData[1]->valueType == "Class02");
+    REQUIRE(r->subData[0]->name == "Class01");
+    REQUIRE(r->subData[1]->name == "Class02");
+    REQUIRE(r->subData[0]->valueType == "Class02");
 
     // Class04 has a data member of type Class03 as composition
     REQUIRE(r->subData[3]->name == "Class03");
@@ -286,9 +286,9 @@ TEST_CASE( "relationships up are parsed", "[Parser]" ) {
         REQUIRE(c->type == PlantUML::Type::Class);
     
     // Class02 extends Class01
-    REQUIRE(r->subData[0]->name == "Class01");
-    REQUIRE(r->subData[1]->name == "Class02");
-    REQUIRE(r->subData[1]->valueType == "Class01");
+    REQUIRE(r->subData[0]->name == "Class02");
+    REQUIRE(r->subData[1]->name == "Class01");
+    REQUIRE(r->subData[0]->valueType == "Class01");
 
     // Class03 has a data member of type Class04 as composition
     REQUIRE(r->subData[2]->name == "Class03");
@@ -322,9 +322,9 @@ TEST_CASE( "relationships down are parsed", "[Parser]" ) {
         REQUIRE(c->type == PlantUML::Type::Class);
     
     // Class01 extends Class02
-    REQUIRE(r->subData[0]->name == "Class02");
-    REQUIRE(r->subData[1]->name == "Class01");
-    REQUIRE(r->subData[1]->valueType == "Class02");
+    REQUIRE(r->subData[0]->name == "Class01");
+    REQUIRE(r->subData[1]->name == "Class02");
+    REQUIRE(r->subData[0]->valueType == "Class02");
 
     // Class04 has a data member of type Class03 as composition
     REQUIRE(r->subData[3]->name == "Class03");
@@ -377,9 +377,9 @@ TEST_CASE( "labels on relationships are parsed", "[Parser]" ) {
     REQUIRE(r->subData[2]->subData[0]->name == "aggregation");
 
     // Class05 extends Class06
-    REQUIRE(r->subData[0]->name == "Class06");
-    REQUIRE(r->subData[1]->name == "Class05");
-    REQUIRE(r->subData[1]->valueType == "Class06");
+    REQUIRE(r->subData[5]->name == "Class06");
+    REQUIRE(r->subData[4]->name == "Class05");
+    REQUIRE(r->subData[4]->valueType == "Class06");
 }
 
 static constexpr auto comments_puml = 
@@ -410,22 +410,22 @@ TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
 
     REQUIRE(r->subData.size() == 2);
     REQUIRE(r->subData[0]->type == PlantUML::Type::Class);
-    REQUIRE(r->subData[0]->name == "Object");
+    REQUIRE(r->subData[0]->name == "ArrayList");
     REQUIRE(r->subData[1]->type == PlantUML::Type::Class);
-    REQUIRE(r->subData[1]->name == "ArrayList");
+    REQUIRE(r->subData[1]->name == "Object");
 
-    REQUIRE(r->subData[0]->subData.size() == 1);
-    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Method);
-    REQUIRE(r->subData[0]->subData[0]->name == "equals");
-    REQUIRE(r->subData[0]->subData[0]->valueType == "void");
+    REQUIRE(r->subData[0]->subData.size() == 2);
+    REQUIRE(r->subData[0]->subData[0]->type == PlantUML::Type::Field);
+    REQUIRE(r->subData[0]->subData[0]->name == "elementData");
+    REQUIRE(r->subData[0]->subData[0]->valueType == "Object[]");
+    REQUIRE(r->subData[0]->subData[1]->type == PlantUML::Type::Method);
+    REQUIRE(r->subData[0]->subData[1]->name == "size");
+    REQUIRE(r->subData[0]->subData[1]->valueType == "int");
 
-    REQUIRE(r->subData[1]->subData.size() == 2);
-    REQUIRE(r->subData[1]->subData[0]->type == PlantUML::Type::Field);
-    REQUIRE(r->subData[1]->subData[0]->name == "elementData");
-    REQUIRE(r->subData[1]->subData[0]->valueType == "Object[]");
-    REQUIRE(r->subData[1]->subData[1]->type == PlantUML::Type::Method);
-    REQUIRE(r->subData[1]->subData[1]->name == "size");
-    REQUIRE(r->subData[1]->subData[1]->valueType == "int");
+    REQUIRE(r->subData[1]->subData.size() == 1);
+    REQUIRE(r->subData[1]->subData[0]->type == PlantUML::Type::Method);
+    REQUIRE(r->subData[1]->subData[0]->name == "equals");
+    REQUIRE(r->subData[1]->subData[0]->valueType == "void");
 }
 
 static constexpr auto packages_puml = 
@@ -510,7 +510,7 @@ TEST_CASE( "hidden relationships are parsed", "[Parser]" ) {
     Parser parser;
     PlantUMLPtr r = parser.parse(hidden_relationships_puml);
 
-    REQUIRE(r->subData.size() == 0);
+    REQUIRE(r->subData.size() == 3);
 }
 
 static constexpr auto real_live_example_part_1_puml = 

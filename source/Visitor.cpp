@@ -35,20 +35,20 @@ void Visitor::visitClosingBracket()
         currentContainer = currentContainer->parent;
 }
 
-void Visitor::visitField(Expression valueType, Expression name) 
+void Visitor::visitField(Expression valueType, Expression name)
 {
     auto field = currentContainer->findOrCreateChild(name.string(), PlantUML::Type::Field);
     field->valueType = valueType.string();
 }
 
-void Visitor::visitExternalField(Expression container, Expression field) 
+void Visitor::visitExternalField(Expression container, Expression field)
 {
     currentContainer = currentContainer->findOrCreateChild(container.string());
     field.evaluate(*this);
     currentContainer = currentContainer->parent;
 }
 
-void Visitor::visitMethod(Expression valueType, Expression name, Expression parameters) 
+void Visitor::visitMethod(Expression valueType, Expression name, Expression parameters)
 {
     currentContainer = currentContainer->findOrCreateChild(name.string(), PlantUML::Type::Method);
     currentContainer->valueType = valueType.string();
@@ -58,7 +58,7 @@ void Visitor::visitMethod(Expression valueType, Expression name, Expression para
     currentContainer = currentContainer->parent;
 }
 
-void Visitor::visitVoidMethod(Expression name, Expression parameters) 
+void Visitor::visitVoidMethod(Expression name, Expression parameters)
 {
     currentContainer = currentContainer->findOrCreateChild(name.string(), PlantUML::Type::Method);
     currentContainer->valueType = "void";
@@ -68,42 +68,68 @@ void Visitor::visitVoidMethod(Expression name, Expression parameters)
     currentContainer = currentContainer->parent;
 }
 
-void Visitor::visitExternalMethod(Expression container, Expression method) 
+void Visitor::visitExternalMethod(Expression container, Expression method)
 {
     currentContainer = currentContainer->findOrCreateChild(container.string());
     method.evaluate(*this);
     currentContainer = currentContainer->parent;
 }
 
-void Visitor::visitExtension(Expression parent, Expression child) 
-{
-    currentContainer->findOrCreateChild(parent[0].string());
-    auto childClass = currentContainer->findOrCreateChild(child[0].string());
 
-    childClass->valueType = parent[0].string();
+void Visitor::visitRelationship(Expression subject, Expression objectPart) 
+{
+    currentElement = currentContainer->findOrCreateChild(subject.string());
+    objectPart.evaluate(*this);
+    currentElement = currentContainer->parent;
 }
 
-void Visitor::visitComposition(Expression owner, Expression type) 
+void Visitor::visitRelationshipFull(Expression subject, Expression objectPart, Expression label) 
 {
-    auto ownerClass = currentContainer->findOrCreateChild(owner[0].string());
-    currentContainer->findOrCreateChild(type[0].string());
-
-    auto field = ownerClass->createChild(PlantUML::Type::Composition);
-    field->valueType = type[0].string();
+    currentElement = currentContainer->findOrCreateChild(subject.string());
+    objectPart.evaluate(*this);
+    label.evaluate(*this);
+    currentElement = currentContainer->parent;
 }
 
-void Visitor::visitAggregation(Expression user, Expression type) 
+void Visitor::visitObject(Expression object) 
 {
-    auto userClass = currentContainer->findOrCreateChild(user[0].string());
-    currentContainer->findOrCreateChild(type[0].string());
-
-    auto field = userClass->createChild(PlantUML::Type::Aggregation);
-    field->valueType = type[0].string();
+    currentContainer->findOrCreateChild(object.string());
+    currentElement->valueType = object.string();
 }
 
-void Visitor::visitUsage(Expression client, Expression server) 
+void Visitor::visitCardinality(Expression e) 
 {
-    
+    currentElement->modifier = prepareNameString(e);
+}
+
+void Visitor::visitRelationshipLabel(Expression e) 
+{
+    // TODO: this is ugly! But it's not possible to get the relationship label in scope of composition and aggregation. Or is it?
+    currentElement->subData.back()->name = prepareNameString(e);
+}
+
+void Visitor::visitExtension(Expression object)
+{
+    object.evaluate(*this);
+}
+
+void Visitor::visitComposition(Expression object)
+{
+    currentElement = currentElement->createChild(PlantUML::Type::Composition);
+    object.evaluate(*this);
+    currentElement = currentElement->parent;
+}
+
+void Visitor::visitAggregation(Expression object)
+{
+    currentElement = currentElement->createChild(PlantUML::Type::Aggregation);
+    object.evaluate(*this);
+    currentElement = currentElement->parent;
+}
+
+void Visitor::visitUsage(Expression object)
+{
+    object.evaluate(*this);
 }
 
 void Visitor::visitName(Expression name) 
