@@ -18,7 +18,7 @@ include(cmake/CPM.cmake)
 
 CPMAddPackage(
   NAME PEGParser
-  VERSION 2.0
+  VERSION 2.1.1
   GIT_REPOSITORY https://github.com/TheLartians/PEGParser.git
 )
 include_directories(${PEGParser_SOURCE_DIR}/include)
