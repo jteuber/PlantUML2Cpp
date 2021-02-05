@@ -499,6 +499,55 @@ TEST_CASE("include in diagram is ignored", "[Parser]")
     REQUIRE(r->subData.size() == 0);
 }
 
+static constexpr auto namespaces_puml =
+    R"(@startuml
+
+class BaseClass
+
+namespace net.dummy #DDDDDD {
+    .BaseClass <|-- Person
+    Meeting o-- Person
+
+    .BaseClass <|- Meeting
+}
+
+namespace net.foo {
+  net.dummy.Person  <|- Person
+  .BaseClass <|-- Person
+
+  net.dummy.Meeting o-- Person
+}
+
+BaseClass <|-- net.unused.Person
+
+@enduml)";
+
+TEST_CASE("Namespaces and namespaced identifiers are parsed", "[Parser]")
+{
+    Parser parser;
+    PlantUMLPtr r = parser.parse(namespaces_puml);
+
+    REQUIRE(r->subData.size() == 4);
+    REQUIRE(r->findChild("BaseClass"));
+    REQUIRE(r->findChild("BaseClass")->type == PlantUML::Type::Class);
+
+    REQUIRE(r->findChild("net.dummy"));
+    REQUIRE(r->findChild("net.dummy")->type == PlantUML::Type::Namespace);
+    REQUIRE(r->findChild("net.dummy")->subData.size() == 2);
+    REQUIRE(r->findChild("net.dummy")->findChild("Meeting"));
+    REQUIRE(r->findChild("net.dummy")->findChild("Person"));
+
+    REQUIRE(r->findChild("net.foo"));
+    REQUIRE(r->findChild("net.foo")->type == PlantUML::Type::Namespace);
+    REQUIRE(r->findChild("net.foo")->subData.size() == 1);
+    REQUIRE(r->findChild("net.foo")->findChild("Person"));
+
+    REQUIRE(r->findChild("net.unused"));
+    REQUIRE(r->findChild("net.unused")->type == PlantUML::Type::Namespace);
+    REQUIRE(r->findChild("net.unused")->subData.size() == 1);
+    REQUIRE(r->findChild("net.unused")->findChild("Person"));
+}
+
 static constexpr auto enum_with_body_puml =
     R"(@startuml
 enum TimeUnit {

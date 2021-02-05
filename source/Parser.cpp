@@ -7,7 +7,7 @@ Parser::Parser(/* args */)
 {
     // ========= GENERAL KEYWORDS =========
     g.setSeparator(g["Whitespace"] << "[\t ]");
-    g["Identifier"] << "[a-zA-Z] [a-zA-Z0-9_.]*";
+    g["Identifier"] << "[a-zA-Z.] [a-zA-Z0-9_.]*";
     g.setProgramRule("QuotedName", peg_parser::presets::createStringProgram("\"", "\""),
                      [](auto e, auto &v) {});
     g["Name"] << "Identifier | QuotedName" >> [](auto e, auto &v) { v.visitName(e); };
