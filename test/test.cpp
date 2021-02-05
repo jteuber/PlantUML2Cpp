@@ -1,25 +1,27 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch2/catch.hpp"
 
 #include "Parser.h"
 
-static constexpr auto empty_puml = 
-R"(@startuml
+static constexpr auto empty_puml =
+    R"(@startuml
 @enduml)";
 
-TEST_CASE( "empty diagram is parsed", "[Parser]" ) {
+TEST_CASE("empty diagram is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(empty_puml);
 
     REQUIRE(r->subData.empty());
 }
 
-static constexpr auto single_element_puml = 
-R"(@startuml
+static constexpr auto single_element_puml =
+    R"(@startuml
 abstract        abstract
 @enduml)";
 
-TEST_CASE( "diagram with one element is parsed", "[Parser]" ) {
+TEST_CASE("diagram with one element is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(single_element_puml);
 
@@ -28,8 +30,8 @@ TEST_CASE( "diagram with one element is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->name == "abstract");
 }
 
-static constexpr auto all_simple_containers_puml = 
-R"(@startuml
+static constexpr auto all_simple_containers_puml =
+    R"(@startuml
 abstract        abstract
 annotation      annotation
 circle          circle
@@ -40,7 +42,8 @@ enum            enum
 interface       interface
 @enduml)";
 
-TEST_CASE( "diagram with all simple containers is parsed", "[Parser]" ) {
+TEST_CASE("diagram with all simple containers is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(all_simple_containers_puml);
 
@@ -64,8 +67,8 @@ TEST_CASE( "diagram with all simple containers is parsed", "[Parser]" ) {
     REQUIRE(r->subData[7]->name == "interface");
 }
 
-static constexpr auto all_containers_puml = 
-R"(@startuml
+static constexpr auto all_containers_puml =
+    R"(@startuml
 abstract        abstract
 abstract class  "abstract class"
 annotation      annotation
@@ -79,7 +82,8 @@ enum            enum
 interface       interface
 @enduml)";
 
-TEST_CASE( "diagram with all containers is parsed", "[Parser]" ) {
+TEST_CASE("diagram with all containers is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(all_containers_puml);
 
@@ -109,12 +113,13 @@ TEST_CASE( "diagram with all containers is parsed", "[Parser]" ) {
     REQUIRE(r->subData[10]->name == "interface");
 }
 
-static constexpr auto entity_with_empty_body_puml = 
-R"(@startuml
+static constexpr auto entity_with_empty_body_puml =
+    R"(@startuml
 entity test { }
 @enduml)";
 
-TEST_CASE( "entity with empty body is parsed", "[Parser]" ) {
+TEST_CASE("entity with empty body is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(entity_with_empty_body_puml);
 
@@ -123,14 +128,15 @@ TEST_CASE( "entity with empty body is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->name == "test");
 }
 
-static constexpr auto entity_with_single_var_puml = 
-R"(@startuml
+static constexpr auto entity_with_single_var_puml =
+    R"(@startuml
 entity test {
     variable : var
 }
 @enduml)";
 
-TEST_CASE( "entity with single variable is parsed", "[Parser]" ) {
+TEST_CASE("entity with single variable is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(entity_with_single_var_puml);
 
@@ -144,15 +150,16 @@ TEST_CASE( "entity with single variable is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->subData[0]->valueType == "var");
 }
 
-static constexpr auto entity_with_two_var_puml = 
-R"(@startuml
+static constexpr auto entity_with_two_var_puml =
+    R"(@startuml
 entity test {
     variable : var
     variable2 : var
 }
 @enduml)";
 
-TEST_CASE( "entity with two variables is parsed", "[Parser]" ) {
+TEST_CASE("entity with two variables is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(entity_with_two_var_puml);
 
@@ -169,15 +176,16 @@ TEST_CASE( "entity with two variables is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->subData[1]->valueType == "var");
 }
 
-static constexpr auto class_with_two_methods_puml = 
-R"(@startuml
+static constexpr auto class_with_two_methods_puml =
+    R"(@startuml
 class test {
     method() : var
     method2(input : bool) : var
 }
 @enduml)";
 
-TEST_CASE( "class with two methods is parsed", "[Parser]" ) {
+TEST_CASE("class with two methods is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(class_with_two_methods_puml);
 
@@ -198,21 +206,22 @@ TEST_CASE( "class with two methods is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->subData[1]->subData[0]->valueType == "bool");
 }
 
-static constexpr auto relationships_left_puml = 
-R"(@startuml
+static constexpr auto relationships_left_puml =
+    R"(@startuml
 Class01 <|-- Class02
 Class03 *-- Class04
 Class05 o-- Class06
 @enduml)";
 
-TEST_CASE( "relationships left are parsed", "[Parser]" ) {
+TEST_CASE("relationships left are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(relationships_left_puml);
 
     REQUIRE(r->subData.size() == 6);
     for (auto c : r->subData)
         REQUIRE(c->type == PlantUML::Type::Class);
-    
+
     // Class02 extends Class01
     REQUIRE(r->subData[0]->name == "Class02");
     REQUIRE(r->subData[1]->name == "Class01");
@@ -234,21 +243,22 @@ TEST_CASE( "relationships left are parsed", "[Parser]" ) {
     REQUIRE(r->subData[4]->subData[0]->valueType == "Class06");
 }
 
-static constexpr auto relationships_right_puml = 
-R"(@startuml
+static constexpr auto relationships_right_puml =
+    R"(@startuml
 Class01 --|> Class02
 Class03 --* Class04
 Class05 --o Class06
 @enduml)";
 
-TEST_CASE( "relationships right are parsed", "[Parser]" ) {
+TEST_CASE("relationships right are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(relationships_right_puml);
 
     REQUIRE(r->subData.size() == 6);
     for (auto c : r->subData)
         REQUIRE(c->type == PlantUML::Type::Class);
-    
+
     // Class01 extends Class02
     REQUIRE(r->subData[0]->name == "Class01");
     REQUIRE(r->subData[1]->name == "Class02");
@@ -270,21 +280,22 @@ TEST_CASE( "relationships right are parsed", "[Parser]" ) {
     REQUIRE(r->subData[4]->subData[0]->valueType == "Class05");
 }
 
-static constexpr auto relationships_up_puml = 
-R"(@startuml
+static constexpr auto relationships_up_puml =
+    R"(@startuml
 Class01 <|- Class02
 Class03 *- Class04
 Class05 o- Class06
 @enduml)";
 
-TEST_CASE( "relationships up are parsed", "[Parser]" ) {
+TEST_CASE("relationships up are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(relationships_up_puml);
 
     REQUIRE(r->subData.size() == 6);
     for (auto c : r->subData)
         REQUIRE(c->type == PlantUML::Type::Class);
-    
+
     // Class02 extends Class01
     REQUIRE(r->subData[0]->name == "Class02");
     REQUIRE(r->subData[1]->name == "Class01");
@@ -306,21 +317,22 @@ TEST_CASE( "relationships up are parsed", "[Parser]" ) {
     REQUIRE(r->subData[4]->subData[0]->valueType == "Class06");
 }
 
-static constexpr auto relationships_down_puml = 
-R"(@startuml
+static constexpr auto relationships_down_puml =
+    R"(@startuml
 Class01 -|> Class02
 Class03 -* Class04
 Class05 -o Class06
 @enduml)";
 
-TEST_CASE( "relationships down are parsed", "[Parser]" ) {
+TEST_CASE("relationships down are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(relationships_down_puml);
 
     REQUIRE(r->subData.size() == 6);
     for (auto c : r->subData)
         REQUIRE(c->type == PlantUML::Type::Class);
-    
+
     // Class01 extends Class02
     REQUIRE(r->subData[0]->name == "Class01");
     REQUIRE(r->subData[1]->name == "Class02");
@@ -342,8 +354,8 @@ TEST_CASE( "relationships down are parsed", "[Parser]" ) {
     REQUIRE(r->subData[4]->subData[0]->valueType == "Class05");
 }
 
-static constexpr auto labels_on_relations_puml = 
-R"(@startuml
+static constexpr auto labels_on_relations_puml =
+    R"(@startuml
 Class01 "1" *-- "many" Class02 : contains
 
 Class03 o-- Class04 : aggregation
@@ -351,7 +363,8 @@ Class03 o-- Class04 : aggregation
 Class05 --|> "1" Class06
 @enduml)";
 
-TEST_CASE( "labels on relationships are parsed", "[Parser]" ) {
+TEST_CASE("labels on relationships are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(labels_on_relations_puml);
 
@@ -382,21 +395,22 @@ TEST_CASE( "labels on relationships are parsed", "[Parser]" ) {
     REQUIRE(r->subData[4]->valueType == "Class06");
 }
 
-static constexpr auto comments_puml = 
-R"(@startuml
+static constexpr auto comments_puml =
+    R"(@startuml
 ' simple comment
     ' indented comment
 @enduml)";
 
-TEST_CASE( "comments are parsed", "[Parser]" ) {
+TEST_CASE("comments are ignored", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(comments_puml);
 
     REQUIRE(r->subData.size() == 0);
 }
 
-static constexpr auto methods_external_puml = 
-R"(@startuml
+static constexpr auto methods_external_puml =
+    R"(@startuml
 Object <|-- ArrayList
 
 Object : equals()
@@ -404,7 +418,8 @@ ArrayList : Object[] elementData
 ArrayList : size() : int
 @enduml)";
 
-TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
+TEST_CASE("methods declared externally parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(methods_external_puml);
 
@@ -428,8 +443,8 @@ TEST_CASE( "methods declared externally parsed", "[Parser]" ) {
     REQUIRE(r->subData[1]->subData[0]->valueType == "void");
 }
 
-static constexpr auto packages_puml = 
-R"(@startuml
+static constexpr auto packages_puml =
+    R"(@startuml
 package "Classic Collections" #DDDDDD {
   Object <|-- ArrayList
 }
@@ -440,29 +455,40 @@ package net.sourceforge.plantuml {
 }
 @enduml)";
 
-TEST_CASE( "packages are parsed", "[Parser]" ) {
+TEST_CASE("packages are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(packages_puml);
 
     REQUIRE(r->subData.size() == 2);
     REQUIRE(r->subData[0]->name == "Classic Collections");
+    REQUIRE(r->subData[0]->type == PlantUML::Type::Package);
     REQUIRE(r->subData[1]->name == "net.sourceforge.plantuml");
+    REQUIRE(r->subData[1]->type == PlantUML::Type::Package);
+
+    REQUIRE(r->subData[0]->subData.size() == 2);
+    REQUIRE(r->subData[0]->subData[0]->name == "ArrayList");
+    REQUIRE(r->subData[0]->subData[1]->name == "Object");
+    REQUIRE(r->subData[1]->subData.size() == 2);
+    REQUIRE(r->subData[1]->subData[0]->name == "Demo1");
+    REQUIRE(r->subData[1]->subData[1]->name == "Demo2");
 }
 
-static constexpr auto include_puml = 
-R"(@startuml
+static constexpr auto include_puml =
+    R"(@startuml
 !include something.iuml
 @enduml)";
 
-TEST_CASE( "include in diagram is ignored", "[Parser]" ) {
+TEST_CASE("include in diagram is ignored", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(include_puml);
 
     REQUIRE(r->subData.size() == 0);
 }
 
-static constexpr auto enum_with_body_puml = 
-R"(@startuml
+static constexpr auto enum_with_body_puml =
+    R"(@startuml
 enum TimeUnit {
   DAYS
   HOURS
@@ -471,15 +497,16 @@ enum TimeUnit {
 
 @enduml)";
 
-TEST_CASE( "enum with body is parsed", "[Parser]" ) {
+TEST_CASE("enum with body is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(enum_with_body_puml);
 
     REQUIRE(r->subData.size() == 1);
 }
 
-static constexpr auto class_with_stereotype_and_spot_puml = 
-R"(@startuml
+static constexpr auto class_with_stereotype_and_spot_puml =
+    R"(@startuml
 
 class System << (S,#FF7700) Singleton >>
 class Date << (D,orchid) >>
@@ -491,30 +518,32 @@ entity test << (T,white) Template >>
 
 @enduml)";
 
-TEST_CASE( "class with stereotype and custom spot is parsed", "[Parser]" ) {
+TEST_CASE("class with stereotype and custom spot is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(class_with_stereotype_and_spot_puml);
 
     REQUIRE(r->subData.size() == 3);
 }
 
-static constexpr auto hidden_relationships_puml = 
-R"(@startuml
+static constexpr auto hidden_relationships_puml =
+    R"(@startuml
 
 Together2 -[hidden]--> Bar1
 Bar1 -[hidden]> Bar2
 
 @enduml)";
 
-TEST_CASE( "hidden relationships are parsed", "[Parser]" ) {
+TEST_CASE("hidden relationships are parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(hidden_relationships_puml);
 
     REQUIRE(r->subData.size() == 3);
 }
 
-static constexpr auto real_live_example_part_1_puml = 
-R"(@startuml
+static constexpr auto real_live_example_part_1_puml =
+    R"(@startuml
 
 !include style/stylesheet.iuml
 
@@ -569,7 +598,8 @@ package "data"
 }
 @enduml)";
 
-TEST_CASE( "real live example part 1 is parsed", "[Parser]" ) {
+TEST_CASE("real live example part 1 is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(real_live_example_part_1_puml);
 
@@ -578,8 +608,8 @@ TEST_CASE( "real live example part 1 is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->subData.size() == 13);
 }
 
-static constexpr auto real_live_example_part_2_puml = 
-R"(@startuml
+static constexpr auto real_live_example_part_2_puml =
+    R"(@startuml
 '~~~~~~~~~~~~~~~~~~~~
 ' algorithms
 '~~~~~~~~~~~~~~~~~~~~
@@ -637,7 +667,8 @@ package "algorithms" {
 
 @enduml)";
 
-TEST_CASE( "real live example part 2 is parsed", "[Parser]" ) {
+TEST_CASE("real live example part 2 is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(real_live_example_part_2_puml);
 
@@ -646,8 +677,8 @@ TEST_CASE( "real live example part 2 is parsed", "[Parser]" ) {
     REQUIRE(r->subData[0]->subData.size() == 11);
 }
 
-static constexpr auto real_live_example_part_3_puml = 
-R"(@startuml
+static constexpr auto real_live_example_part_3_puml =
+    R"(@startuml
 '~~~~~~~~~~~~~~~~~~~~
 ' relationships
 '~~~~~~~~~~~~~~~~~~~~
@@ -717,7 +748,8 @@ WorldLoader -[hidden]> SceneFinisher
 
 @enduml)";
 
-TEST_CASE( "real live example part 3 is parsed", "[Parser]" ) {
+TEST_CASE("real live example part 3 is parsed", "[Parser]")
+{
     Parser parser;
     PlantUMLPtr r = parser.parse(real_live_example_part_3_puml);
 

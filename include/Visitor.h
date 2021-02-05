@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include <peg_parser/generator.h>
 
 #include "PlantUML.h"
@@ -25,8 +27,7 @@ public:
     void visitVoidMethod(Expression name, Expression parameters);
     void visitExternalMethod(Expression container, Expression method);
 
-    void visitRelationship(Expression subject, Expression objectPart);
-    void visitRelationshipFull(Expression subject, Expression objectPart, Expression label);
+    void visitRelationship(Expression subject, Expression objectPart, std::optional<Expression> label);
     void visitObject(Expression object);
     void visitCardinality(Expression e);
     void visitRelationshipLabel(Expression e);
@@ -39,10 +40,12 @@ public:
     void visitName(Expression name);
 
 private:
+    PlantUMLPtr findOrCreateChild(std::string_view name, PlantUML::Type type = PlantUML::Type::Class);
     std::string prepareNameString(Expression name);
 
 private:
     PlantUMLPtr root = std::make_shared<PlantUML>(PlantUML::Type::Diagram, nullptr);
-    PlantUMLPtr currentContainer = root;
-    PlantUMLPtr currentElement = root;
+    std::stack<PlantUMLPtr> namespaceStack = std::stack<PlantUMLPtr>{{root}}; // Namespace in which to look for elements
+    PlantUMLPtr currentContainer = root;                                      // Container into which to put new containers
+    PlantUMLPtr currentElement = root;                                        // Container into which to put new elements
 };

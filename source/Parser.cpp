@@ -76,8 +76,7 @@ Parser::Parser(/* args */)
     g["AggregationObjectPartRight"]  << "QuotedName? AggregationSubjectLeft ObjectRight"            >> [] (auto e, auto& v) { auto s = e.size(); v.visitAggregation(e[s-1]); };
     g["UsageObjectPartRight"]        << "QuotedName? UsageSubjectLeft ObjectRight"                  >> [] (auto e, auto& v) { auto s = e.size(); v.visitUsage(e[s-1]); };
     g["RelationshipObjectPartRight"] << "ExtensionObjectPartRight | CompositionObjectPartRight | AggregationObjectPartRight | UsageObjectPartRight";
-    g["RelationshipLeftSubjectFull"] << "Identifier RelationshipObjectPartRight RelationshipLabel"  >> [] (auto e, auto& v) { v.visitRelationshipFull(e[0], e[1], e[2]); };
-    g["RelationshipLeftSubject"]     << "Identifier RelationshipObjectPartRight"                    >> [] (auto e, auto& v) { v.visitRelationship(e[0], e[1]); };
+    g["RelationshipLeftSubject"]     << "Identifier RelationshipObjectPartRight RelationshipLabel?" >> [] (auto e, auto& v) { v.visitRelationship(e[0], e[1], e["RelationshipLabel"]); };
 
 
     g["ExtensionSubjectRight"]   << "TriangleLeft Line";
@@ -85,14 +84,13 @@ Parser::Parser(/* args */)
     g["AggregationSubjectRight"] << "Line Aggregation";
     g["UsageSubjectRight"]       << "OpenTriLeft Line";
 
-    g["ObjectLeft"]                   << "Identifier Cardinality?"                                  >> [] (auto e, auto& v) { v.visitObject(e[0]); if(e.size() > 1) e[1].evaluate(v); };
-    g["ExtensionObjectPartLeft"]      << "ObjectLeft ExtensionSubjectRight QuotedName?"             >> [] (auto e, auto& v) { v.visitExtension(e[0]); };
-    g["CompositionObjectPartLeft"]    << "ObjectLeft CompositionSubjectRight QuotedName?"           >> [] (auto e, auto& v) { v.visitComposition(e[0]); };
-    g["AggregationObjectPartLeft"]    << "ObjectLeft AggregationSubjectRight QuotedName?"           >> [] (auto e, auto& v) { v.visitAggregation(e[0]); };
-    g["UsageObjectPartLeft"]          << "ObjectLeft UsageSubjectRight QuotedName?"                 >> [] (auto e, auto& v) { v.visitUsage(e[0]); };
-    g["RelationshipObjectPartLeft"]   << "ExtensionObjectPartLeft | CompositionObjectPartLeft | AggregationObjectPartLeft | UsageObjectPartLeft";
-    g["RelationshipRightSubjectFull"] << "RelationshipObjectPartLeft Identifier RelationshipLabel"  >> [] (auto e, auto& v) { v.visitRelationshipFull(e[1], e[0], e[2]); };
-    g["RelationshipRightSubject"]     << "RelationshipObjectPartLeft Identifier"                    >> [] (auto e, auto& v) { v.visitRelationship(e[1], e[0]); };
+    g["ObjectLeft"]                  << "Identifier Cardinality?"                                  >> [] (auto e, auto& v) { v.visitObject(e[0]); if(e.size() > 1) e[1].evaluate(v); };
+    g["ExtensionObjectPartLeft"]     << "ObjectLeft ExtensionSubjectRight QuotedName?"             >> [] (auto e, auto& v) { v.visitExtension(e[0]); };
+    g["CompositionObjectPartLeft"]   << "ObjectLeft CompositionSubjectRight QuotedName?"           >> [] (auto e, auto& v) { v.visitComposition(e[0]); };
+    g["AggregationObjectPartLeft"]   << "ObjectLeft AggregationSubjectRight QuotedName?"           >> [] (auto e, auto& v) { v.visitAggregation(e[0]); };
+    g["UsageObjectPartLeft"]         << "ObjectLeft UsageSubjectRight QuotedName?"                 >> [] (auto e, auto& v) { v.visitUsage(e[0]); };
+    g["RelationshipObjectPartLeft"]  << "ExtensionObjectPartLeft | CompositionObjectPartLeft | AggregationObjectPartLeft | UsageObjectPartLeft";
+    g["RelationshipRightSubject"]    << "RelationshipObjectPartLeft Identifier RelationshipLabel?" >> [] (auto e, auto& v) { v.visitRelationship(e[1], e[0], e["RelationshipLabel"]); };
 
 
     g["Relationship"] << "RelationshipLeftSubjectFull | RelationshipRightSubjectFull | RelationshipLeftSubject | RelationshipRightSubject";
@@ -133,8 +131,9 @@ Parser::Parser(/* args */)
 
     // ========= NAMESPACES =========
     g["Body"] << "((Container | Relationship | ExternalDefinitions | Package | Ignored)? '\n')*";
-    g["PackageDef"] << "'package' Name Color?" >> [] (auto e, auto& v) { v.visitContainer(e, PlantUML::Type::Namespace); };
-    g["Package"] << "PackageDef OpenBrackets Body CloseBrackets";
+    g["NamespaceDef"] << "'namespace' Name Color?" >> [] (auto e, auto& v) { v.visitContainer(e, PlantUML::Type::Namespace); };
+    g["PackageDef"] << "'package' Name Color?" >> [] (auto e, auto& v) { v.visitContainer(e, PlantUML::Type::Package); };
+    g["Package"] << "(PackageDef | NamespaceDef) OpenBrackets Body CloseBrackets";
 
 
     // ========= DIAGRAM =========
