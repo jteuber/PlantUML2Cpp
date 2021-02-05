@@ -15,6 +15,18 @@ TEST_CASE("empty diagram is parsed", "[Parser]")
     REQUIRE(r->subData.empty());
 }
 
+static constexpr auto named_puml =
+    R"(@startuml empty
+@enduml)";
+
+TEST_CASE("named diagram is parsed", "[Parser]")
+{
+    Parser parser;
+    PlantUMLPtr r = parser.parse(named_puml);
+
+    REQUIRE(r->name == "empty");
+}
+
 static constexpr auto single_element_puml =
     R"(@startuml
 abstract        abstract

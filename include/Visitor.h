@@ -14,7 +14,7 @@ class Visitor
 public:
     PlantUMLPtr getResult();
 
-    void visitStart(Expression e);
+    void visitStart(std::optional<Expression> name);
 
     void visitContainer(Expression e, PlantUML::Type type);
     void visitOpeningBracket();

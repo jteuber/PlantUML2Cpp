@@ -7,10 +7,10 @@ PlantUMLPtr Visitor::getResult()
     return root;
 }
 
-void Visitor::visitStart(Expression e)
+void Visitor::visitStart(std::optional<Expression> name)
 {
-    if (e.size() > 1)
-        root->name = e[1].string();
+    if (name)
+        root->name = name->string();
 }
 
 void Visitor::visitContainer(Expression e, PlantUML::Type type)
