@@ -1,6 +1,8 @@
 #include "Visitor.h"
 
 #include <algorithm>
+#include <assert.h>
+#include <sstream>
 
 PlantUMLPtr Visitor::getResult()
 {
@@ -45,20 +47,20 @@ void Visitor::visitClosingBracket()
 
 void Visitor::visitField(Expression valueType, Expression name)
 {
-    auto field = findOrCreateChild(name.string(), PlantUML::Type::Field);
+    auto field = findOrCreateInCurrentContext(name, PlantUML::Type::Field);
     field->valueType = valueType.string();
 }
 
 void Visitor::visitExternalField(Expression container, Expression field)
 {
-    currentContainer = findOrCreateChild(container.string());
+    currentContainer = findOrCreateInCurrentContext(container);
     field.evaluate(*this);
     currentContainer = currentContainer->parent;
 }
 
 void Visitor::visitMethod(Expression valueType, Expression name, Expression parameters)
 {
-    currentContainer = findOrCreateChild(name.string(), PlantUML::Type::Method);
+    currentContainer = findOrCreateInCurrentContext(name, PlantUML::Type::Method);
     currentContainer->valueType = valueType.string();
 
     parameters.evaluate(*this);
@@ -68,7 +70,7 @@ void Visitor::visitMethod(Expression valueType, Expression name, Expression para
 
 void Visitor::visitVoidMethod(Expression name, Expression parameters)
 {
-    currentContainer = findOrCreateChild(name.string(), PlantUML::Type::Method);
+    currentContainer = findOrCreateInCurrentContext(name, PlantUML::Type::Method);
     currentContainer->valueType = "void";
 
     parameters.evaluate(*this);
@@ -78,14 +80,14 @@ void Visitor::visitVoidMethod(Expression name, Expression parameters)
 
 void Visitor::visitExternalMethod(Expression container, Expression method)
 {
-    currentContainer = findOrCreateChild(container.string());
+    currentContainer = findOrCreateInCurrentContext(container);
     method.evaluate(*this);
     currentContainer = currentContainer->parent;
 }
 
 void Visitor::visitRelationship(Expression subject, Expression objectPart, std::optional<Expression> label)
 {
-    currentElement = findOrCreateChild(subject.string());
+    currentElement = findOrCreateInCurrentContext(subject);
     objectPart.evaluate(*this);
     if (label)
         label->evaluate(*this);
@@ -93,7 +95,7 @@ void Visitor::visitRelationship(Expression subject, Expression objectPart, std::
 
 void Visitor::visitObject(Expression object)
 {
-    findOrCreateChild(object.string());
+    findOrCreateInCurrentContext(object);
     currentElement->valueType = object.string();
 }
 
@@ -137,28 +139,76 @@ void Visitor::visitName(Expression name)
     currentContainer->name = prepareNameString(name);
 }
 
-PlantUMLPtr Visitor::findOrCreateChild(std::string_view name, PlantUML::Type type)
+PlantUMLPtr Visitor::findOrCreateInCurrentContext(Expression identifier, PlantUML::Type type)
 {
-    auto child = namespaceStack.top()->findChild(name);
+    // first, split the identifier up into namespace parts
+    auto [namespaceName, name] = splitNamespacedName(prepareNameString(identifier));
+
+    // just a regular name
+    if (namespaceName.empty())
+    {
+        return findOrCreateChild(namespaceStack.top(), currentContainer, name, type);
+    }
+    // identifier starts with a dot => global namespace (this assumes that the name doesn't contain any additional delimiter characters)
+    else if (namespaceName == namespaceDelimiter)
+    {
+        return findOrCreateChild(root, name, type);
+    }
+    // it's a namespace
+    else
+    {
+        namespaceName.remove_suffix(1);
+        auto current = root;
+        for (auto part : {namespaceName, name})
+        {
+            current = findOrCreateChild(current, part, PlantUML::Type::Namespace);
+        }
+        current->type = type;
+
+        return current;
+    }
+}
+
+PlantUMLPtr Visitor::findOrCreateChild(PlantUMLPtr searchContext, PlantUMLPtr createContext, std::string_view name, PlantUML::Type type)
+{
+    auto child = searchContext->findChild(name);
     if (child != nullptr)
     {
         return child;
     }
     else
     {
-        return currentContainer->createChild(name, type);
+        return createContext->createChild(name, type);
     }
 }
 
-std::string Visitor::prepareNameString(Expression name)
+PlantUMLPtr Visitor::findOrCreateChild(PlantUMLPtr searchAndCreateContext, std::string_view name, PlantUML::Type type)
 {
-    auto strName = name.string();
-    auto firstQuote = strName.find_first_of('"');
-    if (firstQuote < strName.size())
+    return findOrCreateChild(searchAndCreateContext, searchAndCreateContext, name, type);
+}
+
+std::string_view Visitor::prepareNameString(Expression e)
+{
+    auto name = e.view();
+    // remove leading and trailing spaces
+    name.remove_prefix(std::min(name.find_first_not_of(' '), name.size()));
+    name.remove_suffix(name.size() - std::min(name.find_last_not_of(' ') + 1, name.size()));
+    // remove double quotes
+    if (name[0] == '"' && name[name.size() - 1] == '"')
     {
-        strName.erase(firstQuote, 1);
-        strName.erase(strName.find_last_of('"'));
+        name.remove_prefix(1);
+        name.remove_suffix(1);
     }
-    strName.erase(strName.find_last_not_of(' ') + 1);
-    return strName;
+
+    return name;
+}
+
+std::pair<std::string_view, std::string_view> Visitor::splitNamespacedName(std::string_view fullName)
+{
+    auto delimiter = std::min(fullName.find_last_of(namespaceDelimiter), fullName.size());
+    delimiter = delimiter < fullName.size() ? delimiter + 1 : 0;
+    auto namespaceName = fullName.substr(0, delimiter);
+    auto name = fullName.substr(delimiter, fullName.size());
+
+    return std::make_pair(namespaceName, name);
 }
