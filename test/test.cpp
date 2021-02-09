@@ -548,6 +548,29 @@ TEST_CASE("Namespaces and namespaced identifiers are parsed", "[Parser]")
     REQUIRE(r->findChild("net.unused")->findChild("Person"));
 }
 
+static constexpr auto namespace_separator_puml =
+    R"(@startuml
+
+set namespaceSeparator ::
+class X1::X2::foo {
+  some info
+}
+
+@enduml)";
+
+TEST_CASE("Namespace separator is parsed", "[Parser]")
+{
+    Parser parser;
+    PlantUMLPtr r = parser.parse(namespace_separator_puml);
+
+    REQUIRE(r->subData.size() == 1);
+
+    REQUIRE(r->findChild("X1::X2"));
+    REQUIRE(r->findChild("X1::X2")->type == PlantUML::Type::Namespace);
+    REQUIRE(r->findChild("X1::X2")->subData.size() == 1);
+    REQUIRE(r->findChild("X1::X2")->findChild("foo"));
+}
+
 static constexpr auto enum_with_body_puml =
     R"(@startuml
 enum TimeUnit {
