@@ -7,10 +7,10 @@ Parser::Parser(/* args */)
 {
     // ========= GENERAL KEYWORDS =========
     g.setSeparator(g["Whitespace"] << "[\t ]");
-    g["Identifier"] << "[a-zA-Z.] [a-zA-Z0-9_.]*";
+    g["Identifier"] << "[a-zA-Z.:] [a-zA-Z0-9_.:]*";
     g.setProgramRule("QuotedName", peg_parser::presets::createStringProgram("\"", "\""),
                      [](auto e, auto &v) {});
-    g["Name"] << "Identifier | QuotedName" >> [](auto e, auto &v) { v.visitName(e); };
+    g["Name"] << "Identifier | QuotedName";
     g["FieldTypename"] << "[a-zA-Z] [a-zA-Z0-9_.:<>]* '[]'?";
 
     g["Color"] << "'#' (!(' ' | ')' | '\n') .)* | Identifier";
@@ -103,14 +103,14 @@ Parser::Parser(/* args */)
     g["Stereotype"] << "'<<' Spot? Identifier? '>>'";
 
     // simple containers
-    g["Abstract"] << "KW_Abstract Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Abstract); };
-    g["Annotation"] << "'annotation' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Annotation); };
-    g["Circle"] << "KW_Circle Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Circle); };
-    g["Class"] << "'class' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Class); };
-    g["Diamond"] << "KW_Diamond Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Diamond); };
-    g["Entity"] << "'entity' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Entity); };
-    g["Enum"] << "'enum' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Enum); };
-    g["Interface"] << "'interface' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Interface); };
+    g["Abstract"] << "KW_Abstract Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Abstract); };
+    g["Annotation"] << "'annotation' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Annotation); };
+    g["Circle"] << "KW_Circle Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Circle); };
+    g["Class"] << "'class' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Class); };
+    g["Diamond"] << "KW_Diamond Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Diamond); };
+    g["Entity"] << "'entity' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Entity); };
+    g["Enum"] << "'enum' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Enum); };
+    g["Interface"] << "'interface' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Interface); };
 
     // containers with bodies
     g["ClassWithBody"] << "Class OpenBrackets ((MethodDef | FieldDef | Ignored)? '\n')* CloseBrackets";
@@ -121,10 +121,16 @@ Parser::Parser(/* args */)
     // collector rule
     g["Container"] << "ClassWithBody | EntityWithBody | InterfaceWithBody | EnumWithBody | Abstract | Annotation | Circle | Class | Diamond | Entity | Enum | Interface ";
 
+    // ========= SETTERS =========
+    g["Set"] << "'set'";
+    g["Separator"] << "(!'\n' .)*";
+    g["SetNamespace"] << "Set 'namespaceSeparator' Separator" >> [](auto e, auto &v) { v.visitSetNamespaceSeparator(e[1]); };
+    g["Setter"] << "SetNamespace";
+
     // ========= NAMESPACES =========
-    g["Body"] << "((Container | Relationship | ExternalDefinitions | Package | Ignored)? '\n')*";
-    g["NamespaceDef"] << "'namespace' Name Color?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Namespace); };
-    g["PackageDef"] << "'package' Name Color?" >> [](auto e, auto &v) { v.visitContainer(e, PlantUML::Type::Package); };
+    g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | Package | Ignored)? '\n')*";
+    g["NamespaceDef"] << "'namespace' Name Color?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], {}, PlantUML::Type::Namespace); };
+    g["PackageDef"] << "'package' Name Color?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], {}, PlantUML::Type::Package); };
     g["Package"] << "(PackageDef | NamespaceDef) OpenBrackets Body CloseBrackets";
 
     // ========= DIAGRAM =========

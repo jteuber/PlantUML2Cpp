@@ -15,14 +15,9 @@ void Visitor::visitStart(std::optional<Expression> name)
         root->name = name->string();
 }
 
-void Visitor::visitContainer(Expression e, PlantUML::Type type)
+void Visitor::visitContainer(Expression name, std::optional<Expression> stereotype, PlantUML::Type type)
 {
-    currentContainer = currentContainer->createChild(type);
-
-    for (auto s : e)
-        s.evaluate(*this);
-
-    currentContainer = currentContainer->parent;
+    currentContainer = findOrCreateInCurrentContext(name, type)->parent;
 }
 
 void Visitor::visitOpeningBracket()
@@ -134,15 +129,15 @@ void Visitor::visitUsage(Expression object)
     object.evaluate(*this);
 }
 
-void Visitor::visitName(Expression name)
+void Visitor::visitSetNamespaceSeparator(Expression separator)
 {
-    currentContainer->name = prepareNameString(name);
+    namespaceDelimiter = separator.string();
 }
 
 PlantUMLPtr Visitor::findOrCreateInCurrentContext(Expression identifier, PlantUML::Type type)
 {
     // first, split the identifier up into namespace parts
-    auto [namespaceName, name] = splitNamespacedName(prepareNameString(identifier));
+    auto [namespaceName, name] = splitNamespacedName(identifier);
 
     // just a regular name
     if (namespaceName.empty())
@@ -157,7 +152,7 @@ PlantUMLPtr Visitor::findOrCreateInCurrentContext(Expression identifier, PlantUM
     // it's a namespace
     else
     {
-        namespaceName.remove_suffix(1);
+        namespaceName.remove_suffix(namespaceDelimiter.size());
         auto current = root;
         for (auto part : {namespaceName, name})
         {
@@ -203,12 +198,23 @@ std::string_view Visitor::prepareNameString(Expression e)
     return name;
 }
 
-std::pair<std::string_view, std::string_view> Visitor::splitNamespacedName(std::string_view fullName)
+std::pair<std::string_view, std::string_view> Visitor::splitNamespacedName(Expression e)
 {
+    auto fullName = e.view();
+    // remove leading and trailing spaces
+    fullName.remove_prefix(std::min(fullName.find_first_not_of(' '), fullName.size()));
+    fullName.remove_suffix(fullName.size() - std::min(fullName.find_last_not_of(' ') + 1, fullName.size()));
+    if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"')
+    {
+        fullName.remove_prefix(1);
+        fullName.remove_suffix(1);
+        return {"", fullName};
+    }
+
     auto delimiter = std::min(fullName.find_last_of(namespaceDelimiter), fullName.size());
     delimiter = delimiter < fullName.size() ? delimiter + 1 : 0;
     auto namespaceName = fullName.substr(0, delimiter);
     auto name = fullName.substr(delimiter, fullName.size());
 
-    return std::make_pair(namespaceName, name);
+    return {namespaceName, name};
 }

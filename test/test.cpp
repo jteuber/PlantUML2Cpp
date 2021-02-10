@@ -461,7 +461,7 @@ package "Classic Collections" #DDDDDD {
   Object <|-- ArrayList
 }
 
-package net.sourceforge.plantuml {
+package "net.sourceforge.plantuml" {
   Object <|-- Demo1
   Demo1 *- Demo2
 }
@@ -504,14 +504,14 @@ static constexpr auto namespaces_puml =
 
 class BaseClass
 
-namespace net.dummy #DDDDDD {
+namespace "net.dummy" #DDDDDD {
     .BaseClass <|-- Person
     Meeting o-- Person
 
     .BaseClass <|- Meeting
 }
 
-namespace net.foo {
+namespace "net.foo" {
   net.dummy.Person  <|- Person
   .BaseClass <|-- Person
 

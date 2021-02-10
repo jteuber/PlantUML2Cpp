@@ -16,7 +16,7 @@ public:
 
     void visitStart(std::optional<Expression> name);
 
-    void visitContainer(Expression e, PlantUML::Type type);
+    void visitContainer(Expression name, std::optional<Expression> stereotype, PlantUML::Type type);
     void visitOpeningBracket();
     void visitClosingBracket();
 
@@ -37,14 +37,14 @@ public:
     void visitAggregation(Expression object);
     void visitUsage(Expression object);
 
-    void visitName(Expression name);
+    void visitSetNamespaceSeparator(Expression separator);
 
 private:
     PlantUMLPtr findOrCreateInCurrentContext(Expression identifier, PlantUML::Type type = PlantUML::Type::Class);
     PlantUMLPtr findOrCreateChild(PlantUMLPtr searchContext, PlantUMLPtr createContext, std::string_view name, PlantUML::Type type = PlantUML::Type::Class);
     PlantUMLPtr findOrCreateChild(PlantUMLPtr searchAndCreateContext, std::string_view name, PlantUML::Type type = PlantUML::Type::Class);
-    std::string_view prepareNameString(Expression name);
-    std::pair<std::string_view, std::string_view> splitNamespacedName(std::string_view fullName);
+    std::string_view prepareNameString(Expression e);
+    std::pair<std::string_view, std::string_view> splitNamespacedName(Expression e);
 
 private:
     PlantUMLPtr root = std::make_shared<PlantUML>(PlantUML::Type::Diagram, nullptr);
