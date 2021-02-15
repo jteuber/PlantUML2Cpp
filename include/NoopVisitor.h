@@ -19,6 +19,7 @@ public:
     void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) override {}
     void visitExternalField(Expression container, Expression field) override {}
 
+    void visitParameter(Expression valueType, Expression name) override {}
     void visitMethod(Expression name, Expression parameters, std::optional<Expression> returnType, std::optional<Expression> visibility) override {}
     void visitExternalMethod(Expression container, Expression method) override {}
 

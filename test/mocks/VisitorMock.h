@@ -21,6 +21,7 @@ struct VisitorMock : public AbstractVisitor
     MOCK_METHOD(void, visitField, (Expression valueType, Expression name, std::optional<Expression> visibility));
     MOCK_METHOD(void, visitExternalField, (Expression container, Expression field));
 
+    MOCK_METHOD(void, visitParameter, (Expression valueType, Expression name));
     MOCK_METHOD(void, visitMethod, (Expression name, Expression parameters, std::optional<Expression> returnType, std::optional<Expression> visibility));
     MOCK_METHOD(void, visitExternalMethod, (Expression container, Expression method));
 

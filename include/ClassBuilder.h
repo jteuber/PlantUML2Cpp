@@ -13,8 +13,6 @@ public:
 
     // Containers
     void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) override;
-    void visitEnum(Expression name) override;
-    void visitPackage(Expression name) override;
     void visitNamespace(Expression name) override;
     void visitOpeningBracket() override;
     void visitClosingBracket() override;
@@ -23,6 +21,7 @@ public:
     void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) override;
     void visitExternalField(Expression container, Expression field) override;
 
+    void visitParameter(Expression valueType, Expression name) override;
     void visitMethod(Expression name, Expression parameters, std::optional<Expression> returnType, std::optional<Expression> visibility) override;
     void visitExternalMethod(Expression container, Expression method) override;
 
@@ -44,6 +43,8 @@ public:
 private:
     std::vector<Class> m_classes;
     std::stack<std::string_view> m_namespaceStack;
+    Visibility m_lastEncounteredVisibility;
+    std::vector<Class>::iterator m_lastEncounteredClass;
 
     std::string namespaceDelimiter = ".";
 };

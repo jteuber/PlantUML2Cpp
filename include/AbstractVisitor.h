@@ -22,6 +22,7 @@ public:
     virtual void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) = 0;
     virtual void visitExternalField(Expression container, Expression field) = 0;
 
+    virtual void visitParameter(Expression valueType, Expression name) = 0;
     virtual void visitMethod(Expression name, Expression parameters, std::optional<Expression> returnType, std::optional<Expression> visibility) = 0;
     virtual void visitExternalMethod(Expression container, Expression method) = 0;
 

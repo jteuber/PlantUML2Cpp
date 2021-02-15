@@ -2,6 +2,7 @@
 
 #include <ranges>
 #include <algorithm>
+#include <iostream>
 
 ClassBuilder::ClassBuilder(/* args */)
 {
@@ -55,16 +56,7 @@ void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Ex
     }
 
     m_classes.push_back(c);
-}
-
-void ClassBuilder::visitEnum(Expression name) 
-{
-    
-}
-
-void ClassBuilder::visitPackage(Expression name) 
-{
-    
+    m_lastEncounteredClass = --m_classes.end();
 }
 
 void ClassBuilder::visitNamespace(Expression name) 
@@ -84,17 +76,81 @@ void ClassBuilder::visitClosingBracket()
 
 void ClassBuilder::visitField(Expression valueType, Expression name, std::optional<Expression> visibility) 
 {
-    
+    Variable var;
+    auto& c = *m_lastEncounteredClass;
+
+    var.name = name.view();
+    var.type = valueType.view();
+
+    if (visibility)
+    {
+        visibility->evaluate(*this);
+        var.visibility = m_lastEncounteredVisibility;
+    }
+    else
+    {
+        if (c.type == Class::Type::Abstract) {
+            var.visibility = Visibility::Private;
+        } 
+        else if (c.type == Class::Type::Class) {
+            var.visibility = Visibility::Private;
+        } 
+        else if (c.type == Class::Type::Interface) {
+            std::cout << "ERROR: Interface with variable encountered" << std::endl;
+        } 
+        else if (c.type == Class::Type::Struct) {
+            var.visibility = Visibility::Public;
+        }
+    }
+
+    c.variables.push_back(var);
 }
 
 void ClassBuilder::visitExternalField(Expression container, Expression field) 
 {
-    
+    //m_lastEncounteredClass = *std::ranges::find(m_classes, container.view(), &Class::name);
+}
+
+void ClassBuilder::visitParameter(Expression valueType, Expression name) 
+{
+    Parameter param;
+    param.name = name.view();
+    param.type = valueType.view();
+    m_lastEncounteredClass->methods.back().parameters.push_back(param);
 }
 
 void ClassBuilder::visitMethod(Expression name, Expression parameters, std::optional<Expression> returnType, std::optional<Expression> visibility) 
 {
-    
+    Method method;
+    auto& c = *m_lastEncounteredClass;
+
+    method.name = name.view();
+    method.returnType = returnType ? returnType->view() : "void";
+
+    if (visibility)
+    {
+        visibility->evaluate(*this);
+        method.visibility = m_lastEncounteredVisibility;
+    }
+    else
+    {
+        if (c.type == Class::Type::Abstract) {
+            method.visibility = Visibility::Private;
+        } 
+        else if (c.type == Class::Type::Class) {
+            method.visibility = Visibility::Private;
+        } 
+        else if (c.type == Class::Type::Interface) {
+            std::cout << "ERROR: Interface with variable encountered" << std::endl;
+        } 
+        else if (c.type == Class::Type::Struct) {
+            method.visibility = Visibility::Public;
+        }
+    }
+
+    c.methods.push_back(method);
+
+    parameters.evaluate(*this);
 }
 
 void ClassBuilder::visitExternalMethod(Expression container, Expression method) 
@@ -104,22 +160,22 @@ void ClassBuilder::visitExternalMethod(Expression container, Expression method)
 
 void ClassBuilder::visitPrivateVisibility() 
 {
-    
+    m_lastEncounteredVisibility = Visibility::Private;
 }
 
 void ClassBuilder::visitProtectedVisibility() 
 {
-    
+    m_lastEncounteredVisibility = Visibility::Protected;
 }
 
 void ClassBuilder::visitPackagePrivateVisibility() 
 {
-    
+    m_lastEncounteredVisibility = Visibility::PackagePrivate;
 }
 
 void ClassBuilder::visitPublicVisibility() 
 {
-    
+    m_lastEncounteredVisibility = Visibility::Public;
 }
 
 void ClassBuilder::visitRelationship(Expression subject, Expression connector, Expression object, std::optional<Expression> objectCardinality, std::optional<Expression> subjectCardinality, std::optional<Expression> label) 

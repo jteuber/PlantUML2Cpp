@@ -46,7 +46,8 @@ Parser::Parser(/* args */)
     g["FieldDef"] << "FieldDefExplicit | FieldDefColon | FieldDefImplicit | FieldDefTypeOnly";
 
     // parameter list
-    g["ParamList"] << "'(' (FieldDef (',' FieldDef)*)? ')'";
+    g["Parameter"] << "Identifier ':' FieldTypename | FieldTypename Identifier" >> [](auto e, auto &v) { v.visitParameter(*e["FieldTypename"], *e["Identifier"]); };
+    g["ParamList"] << "'(' (Parameter (',' Parameter)*)? ')'";
 
     // methods
     g["MethodDefExplicit"] << "'{method}' Identifier+";
