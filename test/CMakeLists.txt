@@ -6,15 +6,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(../include/)
 
-add_executable(tests test.cpp)
-
 # add dependencies
 include(../cmake/CPM.cmake)
 
 CPMAddPackage(
-  NAME Catch2
-  GITHUB_REPOSITORY catchorg/Catch2
-  VERSION 2.5.0
+  NAME googletest
+  GITHUB_REPOSITORY google/googletest
+  GIT_TAG release-1.10.0
+  VERSION 1.10.0
+  OPTIONS "INSTALL_GTEST OFF" "gtest_force_shared_crt"
 )
-target_link_libraries(tests Catch2 PlantUML2Cpp-static PEGParser)
 
+
+add_executable(tests main.cpp ParserTest.cpp ClassBuilderTest.cpp)
+target_link_libraries(tests gtest gtest_main gmock PlantUML2Cpp-static PEGParser)
+
+enable_testing()
+add_test(tests tests)

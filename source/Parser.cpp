@@ -13,7 +13,13 @@ Parser::Parser(/* args */)
     g["Name"] << "Identifier | QuotedName";
     g["FieldTypename"] << "[a-zA-Z] [a-zA-Z0-9_.:<>]* '[]'?";
 
-    g["Color"] << "'#' (!(' ' | ')' | '\n') .)* | Identifier";
+    g["ColorName"] << "'#' (!(' ' | ')' | '\n') .)* | Identifier";
+    g["Gradient"] << "'|' | '/' | '-' | '\\\\'";
+    g["Color"] << "ColorName (Gradient ColorName)?";
+
+    // stereotypes
+    g["Spot"] << "'(' . ',' Color ')'";
+    g["Stereotype"] << "'<<' Spot? Identifier? '>>'";
 
     g["Endl"] << "'\n'";
     g["OpenBrackets"] << "Endl? '{'" >> [](auto e, auto &v) { v.visitOpeningBracket(); };
@@ -26,11 +32,17 @@ Parser::Parser(/* args */)
     g["Ignored"] << "Comment | Include";
 
     // ========= ELEMENTS =========
+    g["Private"] << "'-'" >> [](auto e, auto &v) { v.visitPrivateVisibility(); };
+    g["Protected"] << "'#'" >> [](auto e, auto &v) { v.visitProtectedVisibility(); };
+    g["PackagePrivate"] << "'~'" >> [](auto e, auto &v) { v.visitPackagePrivateVisibility(); };
+    g["Public"] << "'+'" >> [](auto e, auto &v) { v.visitPublicVisibility(); };
+    g["Visibility"] << "Private | Protected | PackagePrivate | Public";
+
     // fields
-    g["FieldDefExplicit"] << "'{field}' Identifier+" >> [](auto e, auto &v) {};
-    g["FieldDefColon"] << "Identifier ':' FieldTypename" >> [](auto e, auto &v) { v.visitField(e[1], e[0]); };
-    g["FieldDefImplicit"] << "FieldTypename Identifier" >> [](auto e, auto &v) { v.visitField(e[0], e[1]); };
-    g["FieldDefTypeOnly"] << "FieldTypename" >> [](auto e, auto &v) { v.visitField(e[0], e[0]); };
+    g["FieldDefExplicit"] << "'{field}' Identifier+";
+    g["FieldDefColon"] << "Visibility? Identifier ':' FieldTypename" >> [](auto e, auto &v) { v.visitField(*e["FieldTypename"], *e["Identifier"], e["Visibility"]); };
+    g["FieldDefImplicit"] << "Visibility? FieldTypename Identifier" >> [](auto e, auto &v) { v.visitField(*e["FieldTypename"], *e["Identifier"], e["Visibility"]); };
+    g["FieldDefTypeOnly"] << "Visibility? FieldTypename" >> [](auto e, auto &v) { v.visitField(*e["FieldTypename"], *e["FieldTypename"], e["Visibility"]); };
     g["FieldDef"] << "FieldDefExplicit | FieldDefColon | FieldDefImplicit | FieldDefTypeOnly";
 
     // parameter list
@@ -38,10 +50,9 @@ Parser::Parser(/* args */)
 
     // methods
     g["MethodDefExplicit"] << "'{method}' Identifier+";
-    g["MethodDefTrailingReturn"] << "Identifier ParamList ':' FieldTypename" >> [](auto e, auto &v) { v.visitMethod(e[2], e[0], e[1]); };
-    g["MethodDefLeadingReturn"] << "FieldTypename Identifier ParamList" >> [](auto e, auto &v) { v.visitMethod(e[0], e[1], e[2]); };
-    g["MethodDefNoReturn"] << "Identifier ParamList" >> [](auto e, auto &v) { v.visitVoidMethod(e[0], e[1]); };
-    g["MethodDef"] << "MethodDefExplicit | MethodDefTrailingReturn | MethodDefLeadingReturn | MethodDefNoReturn";
+    g["MethodDefTrailingReturn"] << "Visibility? Identifier ParamList (':' FieldTypename)?" >> [](auto e, auto &v) { v.visitMethod(*e["Identifier"], *e["ParamList"], e["FieldTypename"], e["Visibility"]); };
+    g["MethodDefLeadingReturn"] << "Visibility? FieldTypename Identifier ParamList" >> [](auto e, auto &v) { v.visitMethod(*e["Identifier"], *e["ParamList"], e["FieldTypename"], e["Visibility"]); };
+    g["MethodDef"] << "MethodDefExplicit | MethodDefLeadingReturn | MethodDefTrailingReturn";
 
     // external fields and methods
     g["ExtFieldDef"] << "Identifier ':' FieldDef" >> [](auto e, auto &v) { v.visitExternalField(e[0], e[1]); };
@@ -58,68 +69,46 @@ Parser::Parser(/* args */)
 
     g["Line"] << "'-'* '[hidden]'? '-'*";
 
-    g["Label"] << "(!('>' | '\n') .)*" >> [](auto e, auto &v) { v.visitRelationshipLabel(e); };
+    g["Label"] << "(!('>' | '\n') .)*";
     g["RelationshipLabel"] << "':' '<'? Label '>'?";
 
-    g["Cardinality"] << "QuotedName" >> [](auto e, auto &v) { v.visitCardinality(e[0]); };
+    g["Object"] << "Identifier";
+    g["Subject"] << "Identifier";
+    g["Cardinality"] << "QuotedName";
 
-    g["ExtensionSubjectLeft"] << "Line TriangleRight";
-    g["CompositionSubjectLeft"] << "Composition Line";
-    g["AggregationSubjectLeft"] << "Aggregation Line";
-    g["UsageSubjectLeft"] << "Line OpenTriRight";
+    g["ExtensionSubjectLeft"] << "Line TriangleRight" >> [](auto e, auto &v) { v.visitExtension(); };
+    g["CompositionSubjectLeft"] << "Composition Line" >> [](auto e, auto &v) { v.visitComposition(); };
+    g["AggregationSubjectLeft"] << "Aggregation Line" >> [](auto e, auto &v) { v.visitAggregation(); };
+    g["UsageSubjectLeft"] << "Line OpenTriRight" >> [](auto e, auto &v) { v.visitUsage(); };
+    g["ConnectorLeft"] << "ExtensionSubjectLeft | CompositionSubjectLeft | AggregationSubjectLeft | UsageSubjectLeft";
+    g["RelationshipLeftSubject"] << "Subject QuotedName? ConnectorLeft Cardinality? Object RelationshipLabel?"
+            >> [](auto e, auto &v) { v.visitRelationship(*e["Subject"], *e["ConnectorRight"], *e["Object"], e["Cardinality"], e["QuotedName"], e["RelationshipLabel"]); };
 
-    g["ObjectRight"] << "Cardinality? Identifier" >> [](auto e, auto &v) { auto s = e.size(); v.visitObject(e[s-1]); if(s > 1) e[0].evaluate(v); };
-    g["ExtensionObjectPartRight"] << "QuotedName? ExtensionSubjectLeft ObjectRight" >> [](auto e, auto &v) { auto s = e.size(); v.visitExtension(e[s-1]); };
-    g["CompositionObjectPartRight"] << "QuotedName? CompositionSubjectLeft ObjectRight" >> [](auto e, auto &v) { auto s = e.size(); v.visitComposition(e[s-1]); };
-    g["AggregationObjectPartRight"] << "QuotedName? AggregationSubjectLeft ObjectRight" >> [](auto e, auto &v) { auto s = e.size(); v.visitAggregation(e[s-1]); };
-    g["UsageObjectPartRight"] << "QuotedName? UsageSubjectLeft ObjectRight" >> [](auto e, auto &v) { auto s = e.size(); v.visitUsage(e[s-1]); };
-    g["RelationshipObjectPartRight"] << "ExtensionObjectPartRight | CompositionObjectPartRight | AggregationObjectPartRight | UsageObjectPartRight";
-    g["RelationshipLeftSubject"] << "Identifier RelationshipObjectPartRight RelationshipLabel?" >> [](auto e, auto &v) { v.visitRelationship(e[0], e[1], e["RelationshipLabel"]); };
+    g["ExtensionSubjectRight"] << "TriangleLeft Line" >> [](auto e, auto &v) { v.visitExtension(); };
+    g["CompositionSubjectRight"] << "Line Composition" >> [](auto e, auto &v) { v.visitComposition(); };
+    g["AggregationSubjectRight"] << "Line Aggregation" >> [](auto e, auto &v) { v.visitAggregation(); };
+    g["UsageSubjectRight"] << "OpenTriLeft Line" >> [](auto e, auto &v) { v.visitUsage(); };
+    g["ConnectorRight"] << "ExtensionSubjectRight | CompositionSubjectRight | AggregationSubjectRight | UsageSubjectRight";
+    g["RelationshipRightSubject"] << "Object Cardinality? ConnectorRight QuotedName? Subject RelationshipLabel?" 
+            >> [](auto e, auto &v) { v.visitRelationship(*e["Subject"], *e["ConnectorRight"], *e["Object"], e["Cardinality"], e["QuotedName"], e["RelationshipLabel"]); };
 
-    g["ExtensionSubjectRight"] << "TriangleLeft Line";
-    g["CompositionSubjectRight"] << "Line Composition";
-    g["AggregationSubjectRight"] << "Line Aggregation";
-    g["UsageSubjectRight"] << "OpenTriLeft Line";
-
-    g["ObjectLeft"] << "Identifier Cardinality?" >> [](auto e, auto &v) { v.visitObject(e[0]); if(e.size() > 1) e[1].evaluate(v); };
-    g["ExtensionObjectPartLeft"] << "ObjectLeft ExtensionSubjectRight QuotedName?" >> [](auto e, auto &v) { v.visitExtension(e[0]); };
-    g["CompositionObjectPartLeft"] << "ObjectLeft CompositionSubjectRight QuotedName?" >> [](auto e, auto &v) { v.visitComposition(e[0]); };
-    g["AggregationObjectPartLeft"] << "ObjectLeft AggregationSubjectRight QuotedName?" >> [](auto e, auto &v) { v.visitAggregation(e[0]); };
-    g["UsageObjectPartLeft"] << "ObjectLeft UsageSubjectRight QuotedName?" >> [](auto e, auto &v) { v.visitUsage(e[0]); };
-    g["RelationshipObjectPartLeft"] << "ExtensionObjectPartLeft | CompositionObjectPartLeft | AggregationObjectPartLeft | UsageObjectPartLeft";
-    g["RelationshipRightSubject"] << "RelationshipObjectPartLeft Identifier RelationshipLabel?" >> [](auto e, auto &v) { v.visitRelationship(e[1], e[0], e["RelationshipLabel"]); };
-
-    g["Relationship"] << "RelationshipLeftSubjectFull | RelationshipRightSubjectFull | RelationshipLeftSubject | RelationshipRightSubject";
+    g["Relationship"] << "RelationshipLeftSubject | RelationshipRightSubject";
 
     // ========= CONTAINERS =========
-    // keywords
-    g["KW_Class"] << "'class'";
-    g["KW_Abstract"] << "'abstract' KW_Class?";
-    g["KW_Circle"] << "'circle' | '()'";
-    g["KW_Diamond"] << "'diamond' | '<>'";
-
-    // stereotypes
-    g["Spot"] << "'(' . ',' Color ')'";
-    g["Stereotype"] << "'<<' Spot? Identifier? '>>'";
+    g["ClassType"] << "'abstract' 'class'? | 'class' | 'entity' | 'interface'";
+    g["IgnoredType"] << "'annotation' | 'circle' | '()' | 'diamond' | '<>'";
 
     // simple containers
-    g["Abstract"] << "KW_Abstract Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Abstract); };
-    g["Annotation"] << "'annotation' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Annotation); };
-    g["Circle"] << "KW_Circle Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Circle); };
-    g["Class"] << "'class' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Class); };
-    g["Diamond"] << "KW_Diamond Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Diamond); };
-    g["Entity"] << "'entity' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Entity); };
-    g["Enum"] << "'enum' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Enum); };
-    g["Interface"] << "'interface' Name Stereotype?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], e["Stereotype"], PlantUML::Type::Interface); };
+    g["Class"] << "ClassType Name (Color | Stereotype)?" >> [](auto e, auto &v) { v.visitClass(*e["ClassType"], *e["Name"], e["Stereotype"]); };
+    g["Enum"] << "'enum' Name (Color | Stereotype)?" >> [](auto e, auto &v) { v.visitEnum(*e["Name"]); };
+    g["IgnoredDef"] << "IgnoredType Name (Color | Stereotype)?";
 
     // containers with bodies
     g["ClassWithBody"] << "Class OpenBrackets ((MethodDef | FieldDef | Ignored)? '\n')* CloseBrackets";
-    g["EntityWithBody"] << "Entity OpenBrackets ((FieldDef | Ignored)? '\n')* CloseBrackets";
-    g["InterfaceWithBody"] << "Interface OpenBrackets ((MethodDef | Ignored)? '\n')* CloseBrackets";
     g["EnumWithBody"] << "Enum OpenBrackets (Identifier? '\n')* CloseBrackets";
 
     // collector rule
-    g["Container"] << "ClassWithBody | EntityWithBody | InterfaceWithBody | EnumWithBody | Abstract | Annotation | Circle | Class | Diamond | Entity | Enum | Interface ";
+    g["Container"] << "ClassWithBody | EnumWithBody | Class | Enum | IgnoredDef";
 
     // ========= SETTERS =========
     g["Set"] << "'set'";
@@ -129,8 +118,8 @@ Parser::Parser(/* args */)
 
     // ========= NAMESPACES =========
     g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | Package | Ignored)? '\n')*";
-    g["NamespaceDef"] << "'namespace' Name Color?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], {}, PlantUML::Type::Namespace); };
-    g["PackageDef"] << "'package' Name Color?" >> [](auto e, auto &v) { v.visitContainer(*e["Name"], {}, PlantUML::Type::Package); };
+    g["NamespaceDef"] << "'namespace' Name Color?" >> [](auto e, auto &v) { v.visitNamespace(*e["Name"]); };
+    g["PackageDef"] << "'package' Name (Color | Stereotype)?" >> [](auto e, auto &v) { v.visitPackage(*e["Name"]); };
     g["Package"] << "(PackageDef | NamespaceDef) OpenBrackets Body CloseBrackets";
 
     // ========= DIAGRAM =========
@@ -145,9 +134,13 @@ Parser::~Parser()
 {
 }
 
-PlantUMLPtr Parser::parse(const std::string &input)
+bool Parser::parse(std::string_view input)
 {
-    Visitor visitor;
-    g.run(input, visitor);
-    return visitor.getResult();
+    m_ast = g.parse(input);
+    return m_ast->valid && m_ast->end >= input.size();
+}
+
+void Parser::visitAST(AbstractVisitor &visitor)
+{
+    g.interpret(m_ast).evaluate(visitor);
 }

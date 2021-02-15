@@ -4,12 +4,9 @@
 
 #include <peg_parser/generator.h>
 
-#include "PlantUML.h"
+#include "AbstractVisitor.h"
 
-class Visitor;
-using Expression = peg_parser::Interpreter<void, Visitor &>::Expression;
-
-class Visitor
+/*class Visitor : public AbstractVisitor
 {
 public:
     PlantUMLPtr getResult();
@@ -54,3 +51,4 @@ private:
 
     std::string namespaceDelimiter = ".";
 };
+*/
