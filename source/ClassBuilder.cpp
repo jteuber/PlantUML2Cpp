@@ -4,18 +4,12 @@
 #include <iostream>
 #include <ranges>
 
-ClassBuilder::ClassBuilder(/* args */) {}
-
-ClassBuilder::~ClassBuilder() {}
-
 const std::vector<Class>& ClassBuilder::results()
 {
     return m_classes;
 }
 
-void ClassBuilder::visitClass(Expression type,
-                              Expression name,
-                              std::optional<Expression> stereotype)
+void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Expression> /*stereotype*/)
 {
     Class c;
 
@@ -31,23 +25,16 @@ void ClassBuilder::visitClass(Expression type,
 
     c.namespaceStack = m_namespaceStack;
 
-    auto fullName = name.view();
-    fullName.remove_prefix(
-        std::min(fullName.find_first_not_of(' '), fullName.size()));
-    fullName.remove_suffix(
-        fullName.size() -
-        std::min(fullName.find_last_not_of(' ') + 1, fullName.size()));
+    auto fullName = removePadding(name.view());
     if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
         fullName.remove_prefix(1);
         fullName.remove_suffix(1);
         c.name = fullName;
     } else {
         for (const auto& ns :
-             fullName | std::ranges::views::split(namespaceDelimiter) |
-                 std::ranges::views::transform([](auto&& rng) {
-                     return std::string_view(&*rng.begin(),
-                                             std::ranges::distance(rng));
-                 })) {
+             fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
+                 return std::string_view(&*rng.begin(), std::ranges::distance(rng));
+             })) {
             c.namespaceStack.push(ns);
         }
         c.name = c.namespaceStack.top();
@@ -64,9 +51,7 @@ void ClassBuilder::visitOpeningBracket() {}
 
 void ClassBuilder::visitClosingBracket() {}
 
-void ClassBuilder::visitField(Expression valueType,
-                              Expression name,
-                              std::optional<Expression> visibility)
+void ClassBuilder::visitField(Expression valueType, Expression name, std::optional<Expression> visibility)
 {
     Variable var;
     auto& c = *m_lastEncounteredClass;
@@ -122,8 +107,7 @@ void ClassBuilder::visitMethod(Expression name,
     parameters.evaluate(*this);
 }
 
-void ClassBuilder::visitExternalMethod(Expression container, Expression method)
-{}
+void ClassBuilder::visitExternalMethod(Expression container, Expression method) {}
 
 void ClassBuilder::visitPrivateVisibility()
 {
@@ -145,24 +129,21 @@ void ClassBuilder::visitPublicVisibility()
     m_lastEncounteredVisibility = Visibility::Public;
 }
 
-void ClassBuilder::visitRelationship(
-    Expression subject,
-    Expression connector,
-    Expression object,
-    std::optional<Expression> objectCardinality,
-    std::optional<Expression> subjectCardinality,
-    std::optional<Expression> label)
+void ClassBuilder::visitRelationship(Expression subject,
+                                     Expression connector,
+                                     Expression object,
+                                     std::optional<Expression> objectCardinality,
+                                     std::optional<Expression> /*subjectCardinality*/,
+                                     std::optional<Expression> label)
 {
     connector.evaluate(*this);
 
-    m_lastEncounteredClass =
-        std::ranges::find(m_classes, prepareNameString(subject), &Class::name);
+    m_lastEncounteredClass = std::ranges::find(m_classes, prepareNameString(subject), &Class::name);
 
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (m_lastRelationship) {
         case Relationship::Extension:
-            m_lastEncounteredClass->parents.push_back(
-                prepareNameString(object));
+            m_lastEncounteredClass->parents.push_back(prepareNameString(object));
             break;
 
         case Relationship::Composition:
@@ -170,10 +151,12 @@ void ClassBuilder::visitRelationship(
             Variable var;
             var.type   = prepareNameString(object);
             var.source = m_lastRelationship;
-            if (objectCardinality)
-                var.cardinality = objectCardinality->view();
-            if (label)
-                var.name = label->view();
+            if (objectCardinality) {
+                var.cardinality = prepareNameString(*objectCardinality);
+            }
+            if (label) {
+                var.name = prepareNameString(*label);
+            }
             m_lastEncounteredClass->variables.push_back(var);
             break;
         }
@@ -210,15 +193,19 @@ void ClassBuilder::visitSetNamespaceSeparator(Expression separator)
 
 std::string_view ClassBuilder::prepareNameString(Expression e)
 {
-    auto name = e.view();
-    // remove leading and trailing spaces
-    name.remove_prefix(std::min(name.find_first_not_of(' '), name.size()));
-    name.remove_suffix(name.size() -
-                       std::min(name.find_last_not_of(' ') + 1, name.size()));
+    auto name = removePadding(e.view());
     // remove double quotes
     if (name[0] == '"' && name[name.size() - 1] == '"') {
         name.remove_prefix(1);
         name.remove_suffix(1);
     }
     return name;
+}
+
+std::string_view ClassBuilder::removePadding(std::string_view in)
+{
+    // remove leading and trailing spaces
+    in.remove_prefix(std::min(in.find_first_not_of(' '), in.size()));
+    in.remove_suffix(in.size() - std::min(in.find_last_not_of(' ') + 1, in.size()));
+    return in;
 }

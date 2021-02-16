@@ -10,11 +10,7 @@ struct VisitorMock : public AbstractVisitor
     MOCK_METHOD(void, visitStart, (std::optional<Expression> name));
 
     // Containers
-    MOCK_METHOD(void,
-                visitClass,
-                (Expression type,
-                 Expression name,
-                 std::optional<Expression> stereotype));
+    MOCK_METHOD(void, visitClass, (Expression type, Expression name, std::optional<Expression> stereotype));
     MOCK_METHOD(void, visitEnum, (Expression name));
     MOCK_METHOD(void, visitPackage, (Expression name));
     MOCK_METHOD(void, visitNamespace, (Expression name));
@@ -22,14 +18,8 @@ struct VisitorMock : public AbstractVisitor
     MOCK_METHOD(void, visitClosingBracket, ());
 
     // Fields and methods
-    MOCK_METHOD(void,
-                visitField,
-                (Expression valueType,
-                 Expression name,
-                 std::optional<Expression> visibility));
-    MOCK_METHOD(void,
-                visitExternalField,
-                (Expression container, Expression field));
+    MOCK_METHOD(void, visitField, (Expression valueType, Expression name, std::optional<Expression> visibility));
+    MOCK_METHOD(void, visitExternalField, (Expression container, Expression field));
 
     MOCK_METHOD(void, visitParameter, (Expression valueType, Expression name));
     MOCK_METHOD(void,
@@ -38,9 +28,7 @@ struct VisitorMock : public AbstractVisitor
                  Expression parameters,
                  std::optional<Expression> returnType,
                  std::optional<Expression> visibility));
-    MOCK_METHOD(void,
-                visitExternalMethod,
-                (Expression container, Expression method));
+    MOCK_METHOD(void, visitExternalMethod, (Expression container, Expression method));
 
     MOCK_METHOD(void, visitPrivateVisibility, ());
     MOCK_METHOD(void, visitProtectedVisibility, ());

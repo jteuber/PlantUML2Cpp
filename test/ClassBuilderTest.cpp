@@ -277,7 +277,7 @@ TEST(ClassBuilderTest, LabelsOnRelations)
     EXPECT_EQ(sut.results()[0].variables[0].source, Relationship::Composition);
     EXPECT_EQ(sut.results()[0].variables[0].cardinality, "many");
 
-    EXPECT_EQ(sut.results()[2].name, "Class01");
+    EXPECT_EQ(sut.results()[2].name, "Class03");
     EXPECT_EQ(sut.results()[2].type, Class::Type::Class);
     ASSERT_EQ(sut.results()[2].variables.size(), 1);
     EXPECT_EQ(sut.results()[2].variables[0].name, "aggregation");

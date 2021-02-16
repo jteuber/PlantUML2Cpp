@@ -6,23 +6,16 @@
 class ClassBuilder : public NoopVisitor
 {
 public:
-    ClassBuilder(/* args */);
-    ~ClassBuilder();
-
     const std::vector<Class>& results();
 
     // Containers
-    void visitClass(Expression type,
-                    Expression name,
-                    std::optional<Expression> stereotype) override;
+    void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) override;
     void visitNamespace(Expression name) override;
     void visitOpeningBracket() override;
     void visitClosingBracket() override;
 
     // Fields and methods
-    void visitField(Expression valueType,
-                    Expression name,
-                    std::optional<Expression> visibility) override;
+    void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) override;
     void visitExternalField(Expression container, Expression field) override;
 
     void visitParameter(Expression valueType, Expression name) override;
@@ -53,9 +46,11 @@ public:
     void visitSetNamespaceSeparator(Expression separator) override;
 
 private:
-    std::string_view prepareNameString(Expression e);
+    // helpers
+    static std::string_view prepareNameString(Expression e);
+    static std::string_view removePadding(std::string_view in);
 
-private:
+    // members
     std::vector<Class> m_classes;
     std::stack<std::string_view> m_namespaceStack;
     Visibility m_lastEncounteredVisibility;

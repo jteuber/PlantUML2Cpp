@@ -80,9 +80,7 @@ abstract        name
 @enduml)";
 
     // Assert Calls
-    EXPECT_CALL(
-        visitor,
-        visitClass(evalsTo("abstract"), evalsTo("name"), emptyOptional()));
+    EXPECT_CALL(visitor, visitClass(evalsTo("abstract"), evalsTo("name"), emptyOptional()));
 
     // Act
     act(parser, visitor, puml);

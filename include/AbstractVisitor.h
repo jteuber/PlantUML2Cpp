@@ -11,28 +11,23 @@ public:
     virtual void visitStart(std::optional<Expression> name) = 0;
 
     // Containers
-    virtual void visitClass(Expression type,
-                            Expression name,
-                            std::optional<Expression> stereotype) = 0;
-    virtual void visitEnum(Expression name)                       = 0;
-    virtual void visitPackage(Expression name)                    = 0;
-    virtual void visitNamespace(Expression name)                  = 0;
-    virtual void visitOpeningBracket()                            = 0;
-    virtual void visitClosingBracket()                            = 0;
+    virtual void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) = 0;
+    virtual void visitEnum(Expression name)                                                         = 0;
+    virtual void visitPackage(Expression name)                                                      = 0;
+    virtual void visitNamespace(Expression name)                                                    = 0;
+    virtual void visitOpeningBracket()                                                              = 0;
+    virtual void visitClosingBracket()                                                              = 0;
 
     // Fields and methods
-    virtual void visitField(Expression valueType,
-                            Expression name,
-                            std::optional<Expression> visibility)           = 0;
-    virtual void visitExternalField(Expression container, Expression field) = 0;
+    virtual void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) = 0;
+    virtual void visitExternalField(Expression container, Expression field)                              = 0;
 
-    virtual void visitParameter(Expression valueType, Expression name) = 0;
+    virtual void visitParameter(Expression valueType, Expression name)        = 0;
     virtual void visitMethod(Expression name,
                              Expression parameters,
                              std::optional<Expression> returnType,
-                             std::optional<Expression> visibility)     = 0;
-    virtual void visitExternalMethod(Expression container,
-                                     Expression method)                = 0;
+                             std::optional<Expression> visibility)            = 0;
+    virtual void visitExternalMethod(Expression container, Expression method) = 0;
 
     virtual void visitPrivateVisibility()        = 0;
     virtual void visitProtectedVisibility()      = 0;

@@ -5,7 +5,7 @@
 #include "Parser.h"
 #include "Visitor.h"
 
-std::string readFullFile(std::string filename)
+std::string readFullFile(const std::string& filename)
 {
     std::string input;
     std::ifstream file(filename);
@@ -17,14 +17,8 @@ std::string readFullFile(std::string filename)
     return input;
 }
 
-static const char* const TYPE2STRING[] = {"Abstract",
-                                          "Annotation",
-                                          "Circle",
-                                          "Class",
-                                          "Diamond",
-                                          "Entity",
-                                          "Enum",
-                                          "Interface"};
+static const char* const TYPE2STRING[] = {
+    "Abstract", "Annotation", "Circle", "Class", "Diamond", "Entity", "Enum", "Interface"};
 
 int main(int argc, char** argv)
 {
