@@ -72,8 +72,8 @@ void ClassBuilder::visitField(Expression valueType, Expression name, std::option
 
 void ClassBuilder::visitExternalField(Expression container, Expression field)
 {
-    // m_lastEncounteredClass = *std::ranges::find(m_classes, container.view(),
-    // &Class::name);
+    m_lastEncounteredClass = std::ranges::find(m_classes, container.view(), &Class::name);
+    field.evaluate(*this);
 }
 
 void ClassBuilder::visitParameter(Expression valueType, Expression name)
@@ -107,7 +107,11 @@ void ClassBuilder::visitMethod(Expression name,
     parameters.evaluate(*this);
 }
 
-void ClassBuilder::visitExternalMethod(Expression container, Expression method) {}
+void ClassBuilder::visitExternalMethod(Expression container, Expression method)
+{
+    m_lastEncounteredClass = std::ranges::find(m_classes, container.view(), &Class::name);
+    method.evaluate(*this);
+}
 
 void ClassBuilder::visitPrivateVisibility()
 {

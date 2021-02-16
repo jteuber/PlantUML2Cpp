@@ -285,3 +285,46 @@ TEST(ClassBuilderTest, LabelsOnRelations)
     EXPECT_EQ(sut.results()[2].variables[0].source, Relationship::Aggregation);
     EXPECT_EQ(sut.results()[2].variables[0].cardinality, "");
 }
+
+TEST(ClassBuilderTest, ExternalMethodsAndVariables)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Object
+        class ArrayList
+
+        Object : equals()
+        ArrayList : Object[] elementData
+        ArrayList : size() : int
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 2);
+
+    EXPECT_EQ(sut.results()[0].name, "Object");
+    EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[0].methods.size(), 1);
+    EXPECT_EQ(sut.results()[0].methods[0].name, "equals");
+    EXPECT_EQ(sut.results()[0].methods[0].returnType, "void");
+    EXPECT_TRUE(sut.results()[0].methods[0].parameters.empty());
+
+    EXPECT_EQ(sut.results()[1].name, "ArrayList");
+    EXPECT_EQ(sut.results()[1].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[1].methods.size(), 1);
+    EXPECT_EQ(sut.results()[1].methods[0].name, "size");
+    EXPECT_EQ(sut.results()[1].methods[0].returnType, "int");
+    EXPECT_TRUE(sut.results()[1].methods[0].parameters.empty());
+
+    ASSERT_EQ(sut.results()[1].variables.size(), 1);
+    EXPECT_EQ(sut.results()[1].variables[0].name, "elementData");
+    EXPECT_EQ(sut.results()[1].variables[0].type, "Object[]");
+    EXPECT_EQ(sut.results()[1].variables[0].source, Relationship::Member);
+    EXPECT_EQ(sut.results()[1].variables[0].cardinality, "");
+}
