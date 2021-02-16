@@ -4,21 +4,23 @@
 
 #include "mocks/VisitorMock.h"
 
-
-using ::testing::Field;
-using ::testing::Property;
 using ::testing::Eq;
+using ::testing::Field;
 using ::testing::Matcher;
+using ::testing::Property;
 
-Matcher<Expression> evalsTo(std::string_view str) {
+Matcher<Expression> evalsTo(std::string_view str)
+{
     return Property(&Expression::view, Eq(str));
 }
 
-Matcher<std::optional<Expression>> emptyOptional() {
+Matcher<std::optional<Expression>> emptyOptional()
+{
     return Property(&std::optional<Expression>::has_value, false);
 }
 
-Matcher<std::optional<Expression>> optionalEvalsTo(std::string_view str) {
+Matcher<std::optional<Expression>> optionalEvalsTo(std::string_view str)
+{
     return Property(&std::optional<Expression>::value, evalsTo(str));
 }
 
@@ -35,7 +37,7 @@ TEST(ParserTest, EmptyDiagram)
     Parser parser;
 
     static constexpr auto puml =
-    R"(@startuml
+        R"(@startuml
 @enduml)";
 
     // Assert Calls
@@ -73,12 +75,14 @@ TEST(ParserTest, SingleAbstract)
     Parser parser;
 
     static constexpr auto puml =
-    R"(@startuml
+        R"(@startuml
 abstract        name
 @enduml)";
 
     // Assert Calls
-    EXPECT_CALL(visitor, visitClass(evalsTo("abstract"), evalsTo("name"), emptyOptional()));
+    EXPECT_CALL(
+        visitor,
+        visitClass(evalsTo("abstract"), evalsTo("name"), emptyOptional()));
 
     // Act
     act(parser, visitor, puml);

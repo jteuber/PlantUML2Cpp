@@ -3,7 +3,6 @@
 #include "ClassBuilder.h"
 #include "Parser.h"
 
-
 void act(Parser& parser, ClassBuilder& sut, std::string_view puml)
 {
     ASSERT_TRUE(parser.parse(puml));
@@ -17,7 +16,7 @@ TEST(ClassBuilderTest, EmptyDiagram)
     Parser parser;
 
     static constexpr auto puml =
-    R"(@startuml
+        R"(@startuml
 @enduml)";
 
     // Act
@@ -34,7 +33,7 @@ TEST(ClassBuilderTest, SingleAbstract)
     Parser parser;
 
     static constexpr auto puml =
-    R"(@startuml
+        R"(@startuml
 abstract        name
 @enduml)";
 
@@ -113,7 +112,7 @@ TEST(ClassBuilderTest, EntityWithSingleVariable)
     Parser parser;
 
     static constexpr auto puml =
-    R"(@startuml
+        R"(@startuml
     entity test {
         variable : var
     }
@@ -124,7 +123,7 @@ TEST(ClassBuilderTest, EntityWithSingleVariable)
 
     // Assert
     ASSERT_EQ(sut.results().size(), 1);
-    
+
     EXPECT_EQ(sut.results()[0].name, "test");
     EXPECT_EQ(sut.results()[0].type, Class::Type::Struct);
     EXPECT_TRUE(sut.results()[0].methods.empty());
@@ -153,7 +152,7 @@ TEST(ClassBuilderTest, ClassWithTwoMethods)
 
     // Assert
     ASSERT_EQ(sut.results().size(), 1);
-    
+
     EXPECT_EQ(sut.results()[0].name, "test");
     EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
     EXPECT_TRUE(sut.results()[0].variables.empty());
@@ -188,7 +187,7 @@ TEST(ClassBuilderTest, Inheritance)
 
     // Assert
     ASSERT_EQ(sut.results().size(), 1);
-    
+
     EXPECT_EQ(sut.results()[0].name, "Class02");
     EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
     ASSERT_EQ(sut.results()[0].parents.size(), 1);
@@ -212,12 +211,13 @@ TEST(ClassBuilderTest, Composition)
 
     // Assert
     ASSERT_EQ(sut.results().size(), 1);
-    
+
     EXPECT_EQ(sut.results()[0].name, "Class03");
     EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
     ASSERT_EQ(sut.results()[0].variables.size(), 1);
     EXPECT_EQ(sut.results()[0].variables[0].name, "");
     EXPECT_EQ(sut.results()[0].variables[0].type, "Class04");
+    EXPECT_EQ(sut.results()[0].variables[0].source, Relationship::Composition);
 }
 
 TEST(ClassBuilderTest, Aggregation)
@@ -237,10 +237,51 @@ TEST(ClassBuilderTest, Aggregation)
 
     // Assert
     ASSERT_EQ(sut.results().size(), 1);
-    
+
     EXPECT_EQ(sut.results()[0].name, "Class05");
     EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
     ASSERT_EQ(sut.results()[0].variables.size(), 1);
     EXPECT_EQ(sut.results()[0].variables[0].name, "");
     EXPECT_EQ(sut.results()[0].variables[0].type, "Class06");
+    EXPECT_EQ(sut.results()[0].variables[0].source, Relationship::Aggregation);
+}
+
+TEST(ClassBuilderTest, LabelsOnRelations)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Class01
+        class Class02
+        class Class03
+        class Class04
+
+        Class01 "1" *-- "many" Class02 : contains
+        Class03 o-- Class04 : aggregation
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 4);
+
+    EXPECT_EQ(sut.results()[0].name, "Class01");
+    EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[0].variables.size(), 1);
+    EXPECT_EQ(sut.results()[0].variables[0].name, "contains");
+    EXPECT_EQ(sut.results()[0].variables[0].type, "Class02");
+    EXPECT_EQ(sut.results()[0].variables[0].source, Relationship::Composition);
+    EXPECT_EQ(sut.results()[0].variables[0].cardinality, "many");
+
+    EXPECT_EQ(sut.results()[2].name, "Class01");
+    EXPECT_EQ(sut.results()[2].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[2].variables.size(), 1);
+    EXPECT_EQ(sut.results()[2].variables[0].name, "aggregation");
+    EXPECT_EQ(sut.results()[2].variables[0].type, "Class04");
+    EXPECT_EQ(sut.results()[2].variables[0].source, Relationship::Aggregation);
+    EXPECT_EQ(sut.results()[2].variables[0].cardinality, "");
 }

@@ -1,10 +1,11 @@
 #pragma once
 
+#include <stack>
 #include <string_view>
 #include <vector>
-#include <stack>
 
-enum class Visibility {
+enum class Visibility
+{
     Private,
     Protected,
     PackagePrivate,
@@ -12,7 +13,8 @@ enum class Visibility {
     Unspecified
 };
 
-enum class Relationship {
+enum class Relationship
+{
     Extension,
     Composition,
     Aggregation,
@@ -51,7 +53,8 @@ struct Class
     std::vector<Variable> variables;
     std::vector<Method> methods;
 
-    enum class Type {
+    enum class Type
+    {
         Abstract,
         Class,
         Interface,

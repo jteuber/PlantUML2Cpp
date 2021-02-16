@@ -11,9 +11,9 @@ public:
     ~Parser();
 
     bool parse(std::string_view input);
-    void visitAST(AbstractVisitor &visitor);
+    void visitAST(AbstractVisitor& visitor);
 
 private:
-    peg_parser::ParserGenerator<void, AbstractVisitor &> g;
+    peg_parser::ParserGenerator<void, AbstractVisitor&> g;
     std::shared_ptr<peg_parser::SyntaxTree> m_ast;
 };

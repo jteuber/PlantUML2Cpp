@@ -8,8 +8,9 @@ Parser::Parser(/* args */)
     // ========= GENERAL KEYWORDS =========
     g.setSeparator(g["Whitespace"] << "[\t ]");
     g["Identifier"] << "[a-zA-Z.:] [a-zA-Z0-9_.:]*";
-    g.setProgramRule("QuotedName", peg_parser::presets::createStringProgram("\"", "\""),
-                     [](auto e, auto &v) {});
+    g.setProgramRule("QuotedName",
+                     peg_parser::presets::createStringProgram("\"", "\""),
+                     [](auto e, auto& v) {});
     g["Name"] << "Identifier | QuotedName";
     g["FieldTypename"] << "[a-zA-Z] [a-zA-Z0-9_.:<>]* '[]'?";
 
@@ -22,8 +23,10 @@ Parser::Parser(/* args */)
     g["Stereotype"] << "'<<' Spot? Identifier? '>>'";
 
     g["Endl"] << "'\n'";
-    g["OpenBrackets"] << "Endl? '{'" >> [](auto e, auto &v) { v.visitOpeningBracket(); };
-    g["CloseBrackets"] << "'}'" >> [](auto e, auto &v) { v.visitClosingBracket(); };
+    g["OpenBrackets"] << "Endl? '{'" >>
+        [](auto e, auto& v) { v.visitOpeningBracket(); };
+    g["CloseBrackets"] << "'}'" >>
+        [](auto e, auto& v) { v.visitClosingBracket(); };
 
     // ========= COMMENTS =========
     g["Comment"] << "'\\'' (!'\n' .)*";
@@ -32,32 +35,68 @@ Parser::Parser(/* args */)
     g["Ignored"] << "Comment | Include";
 
     // ========= ELEMENTS =========
-    g["Private"] << "'-'" >> [](auto e, auto &v) { v.visitPrivateVisibility(); };
-    g["Protected"] << "'#'" >> [](auto e, auto &v) { v.visitProtectedVisibility(); };
-    g["PackagePrivate"] << "'~'" >> [](auto e, auto &v) { v.visitPackagePrivateVisibility(); };
-    g["Public"] << "'+'" >> [](auto e, auto &v) { v.visitPublicVisibility(); };
+    g["Private"] << "'-'" >>
+        [](auto e, auto& v) { v.visitPrivateVisibility(); };
+    g["Protected"] << "'#'" >>
+        [](auto e, auto& v) { v.visitProtectedVisibility(); };
+    g["PackagePrivate"] << "'~'" >>
+        [](auto e, auto& v) { v.visitPackagePrivateVisibility(); };
+    g["Public"] << "'+'" >> [](auto e, auto& v) { v.visitPublicVisibility(); };
     g["Visibility"] << "Private | Protected | PackagePrivate | Public";
 
     // fields
     g["FieldDefExplicit"] << "'{field}' Identifier+";
-    g["FieldDefColon"] << "Visibility? Identifier ':' FieldTypename" >> [](auto e, auto &v) { v.visitField(*e["FieldTypename"], *e["Identifier"], e["Visibility"]); };
-    g["FieldDefImplicit"] << "Visibility? FieldTypename Identifier" >> [](auto e, auto &v) { v.visitField(*e["FieldTypename"], *e["Identifier"], e["Visibility"]); };
-    g["FieldDefTypeOnly"] << "Visibility? FieldTypename" >> [](auto e, auto &v) { v.visitField(*e["FieldTypename"], *e["FieldTypename"], e["Visibility"]); };
-    g["FieldDef"] << "FieldDefExplicit | FieldDefColon | FieldDefImplicit | FieldDefTypeOnly";
+    g["FieldDefColon"] << "Visibility? Identifier ':' FieldTypename" >>
+        [](auto e, auto& v) {
+            v.visitField(
+                *e["FieldTypename"], *e["Identifier"], e["Visibility"]);
+        };
+    g["FieldDefImplicit"] << "Visibility? FieldTypename Identifier" >>
+        [](auto e, auto& v) {
+            v.visitField(
+                *e["FieldTypename"], *e["Identifier"], e["Visibility"]);
+        };
+    g["FieldDefTypeOnly"] << "Visibility? FieldTypename" >> [](auto e,
+                                                               auto& v) {
+        v.visitField(*e["FieldTypename"], *e["FieldTypename"], e["Visibility"]);
+    };
+    g["FieldDef"] << "FieldDefExplicit | FieldDefColon | FieldDefImplicit | "
+                     "FieldDefTypeOnly";
 
     // parameter list
-    g["Parameter"] << "Identifier ':' FieldTypename | FieldTypename Identifier" >> [](auto e, auto &v) { v.visitParameter(*e["FieldTypename"], *e["Identifier"]); };
+    g["Parameter"]
+            << "Identifier ':' FieldTypename | FieldTypename Identifier" >>
+        [](auto e, auto& v) {
+            v.visitParameter(*e["FieldTypename"], *e["Identifier"]);
+        };
     g["ParamList"] << "'(' (Parameter (',' Parameter)*)? ')'";
 
     // methods
     g["MethodDefExplicit"] << "'{method}' Identifier+";
-    g["MethodDefTrailingReturn"] << "Visibility? Identifier ParamList (':' FieldTypename)?" >> [](auto e, auto &v) { v.visitMethod(*e["Identifier"], *e["ParamList"], e["FieldTypename"], e["Visibility"]); };
-    g["MethodDefLeadingReturn"] << "Visibility? FieldTypename Identifier ParamList" >> [](auto e, auto &v) { v.visitMethod(*e["Identifier"], *e["ParamList"], e["FieldTypename"], e["Visibility"]); };
-    g["MethodDef"] << "MethodDefExplicit | MethodDefLeadingReturn | MethodDefTrailingReturn";
+    g["MethodDefTrailingReturn"]
+            << "Visibility? Identifier ParamList (':' FieldTypename)?" >>
+        [](auto e, auto& v) {
+            v.visitMethod(*e["Identifier"],
+                          *e["ParamList"],
+                          e["FieldTypename"],
+                          e["Visibility"]);
+        };
+    g["MethodDefLeadingReturn"]
+            << "Visibility? FieldTypename Identifier ParamList" >>
+        [](auto e, auto& v) {
+            v.visitMethod(*e["Identifier"],
+                          *e["ParamList"],
+                          e["FieldTypename"],
+                          e["Visibility"]);
+        };
+    g["MethodDef"] << "MethodDefExplicit | MethodDefLeadingReturn | "
+                      "MethodDefTrailingReturn";
 
     // external fields and methods
-    g["ExtFieldDef"] << "Identifier ':' FieldDef" >> [](auto e, auto &v) { v.visitExternalField(e[0], e[1]); };
-    g["ExtMethodDef"] << "Identifier ':' MethodDef" >> [](auto e, auto &v) { v.visitExternalMethod(e[0], e[1]); };
+    g["ExtFieldDef"] << "Identifier ':' FieldDef" >>
+        [](auto e, auto& v) { v.visitExternalField(e[0], e[1]); };
+    g["ExtMethodDef"] << "Identifier ':' MethodDef" >>
+        [](auto e, auto& v) { v.visitExternalMethod(e[0], e[1]); };
     g["ExternalDefinitions"] << "ExtMethodDef | ExtFieldDef";
 
     // ========= RELATIONSHIPS =========
@@ -77,21 +116,49 @@ Parser::Parser(/* args */)
     g["Subject"] << "Identifier";
     g["Cardinality"] << "QuotedName";
 
-    g["ExtensionSubjectLeft"] << "Line TriangleRight" >> [](auto e, auto &v) { v.visitExtension(); };
-    g["CompositionSubjectLeft"] << "Composition Line" >> [](auto e, auto &v) { v.visitComposition(); };
-    g["AggregationSubjectLeft"] << "Aggregation Line" >> [](auto e, auto &v) { v.visitAggregation(); };
-    g["UsageSubjectLeft"] << "Line OpenTriRight" >> [](auto e, auto &v) { v.visitUsage(); };
-    g["ConnectorLeft"] << "ExtensionSubjectLeft | CompositionSubjectLeft | AggregationSubjectLeft | UsageSubjectLeft";
-    g["RelationshipLeftSubject"] << "Subject QuotedName? ConnectorLeft Cardinality? Object RelationshipLabel?"
-            >> [](auto e, auto &v) { v.visitRelationship(*e["Subject"], *e["ConnectorLeft"], *e["Object"], e["Cardinality"], e["QuotedName"], e["RelationshipLabel"]); };
+    g["ExtensionSubjectLeft"] << "Line TriangleRight" >>
+        [](auto e, auto& v) { v.visitExtension(); };
+    g["CompositionSubjectLeft"] << "Composition Line" >>
+        [](auto e, auto& v) { v.visitComposition(); };
+    g["AggregationSubjectLeft"] << "Aggregation Line" >>
+        [](auto e, auto& v) { v.visitAggregation(); };
+    g["UsageSubjectLeft"] << "Line OpenTriRight" >>
+        [](auto e, auto& v) { v.visitUsage(); };
 
-    g["ExtensionSubjectRight"] << "TriangleLeft Line" >> [](auto e, auto &v) { v.visitExtension(); };
-    g["CompositionSubjectRight"] << "Line Composition" >> [](auto e, auto &v) { v.visitComposition(); };
-    g["AggregationSubjectRight"] << "Line Aggregation" >> [](auto e, auto &v) { v.visitAggregation(); };
-    g["UsageSubjectRight"] << "OpenTriLeft Line" >> [](auto e, auto &v) { v.visitUsage(); };
-    g["ConnectorRight"] << "ExtensionSubjectRight | CompositionSubjectRight | AggregationSubjectRight | UsageSubjectRight";
-    g["RelationshipRightSubject"] << "Object Cardinality? ConnectorRight QuotedName? Subject RelationshipLabel?" 
-            >> [](auto e, auto &v) { v.visitRelationship(*e["Subject"], *e["ConnectorRight"], *e["Object"], e["Cardinality"], e["QuotedName"], e["RelationshipLabel"]); };
+    g["ConnectorLeft"] << "ExtensionSubjectLeft | CompositionSubjectLeft | "
+                          "AggregationSubjectLeft | UsageSubjectLeft";
+    g["RelationshipLeftSubject"] << "Subject QuotedName? ConnectorLeft "
+                                    "Cardinality? Object RelationshipLabel?" >>
+        [](auto e, auto& v) {
+            v.visitRelationship(*e["Subject"],
+                                *e["ConnectorLeft"],
+                                *e["Object"],
+                                e["Cardinality"],
+                                e["QuotedName"],
+                                e["RelationshipLabel"]);
+        };
+
+    g["ExtensionSubjectRight"] << "TriangleLeft Line" >>
+        [](auto e, auto& v) { v.visitExtension(); };
+    g["CompositionSubjectRight"] << "Line Composition" >>
+        [](auto e, auto& v) { v.visitComposition(); };
+    g["AggregationSubjectRight"] << "Line Aggregation" >>
+        [](auto e, auto& v) { v.visitAggregation(); };
+    g["UsageSubjectRight"] << "OpenTriLeft Line" >>
+        [](auto e, auto& v) { v.visitUsage(); };
+
+    g["ConnectorRight"] << "ExtensionSubjectRight | CompositionSubjectRight | "
+                           "AggregationSubjectRight | UsageSubjectRight";
+    g["RelationshipRightSubject"] << "Object Cardinality? ConnectorRight "
+                                     "QuotedName? Subject RelationshipLabel?" >>
+        [](auto e, auto& v) {
+            v.visitRelationship(*e["Subject"],
+                                *e["ConnectorRight"],
+                                *e["Object"],
+                                e["Cardinality"],
+                                e["QuotedName"],
+                                e["RelationshipLabel"]);
+        };
 
     g["Relationship"] << "RelationshipLeftSubject | RelationshipRightSubject";
 
@@ -100,40 +167,50 @@ Parser::Parser(/* args */)
     g["IgnoredType"] << "'annotation' | 'circle' | '()' | 'diamond' | '<>'";
 
     // simple containers
-    g["Class"] << "ClassType Name (Color | Stereotype)?" >> [](auto e, auto &v) { v.visitClass(*e["ClassType"], *e["Name"], e["Stereotype"]); };
-    g["Enum"] << "'enum' Name (Color | Stereotype)?" >> [](auto e, auto &v) { v.visitEnum(*e["Name"]); };
+    g["Class"] << "ClassType Name (Color | Stereotype)?" >>
+        [](auto e, auto& v) {
+            v.visitClass(*e["ClassType"], *e["Name"], e["Stereotype"]);
+        };
+    g["Enum"] << "'enum' Name (Color | Stereotype)?" >>
+        [](auto e, auto& v) { v.visitEnum(*e["Name"]); };
     g["IgnoredDef"] << "IgnoredType Name (Color | Stereotype)?";
 
     // containers with bodies
-    g["ClassWithBody"] << "Class OpenBrackets ((MethodDef | FieldDef | Ignored)? '\n')* CloseBrackets";
+    g["ClassWithBody"] << "Class OpenBrackets ((MethodDef | FieldDef | "
+                          "Ignored)? '\n')* CloseBrackets";
     g["EnumWithBody"] << "Enum OpenBrackets (Identifier? '\n')* CloseBrackets";
 
     // collector rule
-    g["Container"] << "ClassWithBody | EnumWithBody | Class | Enum | IgnoredDef";
+    g["Container"]
+        << "ClassWithBody | EnumWithBody | Class | Enum | IgnoredDef";
 
     // ========= SETTERS =========
     g["Set"] << "'set'";
     g["Separator"] << "(!'\n' .)*";
-    g["SetNamespace"] << "Set 'namespaceSeparator' Separator" >> [](auto e, auto &v) { v.visitSetNamespaceSeparator(e[1]); };
+    g["SetNamespace"] << "Set 'namespaceSeparator' Separator" >>
+        [](auto e, auto& v) { v.visitSetNamespaceSeparator(e[1]); };
     g["Setter"] << "SetNamespace";
 
     // ========= NAMESPACES =========
-    g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | Package | Ignored)? '\n')*";
-    g["NamespaceDef"] << "'namespace' Name Color?" >> [](auto e, auto &v) { v.visitNamespace(*e["Name"]); };
-    g["PackageDef"] << "'package' Name (Color | Stereotype)?" >> [](auto e, auto &v) { v.visitPackage(*e["Name"]); };
-    g["Package"] << "(PackageDef | NamespaceDef) OpenBrackets Body CloseBrackets";
+    g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | "
+                 "Package | Ignored)? '\n')*";
+    g["NamespaceDef"] << "'namespace' Name Color?" >>
+        [](auto e, auto& v) { v.visitNamespace(*e["Name"]); };
+    g["PackageDef"] << "'package' Name (Color | Stereotype)?" >>
+        [](auto e, auto& v) { v.visitPackage(*e["Name"]); };
+    g["Package"]
+        << "(PackageDef | NamespaceDef) OpenBrackets Body CloseBrackets";
 
     // ========= DIAGRAM =========
-    g["Start"] << "'@startuml' Name? '\n'" >> [](auto e, auto &v) { v.visitStart(e["Name"]); };
+    g["Start"] << "'@startuml' Name? '\n'" >>
+        [](auto e, auto& v) { v.visitStart(e["Name"]); };
     g["End"] << "'@enduml' '\n'?";
     g["Diagram"] << "Start Body End";
 
     g.setStart(g["Diagram"]);
 }
 
-Parser::~Parser()
-{
-}
+Parser::~Parser() {}
 
 bool Parser::parse(std::string_view input)
 {
@@ -141,7 +218,7 @@ bool Parser::parse(std::string_view input)
     return m_ast->valid && m_ast->end >= input.size();
 }
 
-void Parser::visitAST(AbstractVisitor &visitor)
+void Parser::visitAST(AbstractVisitor& visitor)
 {
     g.interpret(m_ast).evaluate(visitor);
 }
