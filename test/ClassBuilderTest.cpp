@@ -328,3 +328,46 @@ TEST(ClassBuilderTest, ExternalMethodsAndVariables)
     EXPECT_EQ(sut.results()[1].variables[0].source, Relationship::Member);
     EXPECT_EQ(sut.results()[1].variables[0].cardinality, "");
 }
+
+TEST(ClassBuilderTest, Namespaces)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+        class BaseClass
+        namespace net.dummy #DDDDDD {
+            class Person
+            .BaseClass <|-- Person
+        }
+        class BaseClass2
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 3);
+
+    EXPECT_EQ(sut.results()[0].name, "BaseClass");
+    EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
+    EXPECT_TRUE(sut.results()[0].namespaceStack.empty());
+
+    Class person = sut.results()[1];
+    EXPECT_EQ(person.name, "Person");
+    EXPECT_EQ(person.type, Class::Type::Class);
+    ASSERT_EQ(person.namespaceStack.size(), 2);
+    EXPECT_EQ(person.namespaceStack.top(), "dummy");
+    person.namespaceStack.pop();
+    EXPECT_EQ(person.namespaceStack.top(), "net");
+    ASSERT_EQ(person.parents.size(), 1);
+    EXPECT_EQ(person.parents[0], ".BaseClass");
+
+    EXPECT_EQ(sut.results()[2].name, "BaseClass2");
+    EXPECT_EQ(sut.results()[2].type, Class::Type::Class);
+    EXPECT_TRUE(sut.results()[2].namespaceStack.empty());
+}

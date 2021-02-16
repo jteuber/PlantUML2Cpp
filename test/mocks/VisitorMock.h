@@ -12,8 +12,8 @@ struct VisitorMock : public AbstractVisitor
     // Containers
     MOCK_METHOD(void, visitClass, (Expression type, Expression name, std::optional<Expression> stereotype));
     MOCK_METHOD(void, visitEnum, (Expression name));
-    MOCK_METHOD(void, visitPackage, (Expression name));
-    MOCK_METHOD(void, visitNamespace, (Expression name));
+    MOCK_METHOD(void, visitPackage, (Expression name, Expression body));
+    MOCK_METHOD(void, visitNamespace, (Expression name, Expression body));
     MOCK_METHOD(void, visitOpeningBracket, ());
     MOCK_METHOD(void, visitClosingBracket, ());
 

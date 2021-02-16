@@ -24,28 +24,23 @@ void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Ex
     }
 
     c.namespaceStack = m_namespaceStack;
-
-    auto fullName = removePadding(name.view());
-    if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
-        fullName.remove_prefix(1);
-        fullName.remove_suffix(1);
-        c.name = fullName;
-    } else {
-        for (const auto& ns :
-             fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
-                 return std::string_view(&*rng.begin(), std::ranges::distance(rng));
-             })) {
-            c.namespaceStack.push(ns);
-        }
-        c.name = c.namespaceStack.top();
-        c.namespaceStack.pop();
-    }
+    splitNamespacedName(name.view(), c.namespaceStack);
+    c.name = c.namespaceStack.top();
+    c.namespaceStack.pop();
 
     m_classes.push_back(c);
     m_lastEncounteredClass = --m_classes.end();
 }
 
-void ClassBuilder::visitNamespace(Expression name) {}
+void ClassBuilder::visitNamespace(Expression name, Expression body)
+{
+    auto size = m_namespaceStack.size();
+    splitNamespacedName(name.view(), m_namespaceStack);
+    body.evaluate(*this);
+    while (m_namespaceStack.size() > size) {
+        m_namespaceStack.pop();
+    }
+}
 
 void ClassBuilder::visitOpeningBracket() {}
 
@@ -212,4 +207,21 @@ std::string_view ClassBuilder::removePadding(std::string_view in)
     in.remove_prefix(std::min(in.find_first_not_of(' '), in.size()));
     in.remove_suffix(in.size() - std::min(in.find_last_not_of(' ') + 1, in.size()));
     return in;
+}
+
+void ClassBuilder::splitNamespacedName(std::string_view name, std::stack<std::string_view>& out)
+{
+    auto fullName = removePadding(name);
+    if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
+        fullName.remove_prefix(1);
+        fullName.remove_suffix(1);
+        out.push(fullName);
+    } else {
+        for (const auto& ns :
+             fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
+                 return std::string_view(&*rng.begin(), std::ranges::distance(rng));
+             })) {
+            out.push(ns);
+        }
+    }
 }

@@ -141,9 +141,11 @@ Parser::Parser(/* args */)
     // ========= NAMESPACES =========
     g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | "
                  "Package | Ignored)? '\n')*";
-    g["NamespaceDef"] << "'namespace' Name Color?" >> [](auto e, auto& v) { v.visitNamespace(*e["Name"]); };
-    g["PackageDef"] << "'package' Name (Color | Stereotype)?" >> [](auto e, auto& v) { v.visitPackage(*e["Name"]); };
-    g["Package"] << "(PackageDef | NamespaceDef) OpenBrackets Body CloseBrackets";
+    g["NamespaceDef"] << "'namespace' Name Color? OpenBrackets Body CloseBrackets" >>
+        [](auto e, auto& v) { v.visitNamespace(*e["Name"], *e["Body"]); };
+    g["PackageDef"] << "'package' Name (Color | Stereotype)? OpenBrackets Body CloseBrackets" >>
+        [](auto e, auto& v) { v.visitPackage(*e["Name"], *e["Body"]); };
+    g["Package"] << "PackageDef | NamespaceDef";
 
     // ========= DIAGRAM =========
     g["Start"] << "'@startuml' Name? '\n'" >> [](auto e, auto& v) { v.visitStart(e["Name"]); };

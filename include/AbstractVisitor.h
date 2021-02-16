@@ -13,8 +13,8 @@ public:
     // Containers
     virtual void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) = 0;
     virtual void visitEnum(Expression name)                                                         = 0;
-    virtual void visitPackage(Expression name)                                                      = 0;
-    virtual void visitNamespace(Expression name)                                                    = 0;
+    virtual void visitPackage(Expression name, Expression body)                                     = 0;
+    virtual void visitNamespace(Expression name, Expression body)                                   = 0;
     virtual void visitOpeningBracket()                                                              = 0;
     virtual void visitClosingBracket()                                                              = 0;
 

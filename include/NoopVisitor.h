@@ -10,8 +10,8 @@ public:
     // Containers
     void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) override {}
     void visitEnum(Expression name) override {}
-    void visitPackage(Expression name) override {}
-    void visitNamespace(Expression name) override {}
+    void visitPackage(Expression name, Expression body) override {}
+    void visitNamespace(Expression name, Expression body) override {}
     void visitOpeningBracket() override {}
     void visitClosingBracket() override {}
 
