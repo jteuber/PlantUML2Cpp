@@ -8,14 +8,25 @@ enum class Visibility {
     Private,
     Protected,
     PackagePrivate,
-    Public
+    Public,
+    Unspecified
+};
+
+enum class Relationship {
+    Extension,
+    Composition,
+    Aggregation,
+    Usage,
+    Member
 };
 
 struct Variable
 {
     std::string_view name;
     std::string_view type;
-    Visibility visibility;
+    std::string_view cardinality;
+    Visibility visibility = Visibility::Unspecified;
+    Relationship source;
 };
 
 struct Parameter
@@ -29,12 +40,13 @@ struct Method
     std::string_view name;
     std::string_view returnType;
     std::vector<Parameter> parameters;
-    Visibility visibility;
+    Visibility visibility = Visibility::Unspecified;
 };
 
 struct Class
 {
     std::string_view name;
+    std::vector<std::string_view> parents;
     std::stack<std::string_view> namespaceStack;
     std::vector<Variable> variables;
     std::vector<Method> methods;
@@ -44,5 +56,5 @@ struct Class
         Class,
         Interface,
         Struct
-    } type;
+    } type = Type::Class;
 };

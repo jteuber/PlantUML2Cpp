@@ -170,3 +170,77 @@ TEST(ClassBuilderTest, ClassWithTwoMethods)
     EXPECT_EQ(sut.results()[0].methods[1].parameters[0].name, "input");
     EXPECT_EQ(sut.results()[0].methods[1].parameters[0].type, "bool");
 }
+
+TEST(ClassBuilderTest, Inheritance)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Class02
+        Class01 <|-- Class02
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 1);
+    
+    EXPECT_EQ(sut.results()[0].name, "Class02");
+    EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[0].parents.size(), 1);
+    EXPECT_EQ(sut.results()[0].parents[0], "Class01");
+}
+
+TEST(ClassBuilderTest, Composition)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Class03
+        Class03 *-- Class04
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 1);
+    
+    EXPECT_EQ(sut.results()[0].name, "Class03");
+    EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[0].variables.size(), 1);
+    EXPECT_EQ(sut.results()[0].variables[0].name, "");
+    EXPECT_EQ(sut.results()[0].variables[0].type, "Class04");
+}
+
+TEST(ClassBuilderTest, Aggregation)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Class05
+        Class05 o-- Class06
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 1);
+    
+    EXPECT_EQ(sut.results()[0].name, "Class05");
+    EXPECT_EQ(sut.results()[0].type, Class::Type::Class);
+    ASSERT_EQ(sut.results()[0].variables.size(), 1);
+    EXPECT_EQ(sut.results()[0].variables[0].name, "");
+    EXPECT_EQ(sut.results()[0].variables[0].type, "Class06");
+}

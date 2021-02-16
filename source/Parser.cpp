@@ -83,7 +83,7 @@ Parser::Parser(/* args */)
     g["UsageSubjectLeft"] << "Line OpenTriRight" >> [](auto e, auto &v) { v.visitUsage(); };
     g["ConnectorLeft"] << "ExtensionSubjectLeft | CompositionSubjectLeft | AggregationSubjectLeft | UsageSubjectLeft";
     g["RelationshipLeftSubject"] << "Subject QuotedName? ConnectorLeft Cardinality? Object RelationshipLabel?"
-            >> [](auto e, auto &v) { v.visitRelationship(*e["Subject"], *e["ConnectorRight"], *e["Object"], e["Cardinality"], e["QuotedName"], e["RelationshipLabel"]); };
+            >> [](auto e, auto &v) { v.visitRelationship(*e["Subject"], *e["ConnectorLeft"], *e["Object"], e["Cardinality"], e["QuotedName"], e["RelationshipLabel"]); };
 
     g["ExtensionSubjectRight"] << "TriangleLeft Line" >> [](auto e, auto &v) { v.visitExtension(); };
     g["CompositionSubjectRight"] << "Line Composition" >> [](auto e, auto &v) { v.visitComposition(); };

@@ -81,27 +81,16 @@ void ClassBuilder::visitField(Expression valueType, Expression name, std::option
 
     var.name = name.view();
     var.type = valueType.view();
+    var.source = Relationship::Member;
 
     if (visibility)
     {
         visibility->evaluate(*this);
         var.visibility = m_lastEncounteredVisibility;
     }
-    else
-    {
-        if (c.type == Class::Type::Abstract) {
-            var.visibility = Visibility::Private;
-        } 
-        else if (c.type == Class::Type::Class) {
-            var.visibility = Visibility::Private;
-        } 
-        else if (c.type == Class::Type::Interface) {
-            std::cout << "ERROR: Interface with variable encountered" << std::endl;
-        } 
-        else if (c.type == Class::Type::Struct) {
-            var.visibility = Visibility::Public;
-        }
-    }
+    else if (c.type == Class::Type::Interface) {
+        std::cout << "ERROR: Interface with variable encountered" << std::endl;
+    } 
 
     c.variables.push_back(var);
 }
@@ -132,20 +121,8 @@ void ClassBuilder::visitMethod(Expression name, Expression parameters, std::opti
         visibility->evaluate(*this);
         method.visibility = m_lastEncounteredVisibility;
     }
-    else
-    {
-        if (c.type == Class::Type::Abstract) {
-            method.visibility = Visibility::Private;
-        } 
-        else if (c.type == Class::Type::Class) {
-            method.visibility = Visibility::Private;
-        } 
-        else if (c.type == Class::Type::Interface) {
-            std::cout << "ERROR: Interface with variable encountered" << std::endl;
-        } 
-        else if (c.type == Class::Type::Struct) {
-            method.visibility = Visibility::Public;
-        }
+    else if (c.type == Class::Type::Struct) {
+        std::cout << "ERROR: Struct with method encountered" << std::endl;
     }
 
     c.methods.push_back(method);
@@ -180,30 +157,73 @@ void ClassBuilder::visitPublicVisibility()
 
 void ClassBuilder::visitRelationship(Expression subject, Expression connector, Expression object, std::optional<Expression> objectCardinality, std::optional<Expression> subjectCardinality, std::optional<Expression> label) 
 {
-    
+    connector.evaluate(*this);
+
+    m_lastEncounteredClass = std::ranges::find(m_classes, prepareNameString(subject), &Class::name);
+    if(m_lastEncounteredClass != m_classes.end())
+    {
+        switch (m_lastRelationship)
+        {
+        case Relationship::Extension:
+            m_lastEncounteredClass->parents.push_back(prepareNameString(object));
+            break;
+
+        case Relationship::Composition:
+        case Relationship::Aggregation:
+        {
+            Variable var;
+            var.type = prepareNameString(object);
+            var.source = m_lastRelationship;
+            if (objectCardinality)
+                var.cardinality =objectCardinality->view();
+            if( label)
+                var.name = label->view();
+            m_lastEncounteredClass->variables.push_back(var);
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 
 void ClassBuilder::visitExtension() 
 {
-    
+    m_lastRelationship = Relationship::Extension;
 }
 
 void ClassBuilder::visitComposition() 
 {
-    
+    m_lastRelationship = Relationship::Composition;
 }
 
 void ClassBuilder::visitAggregation() 
 {
-    
+    m_lastRelationship = Relationship::Aggregation;
 }
 
 void ClassBuilder::visitUsage() 
 {
-    
+    m_lastRelationship = Relationship::Usage;
 }
 
 void ClassBuilder::visitSetNamespaceSeparator(Expression separator) 
 {
     namespaceDelimiter = separator.string();
+}
+
+
+std::string_view ClassBuilder::prepareNameString(Expression e)
+{
+    auto name = e.view();
+    // remove leading and trailing spaces
+    name.remove_prefix(std::min(name.find_first_not_of(' '), name.size()));
+    name.remove_suffix(name.size() - std::min(name.find_last_not_of(' ') + 1, name.size()));
+    // remove double quotes
+    if (name[0] == '"' && name[name.size() - 1] == '"')
+    {
+        name.remove_prefix(1);
+        name.remove_suffix(1);
+    }
+    return name;
 }

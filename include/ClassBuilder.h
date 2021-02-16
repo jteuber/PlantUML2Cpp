@@ -41,9 +41,13 @@ public:
     void visitSetNamespaceSeparator(Expression separator) override;
 
 private:
+    std::string_view prepareNameString(Expression e);
+
+private:
     std::vector<Class> m_classes;
     std::stack<std::string_view> m_namespaceStack;
     Visibility m_lastEncounteredVisibility;
+    Relationship m_lastRelationship;
     std::vector<Class>::iterator m_lastEncounteredClass;
 
     std::string namespaceDelimiter = ".";
