@@ -13,12 +13,13 @@ public:
     virtual void visitStereotype(std::optional<Expression> identifier) = 0;
 
     // Containers
-    virtual void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) = 0;
-    virtual void visitEnum(Expression name)                                                         = 0;
-    virtual void visitPackage(Expression name, Expression body)                                     = 0;
-    virtual void visitNamespace(Expression name, Expression body)                                   = 0;
-    virtual void visitOpeningBracket()                                                              = 0;
-    virtual void visitClosingBracket()                                                              = 0;
+    virtual void visitClass(Expression type,
+                            Expression name,
+                            std::optional<Expression> stereotype,
+                            std::optional<Expression> body)                 = 0;
+    virtual void visitEnum(Expression name, std::optional<Expression> body) = 0;
+    virtual void visitPackage(Expression name, Expression body)             = 0;
+    virtual void visitNamespace(Expression name, Expression body)           = 0;
 
     // Fields and methods
     virtual void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) = 0;

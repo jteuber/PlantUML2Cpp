@@ -21,8 +21,8 @@ Parser::Parser(/* args */)
     g["Stereotype"] << "'<<' Spot? Identifier? '>>'" >> [](auto e, auto& v) { v.visitStereotype(e["Identifier"]); };
 
     g["Endl"] << "'\n'";
-    g["OpenBrackets"] << "Endl? '{'" >> [](auto e, auto& v) { v.visitOpeningBracket(); };
-    g["CloseBrackets"] << "'}'" >> [](auto e, auto& v) { v.visitClosingBracket(); };
+    g["OpenBrackets"] << "Endl? '{'";
+    g["CloseBrackets"] << "'}'";
 
     // ========= COMMENTS =========
     g["Comment"] << "'\\'' (!'\n' .)*";
@@ -117,16 +117,17 @@ Parser::Parser(/* args */)
     g["ClassType"] << "'abstract' 'class'? | 'class' | 'entity' | 'interface'";
     g["IgnoredType"] << "'annotation' | 'circle' | '()' | 'diamond' | '<>'";
 
-    // simple containers
-    g["Class"] << "ClassType Name (Color | Stereotype)?" >>
-        [](auto e, auto& v) { v.visitClass(*e["ClassType"], *e["Name"], e["Stereotype"]); };
-    g["Enum"] << "'enum' Name (Color | Stereotype)?" >> [](auto e, auto& v) { v.visitEnum(*e["Name"]); };
-    g["IgnoredDef"] << "IgnoredType Name (Color | Stereotype)?";
+    // body of containers
+    g["ClassBody"] << "OpenBrackets ((MethodDef | FieldDef | "
+                      "Ignored)? '\n')* CloseBrackets";
+    g["EnumBody"] << "OpenBrackets (Identifier? '\n')* CloseBrackets";
 
-    // containers with bodies
-    g["ClassWithBody"] << "Class OpenBrackets ((MethodDef | FieldDef | "
-                          "Ignored)? '\n')* CloseBrackets";
-    g["EnumWithBody"] << "Enum OpenBrackets (Identifier? '\n')* CloseBrackets";
+    // simple containers
+    g["Class"] << "ClassType Name (Color | Stereotype)? ClassBody?" >>
+        [](auto e, auto& v) { v.visitClass(*e["ClassType"], *e["Name"], e["Stereotype"], e["ClassBody"]); };
+    g["Enum"] << "'enum' Name (Color | Stereotype)? EnumBody?" >>
+        [](auto e, auto& v) { v.visitEnum(*e["Name"], e["EnumBody"]); };
+    g["IgnoredDef"] << "IgnoredType Name (Color | Stereotype)?";
 
     // collector rule
     g["Container"] << "ClassWithBody | EnumWithBody | Class | Enum | IgnoredDef";
@@ -155,7 +156,7 @@ Parser::Parser(/* args */)
     g.setStart(g["Diagram"]);
 }
 
-Parser::~Parser() {}
+Parser::~Parser() = default;
 
 bool Parser::parse(std::string_view input)
 {

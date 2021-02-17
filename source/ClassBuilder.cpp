@@ -16,7 +16,10 @@ void ClassBuilder::visitStereotype(std::optional<Expression> identifier)
     }
 }
 
-void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Expression> stereotype)
+void ClassBuilder::visitClass(Expression type,
+                              Expression name,
+                              std::optional<Expression> stereotype,
+                              std::optional<Expression> body)
 {
     Class c;
 
@@ -41,6 +44,10 @@ void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Ex
     if (stereotype) {
         stereotype->evaluate(*this);
     }
+    if (body) {
+        body->evaluate(*this);
+    }
+    m_lastEncounteredClass = m_classes.end();
 }
 
 void ClassBuilder::visitNamespace(Expression name, Expression body)
@@ -53,41 +60,42 @@ void ClassBuilder::visitNamespace(Expression name, Expression body)
     }
 }
 
-void ClassBuilder::visitOpeningBracket() {}
-
-void ClassBuilder::visitClosingBracket() {}
-
 void ClassBuilder::visitField(Expression valueType, Expression name, std::optional<Expression> visibility)
 {
-    Variable var;
-    auto& c = *m_lastEncounteredClass;
+    if (m_lastEncounteredClass != m_classes.end()) {
+        Variable var;
+        auto& c = *m_lastEncounteredClass;
 
-    var.name   = name.view();
-    var.type   = valueType.view();
-    var.source = Relationship::Member;
+        var.name   = name.view();
+        var.type   = valueType.view();
+        var.source = Relationship::Member;
 
-    if (visibility) {
-        visibility->evaluate(*this);
-        var.visibility = m_lastEncounteredVisibility;
-    } else if (c.type == Class::Type::Interface) {
-        std::cout << "ERROR: Interface with variable encountered" << std::endl;
+        if (visibility) {
+            visibility->evaluate(*this);
+            var.visibility = m_lastEncounteredVisibility;
+        } else if (c.type == Class::Type::Interface) {
+            std::cout << "ERROR: Interface with variable encountered" << std::endl;
+        }
+
+        c.variables.push_back(var);
     }
-
-    c.variables.push_back(var);
 }
 
 void ClassBuilder::visitExternalField(Expression container, Expression field)
 {
     m_lastEncounteredClass = std::ranges::find(m_classes, container.view(), &Class::name);
     field.evaluate(*this);
+    m_lastEncounteredClass = m_classes.end();
 }
 
 void ClassBuilder::visitParameter(Expression valueType, Expression name)
 {
-    Parameter param;
-    param.name = name.view();
-    param.type = valueType.view();
-    m_lastEncounteredClass->methods.back().parameters.push_back(param);
+    if (m_lastEncounteredClass != m_classes.end()) {
+        Parameter param;
+        param.name = name.view();
+        param.type = valueType.view();
+        m_lastEncounteredClass->methods.back().parameters.push_back(param);
+    }
 }
 
 void ClassBuilder::visitMethod(Expression name,
@@ -95,28 +103,31 @@ void ClassBuilder::visitMethod(Expression name,
                                std::optional<Expression> returnType,
                                std::optional<Expression> visibility)
 {
-    Method method;
-    auto& c = *m_lastEncounteredClass;
+    if (m_lastEncounteredClass != m_classes.end()) {
+        Method method;
+        auto& c = *m_lastEncounteredClass;
 
-    method.name       = name.view();
-    method.returnType = returnType ? returnType->view() : "void";
+        method.name       = name.view();
+        method.returnType = returnType ? returnType->view() : "void";
 
-    if (visibility) {
-        visibility->evaluate(*this);
-        method.visibility = m_lastEncounteredVisibility;
-    } else if (c.type == Class::Type::Struct) {
-        std::cout << "ERROR: Struct with method encountered" << std::endl;
+        if (visibility) {
+            visibility->evaluate(*this);
+            method.visibility = m_lastEncounteredVisibility;
+        } else if (c.type == Class::Type::Struct) {
+            std::cout << "ERROR: Struct with method encountered" << std::endl;
+        }
+
+        c.methods.push_back(method);
+
+        parameters.evaluate(*this);
     }
-
-    c.methods.push_back(method);
-
-    parameters.evaluate(*this);
 }
 
 void ClassBuilder::visitExternalMethod(Expression container, Expression method)
 {
     m_lastEncounteredClass = std::ranges::find(m_classes, container.view(), &Class::name);
     method.evaluate(*this);
+    m_lastEncounteredClass = m_classes.end();
 }
 
 void ClassBuilder::visitPrivateVisibility()

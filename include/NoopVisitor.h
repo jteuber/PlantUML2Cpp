@@ -10,12 +10,14 @@ public:
     void visitStereotype(std::optional<Expression> identifier) override {}
 
     // Containers
-    void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) override {}
-    void visitEnum(Expression name) override {}
+    void visitClass(Expression type,
+                    Expression name,
+                    std::optional<Expression> stereotype,
+                    std::optional<Expression> body) override
+    {}
+    void visitEnum(Expression name, std::optional<Expression> body) override {}
     void visitPackage(Expression name, Expression body) override {}
     void visitNamespace(Expression name, Expression body) override {}
-    void visitOpeningBracket() override {}
-    void visitClosingBracket() override {}
 
     // Fields and methods
     void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) override {}
