@@ -371,3 +371,75 @@ TEST(ClassBuilderTest, Namespaces)
     EXPECT_EQ(sut.results()[2].type, Class::Type::Class);
     EXPECT_TRUE(sut.results()[2].namespaceStack.empty());
 }
+
+TEST(ClassBuilderTest, NamespaceSeperator)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+        set namespaceSeparator ::
+        class X1::X2::foo {
+        some info
+        }
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 1);
+
+    Class foo = sut.results()[0];
+    EXPECT_EQ(foo.name, "foo");
+    EXPECT_EQ(foo.type, Class::Type::Class);
+    ASSERT_EQ(foo.namespaceStack.size(), 2);
+    EXPECT_EQ(foo.namespaceStack.top(), "X2");
+    foo.namespaceStack.pop();
+    EXPECT_EQ(foo.namespaceStack.top(), "X1");
+}
+
+TEST(ClassBuilderTest, Stereotypes)
+{
+    // Arrange
+    ClassBuilder sut;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+        class System << (S,#FF7700) Singleton >>
+        class Date << (D,orchid) >>
+
+        entity test << (T,white) Template >>
+        {
+            test : var
+        }
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 3);
+
+    Class system = sut.results()[0];
+    EXPECT_EQ(system.name, "System");
+    EXPECT_EQ(system.stereotype, "Singleton");
+    EXPECT_EQ(system.type, Class::Type::Class);
+
+    Class date = sut.results()[1];
+    EXPECT_EQ(date.name, "Date");
+    EXPECT_EQ(date.stereotype, "");
+    EXPECT_EQ(date.type, Class::Type::Class);
+
+    Class test = sut.results()[2];
+    EXPECT_EQ(test.name, "test");
+    EXPECT_EQ(test.stereotype, "Template");
+    EXPECT_EQ(test.type, Class::Type::Struct);
+}

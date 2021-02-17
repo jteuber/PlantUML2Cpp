@@ -7,6 +7,8 @@ class NoopVisitor : public AbstractVisitor
 public:
     void visitStart(std::optional<Expression> name) override {}
 
+    void visitStereotype(std::optional<Expression> identifier) override {}
+
     // Containers
     void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) override {}
     void visitEnum(Expression name) override {}

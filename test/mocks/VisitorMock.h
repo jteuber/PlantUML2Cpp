@@ -9,6 +9,8 @@ struct VisitorMock : public AbstractVisitor
 {
     MOCK_METHOD(void, visitStart, (std::optional<Expression> name));
 
+    MOCK_METHOD(void, visitStereotype, (std::optional<Expression> identifier));
+
     // Containers
     MOCK_METHOD(void, visitClass, (Expression type, Expression name, std::optional<Expression> stereotype));
     MOCK_METHOD(void, visitEnum, (Expression name));

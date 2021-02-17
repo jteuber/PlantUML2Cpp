@@ -18,7 +18,7 @@ Parser::Parser(/* args */)
 
     // stereotypes
     g["Spot"] << "'(' . ',' Color ')'";
-    g["Stereotype"] << "'<<' Spot? Identifier? '>>'";
+    g["Stereotype"] << "'<<' Spot? Identifier? '>>'" >> [](auto e, auto& v) { v.visitStereotype(e["Identifier"]); };
 
     g["Endl"] << "'\n'";
     g["OpenBrackets"] << "Endl? '{'" >> [](auto e, auto& v) { v.visitOpeningBracket(); };

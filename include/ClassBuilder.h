@@ -8,6 +8,8 @@ class ClassBuilder : public NoopVisitor
 public:
     const std::vector<Class>& results();
 
+    void visitStereotype(std::optional<Expression> identifier) override;
+
     // Containers
     void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) override;
     void visitNamespace(Expression name, Expression body) override;
@@ -56,7 +58,7 @@ private:
     std::stack<std::string_view> m_namespaceStack;
     Visibility m_lastEncounteredVisibility;
     Relationship m_lastRelationship;
-    std::vector<Class>::iterator m_lastEncounteredClass;
+    std::vector<Class>::iterator m_lastEncounteredClass = m_classes.end();
 
     std::string namespaceDelimiter = ".";
 };

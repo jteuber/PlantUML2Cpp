@@ -9,7 +9,14 @@ const std::vector<Class>& ClassBuilder::results()
     return m_classes;
 }
 
-void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Expression> /*stereotype*/)
+void ClassBuilder::visitStereotype(std::optional<Expression> identifier)
+{
+    if (identifier && m_lastEncounteredClass != m_classes.end()) {
+        m_lastEncounteredClass->stereotype = prepareNameString(*identifier);
+    }
+}
+
+void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Expression> stereotype)
 {
     Class c;
 
@@ -30,6 +37,10 @@ void ClassBuilder::visitClass(Expression type, Expression name, std::optional<Ex
 
     m_classes.push_back(c);
     m_lastEncounteredClass = --m_classes.end();
+
+    if (stereotype) {
+        stereotype->evaluate(*this);
+    }
 }
 
 void ClassBuilder::visitNamespace(Expression name, Expression body)

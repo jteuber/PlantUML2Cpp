@@ -48,6 +48,7 @@ struct Method
 struct Class
 {
     std::string_view name;
+    std::string_view stereotype;
     std::vector<std::string_view> parents;
     std::stack<std::string_view> namespaceStack;
     std::vector<Variable> variables;

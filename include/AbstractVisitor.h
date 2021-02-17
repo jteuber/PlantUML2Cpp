@@ -10,6 +10,8 @@ class AbstractVisitor
 public:
     virtual void visitStart(std::optional<Expression> name) = 0;
 
+    virtual void visitStereotype(std::optional<Expression> identifier) = 0;
+
     // Containers
     virtual void visitClass(Expression type, Expression name, std::optional<Expression> stereotype) = 0;
     virtual void visitEnum(Expression name)                                                         = 0;
