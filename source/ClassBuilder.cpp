@@ -164,7 +164,7 @@ void ClassBuilder::visitRelationship(Expression subject,
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (m_lastRelationship) {
         case Relationship::Extension:
-            m_lastEncounteredClass->parents.push_back(prepareNameString(object));
+            m_lastEncounteredClass->parents.push_back(std::string(prepareNameString(object)));
             break;
 
         case Relationship::Composition:
@@ -231,19 +231,19 @@ std::string_view ClassBuilder::removePadding(std::string_view in)
     return in;
 }
 
-void ClassBuilder::splitNamespacedName(std::string_view name, std::stack<std::string_view>& out)
+void ClassBuilder::splitNamespacedName(std::string_view name, std::stack<std::string>& out)
 {
     auto fullName = removePadding(name);
     if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
         fullName.remove_prefix(1);
         fullName.remove_suffix(1);
-        out.push(fullName);
+        out.push(std::string(fullName));
     } else {
         for (const auto& ns :
              fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
                  return std::string_view(&*rng.begin(), std::ranges::distance(rng));
              })) {
-            out.push(ns);
+            out.push(std::string(ns));
         }
     }
 }

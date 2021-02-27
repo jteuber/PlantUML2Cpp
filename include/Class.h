@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stack>
-#include <string_view>
+#include <string>
 #include <vector>
 
 enum class Visibility
@@ -24,33 +24,33 @@ enum class Relationship
 
 struct Variable
 {
-    std::string_view name;
-    std::string_view type;
-    std::string_view cardinality;
+    std::string name;
+    std::string type;
+    std::string cardinality;
     Visibility visibility = Visibility::Unspecified;
     Relationship source;
 };
 
 struct Parameter
 {
-    std::string_view name;
-    std::string_view type;
+    std::string name;
+    std::string type;
 };
 
 struct Method
 {
-    std::string_view name;
-    std::string_view returnType;
+    std::string name;
+    std::string returnType;
     std::vector<Parameter> parameters;
     Visibility visibility = Visibility::Unspecified;
 };
 
 struct Class
 {
-    std::string_view name;
-    std::string_view stereotype;
-    std::vector<std::string_view> parents;
-    std::stack<std::string_view> namespaceStack;
+    std::string name;
+    std::string stereotype;
+    std::vector<std::string> parents;
+    std::stack<std::string> namespaceStack;
     std::vector<Variable> variables;
     std::vector<Method> methods;
 

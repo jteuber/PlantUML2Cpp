@@ -52,11 +52,11 @@ private:
     // helpers
     static std::string_view prepareNameString(Expression e);
     static std::string_view removePadding(std::string_view in);
-    void splitNamespacedName(std::string_view name, std::stack<std::string_view>& out);
+    void splitNamespacedName(std::string_view name, std::stack<std::string>& out);
 
     // members
     std::vector<Class> m_classes;
-    std::stack<std::string_view> m_namespaceStack;
+    std::stack<std::string> m_namespaceStack;
     Visibility m_lastEncounteredVisibility;
     Relationship m_lastRelationship;
     std::vector<Class>::iterator m_lastEncounteredClass = m_classes.end();

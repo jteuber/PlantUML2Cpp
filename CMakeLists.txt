@@ -24,4 +24,12 @@ CPMAddPackage(
 include_directories(${PEGParser_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC PEGParser)
 
+CPMAddPackage(
+  NAME fmt
+  GIT_TAG 6.1.2
+  GITHUB_REPOSITORY fmtlib/fmt
+)
+include_directories(${fmt_SOURCE_DIR}/include)
+target_link_libraries(PlantUML2Cpp PUBLIC fmt)
+
 add_subdirectory(test)
