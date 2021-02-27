@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Class.h"
+
 #include <array>
 #include <string>
 #include <unordered_map>
@@ -14,10 +16,10 @@ struct Config
     std::unordered_map<std::string, std::string> containerByCardinalityAggregation = {
         {"", "std::shared_ptr<{}>"}, {"1", "std::shared_ptr<{}>"}, {"0..*", "std::vector<std::shared_ptr<{}>>"}};
 
-    std::array<std::string, 6> memberOrder{"public_methods",
-                                           "public_members",
-                                           "protected_methods",
-                                           "protected_members",
-                                           "private_methods",
-                                           "private_members"};
+    std::array<std::pair<Visibility, std::string>, 6> memberOrder = {std::pair{Visibility::Public, "methods"},
+                                                                     std::pair{Visibility::Public, "members"},
+                                                                     std::pair{Visibility::Protected, "methods"},
+                                                                     std::pair{Visibility::Protected, "members"},
+                                                                     std::pair{Visibility::Private, "methods"},
+                                                                     std::pair{Visibility::Private, "members"}};
 };

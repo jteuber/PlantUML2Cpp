@@ -49,18 +49,10 @@ std::string HeaderGenerator::generate(const Class& in)
 
     // Body: methods
     for (const auto& memberIdentifier : m_config->memberOrder) {
-        if (memberIdentifier == "public_methods") {
-            ret += generateMethods(in.methods, Visibility::Public, "public: \n");
-        } else if (memberIdentifier == "protected_methods") {
-            ret += generateMethods(in.methods, Visibility::Protected, "protected: \n");
-        } else if (memberIdentifier == "private_methods") {
-            ret += generateMethods(in.methods, Visibility::Private, "private: \n");
-        } else if (memberIdentifier == "public_members") {
-            ret += generateMembers(in.variables, Visibility::Public, "public: \n");
-        } else if (memberIdentifier == "protected_members") {
-            ret += generateMembers(in.variables, Visibility::Protected, "protected: \n");
-        } else {
-            ret += generateMembers(in.variables, Visibility::Private, "private: \n");
+        if (memberIdentifier.second == "methods") {
+            ret += generateMethods(in.methods, memberIdentifier.first);
+        } else if (memberIdentifier.second == "members") {
+            ret += generateMembers(in.variables, memberIdentifier.first);
         }
     }
 
@@ -69,42 +61,45 @@ std::string HeaderGenerator::generate(const Class& in)
     return ret;
 }
 
-std::string HeaderGenerator::generateMethods(const std::vector<Method>& methods, Visibility vis, std::string prefix)
+std::string HeaderGenerator::generateMethods(const std::vector<Method>& methods, Visibility vis)
 {
     std::string ret;
     auto methodView = methods | filterOnVisibility<Method>(vis);
     if (methodView.begin() != methodView.end()) {
-        ret = std::move(prefix);
-        for (const auto& m : methodView) {
-            ret += m_config->indent + m.returnType + " " + m.name + "(";
-            if (!m.parameters.empty()) {
-                ret += std::accumulate(m.parameters.begin(),
-                                       m.parameters.end(),
-                                       std::string(),
-                                       [](const std::string& acc, const Parameter& param) {
-                                           return acc + param.type + " " + param.name + ", ";
-                                       });
-                ret.erase(ret.length() - 2);
-            }
-            ret += ");\n";
-        }
+        ret += visibilityToString(vis);
+        auto methodStings = methodView | std::views::transform([this](const Method& m) { return methodToString(m); });
+        ret += std::accumulate(methodStings.begin(), methodStings.end(), std::string());
     }
 
-    return ret;
+    return ret + "\n";
 }
 
-std::string HeaderGenerator::generateMembers(const std::vector<Variable>& members, Visibility vis, std::string prefix)
+std::string HeaderGenerator::generateMembers(const std::vector<Variable>& members, Visibility vis)
 {
     std::string ret;
     auto memberView = members | filterOnVisibility<Variable>(vis);
     if (memberView.begin() != memberView.end()) {
-        ret = std::move(prefix);
+        ret += visibilityToString(vis);
         auto memberStrings =
             memberView | std::views::transform([this](const Variable& var) { return variableToString(var); });
-        ret += std::reduce(memberStrings.begin(), memberStrings.end());
+        ret += std::accumulate(memberStrings.begin(), memberStrings.end(), std::string());
     }
 
-    return ret;
+    return ret + "\n";
+}
+
+std::string HeaderGenerator::methodToString(const Method& m)
+{
+    std::string ret = m_config->indent + m.returnType + " " + m.name + "(";
+    if (!m.parameters.empty()) {
+        ret += std::accumulate(
+            m.parameters.begin(),
+            m.parameters.end(),
+            std::string(),
+            [](const std::string& acc, const Parameter& param) { return acc + param.type + " " + param.name + ", "; });
+        ret.erase(ret.length() - 2);
+    }
+    return ret + ");\n";
 }
 
 std::string HeaderGenerator::variableToString(const Variable& var)
@@ -126,5 +121,17 @@ std::string HeaderGenerator::variableToString(const Variable& var)
     }
     default:
         return m_config->indent + var.type + " " + var.name + ";\n";
+    }
+}
+
+std::string HeaderGenerator::visibilityToString(Visibility vis)
+{
+    switch (vis) {
+    case Visibility::Protected:
+        return "protected:\n";
+    case Visibility::Private:
+        return "private:\n";
+    default:
+        return "public:\n";
     }
 }
