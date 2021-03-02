@@ -3,8 +3,10 @@
 
 #include <algorithm>
 #include <concepts>
+#include <list>
 #include <numeric>
 #include <ranges>
+#include <set>
 #include <utility>
 
 #include <fmt/core.h>
@@ -28,6 +30,9 @@ auto filterOnVisibility(Visibility vis)
 std::string HeaderGenerator::generate(const Class& in)
 {
     std::string ret;
+
+    // Includes
+    ret += generateIncludes(in);
 
     // Definintion
     std::string classDef = "class";
@@ -74,18 +79,86 @@ std::string HeaderGenerator::generateMethods(const std::vector<Method>& methods,
     return ret + "\n";
 }
 
-std::string HeaderGenerator::generateMembers(const std::vector<Variable>& members, Visibility vis)
+std::string
+HeaderGenerator::generateMembers(const std::vector<Variable>& members, Visibility vis, Class::Type classType)
 {
     std::string ret;
     auto memberView = members | filterOnVisibility<Variable>(vis);
     if (memberView.begin() != memberView.end()) {
         ret += visibilityToString(vis);
-        auto memberStrings =
-            memberView | std::views::transform([this](const Variable& var) { return variableToString(var); });
+        auto memberStrings = memberView | std::views::transform([this, classType](const Variable& var) {
+                                 return variableToString(var, classType);
+                             });
         ret += std::accumulate(memberStrings.begin(), memberStrings.end(), std::string());
     }
 
     return ret + "\n";
+}
+
+std::string HeaderGenerator::generateIncludes(const Class& in)
+{
+    // record all used types
+    std::set<std::string> rawUsedTypes;
+    for (const auto& p : in.parents) {
+        rawUsedTypes.insert(p);
+    }
+    for (const auto& v : in.variables) {
+        rawUsedTypes.insert(variableTypeToString(v));
+    }
+    for (const auto& m : in.methods) {
+        rawUsedTypes.insert(m.returnType);
+        for (const auto& p : m.parameters) {
+            rawUsedTypes.insert(p.type);
+        }
+    }
+
+    // split all template types
+    std::set<std::string> usedTypes;
+    const std::regex templateRegex("([a-zA-Z:_]+)<([a-zA-Z:_<>]+)[, ]*([a-zA-Z:_<>]+)?>");
+    std::smatch templateMatch;
+    for (const auto& type : rawUsedTypes) {
+        std::list<std::string> list{type};
+        while (!list.empty()) {
+            if (std::regex_match(list.front(), templateMatch, templateRegex)) {
+                assert(templateMatch.size() >= 3));
+
+                std::ssub_match sub_match  = templateMatch[1];
+                std::ssub_match paramMatch = templateMatch[2];
+                usedTypes.insert(sub_match.str());
+                list.push_back(paramMatch.str());
+
+                if (templateMatch.size() == 4) {
+                    std::ssub_match paramMatch2 = templateMatch[3];
+                    list.push_back(paramMatch2.str());
+                }
+            } else {
+                usedTypes.insert(*it);
+            }
+            list.pop_front();
+        }
+    }
+
+    std::set<std::string> libraryIncludes;
+    std::set<std::string> localIncludes;
+    for (const auto& type : usedTypes) {
+        if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
+            libraryIncludes.insert(it->second);
+        } else if (auto ns = type.find_last_of("::"); ns != std::string::npos) {
+            libraryIncludes.insert(type.substr(ns));
+        } else {
+            localIncludes.insert(type);
+        }
+    }
+
+    auto libIncludeStrings =
+        libraryIncludes | std::views::transform([this](const std::string& inc) { return "#include <" + inc + ">\n"; });
+    std::string libIncs = std::accumulate(includeStrings.begin(), includeStrings.end(), std::string());
+
+    auto localIncludeStrings =
+        localIncludes | std::views::transform([this](const std::string& inc) { return "#include \"" + inc + "\"\n"; });
+    std::string localIncs = std::accumulate(localIncludeStrings.begin(), localIncludeStrings.end(), std::string());
+
+    return libIncs + "\n" + localIncs;
 }
 
 std::string HeaderGenerator::methodToString(const Method& m)
@@ -102,25 +175,35 @@ std::string HeaderGenerator::methodToString(const Method& m)
     return ret + ");\n";
 }
 
-std::string HeaderGenerator::variableToString(const Variable& var)
+std::string HeaderGenerator::variableToString(const Variable& var, Class::Type classType)
+{
+    std::string varName = var.name;
+    bool needsPrefix    = !(classType == Class::Type::Struct && m_config.noMemberPrefixForStructs);
+    if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
+        varName = m_config->memberPrefix + varName;
+    }
+    return variableTypeToString(var) + " " + varName + ";\n";
+}
+
+std::string HeaderGenerator::variableTypeToString(const Variable& var)
 {
     switch (var.source) {
     case Relationship::Aggregation: {
         auto containerIt = m_config->containerByCardinalityAggregation.find(var.cardinality);
         if (containerIt != m_config->containerByCardinalityAggregation.end()) {
-            return fmt::format(containerIt->second, var.type) + " " + var.name + ";\n";
+            return fmt::format(containerIt->second, var.type);
         }
-        return m_config->indent + var.type + " " + var.name + ";\n";
+        return m_config->indent + var.type;
     }
     case Relationship::Composition: {
         auto containerIt = m_config->containerByCardinalityComposition.find(var.cardinality);
         if (containerIt != m_config->containerByCardinalityComposition.end()) {
-            return fmt::format(containerIt->second, var.type) + " " + var.name + ";\n";
+            return fmt::format(containerIt->second, var.type);
         }
-        return m_config->indent + var.type + " " + var.name + ";\n";
+        return m_config->indent + var.type;
     }
     default:
-        return m_config->indent + var.type + " " + var.name + ";\n";
+        return m_config->indent + var.type;
     }
 }
 

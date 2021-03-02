@@ -176,6 +176,46 @@ TEST(HeaderGenerator, AllKindsOfMembers)
 
     // Assert
     std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    regex += "public:" + ws + "int" + ws + "m_simplePublicMember;" + ws;
+    regex += "protected:" + ws + "int" + ws + "m_simpleProtectedMember;" + ws;
+    regex += "private:" + ws + "int" + ws + "m_simplePrivateMember;" + ws;
+    regex += "int" + ws + "m_simplePrivateMember2;" + ws;
+    regex += "\\};(.|\n)*";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}
+
+TEST(HeaderGenerator, MembersInStruct)
+{
+    // Arrange
+    auto config = std::make_shared<Config>();
+    HeaderGenerator sut(config);
+
+    Variable member;
+    member.name       = "simplePublicMember";
+    member.type       = "int";
+    member.visibility = Visibility::Public;
+
+    Class input;
+    input.name = "simpleStruct";
+    input.type = Class::Type::Struct;
+    input.variables.push_back(member);
+
+    member.name       = "simplePrivateMember";
+    member.visibility = Visibility::Private;
+    input.variables.push_back(member);
+    member.name = "simplePrivateMember2";
+    input.variables.push_back(member);
+
+    member.name       = "simpleProtectedMember";
+    member.visibility = Visibility::Protected;
+    input.variables.push_back(member);
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = "struct[ \t]*simpleStruct" + ws + "\\{" + ws;
     regex += "public:" + ws + "int" + ws + "simplePublicMember;" + ws;
     regex += "protected:" + ws + "int" + ws + "simpleProtectedMember;" + ws;
     regex += "private:" + ws + "int" + ws + "simplePrivateMember;" + ws;

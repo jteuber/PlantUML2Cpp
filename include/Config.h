@@ -8,8 +8,9 @@
 
 struct Config
 {
-    std::string memberPrefix = "m_";
-    std::string indent       = "    ";
+    std::string memberPrefix      = "m_";
+    std::string indent            = "    ";
+    bool noMemberPrefixForStructs = true;
 
     std::unordered_map<std::string, std::string> containerByCardinalityComposition = {
         {"", "std::shared_ptr<{}>"}, {"1", "std::shared_ptr<{}>"}, {"0..*", "std::vector<{}>"}};
@@ -22,4 +23,6 @@ struct Config
                                                                      std::pair{Visibility::Protected, "members"},
                                                                      std::pair{Visibility::Private, "methods"},
                                                                      std::pair{Visibility::Private, "members"}};
+
+    std::unordered_map<std::string, std::string> typeToIncludeMap = {{"std::shared_ptr", "memory"}};
 };

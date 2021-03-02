@@ -14,9 +14,11 @@ public:
 
 private:
     std::string generateMethods(const std::vector<Method>& methods, Visibility vis);
-    std::string generateMembers(const std::vector<Variable>& members, Visibility vis);
+    std::string generateMembers(const std::vector<Variable>& members, Visibility vis, Class::Type classType);
+    std::string generateIncludes(const Class& in);
     std::string methodToString(const Method& m);
-    std::string variableToString(const Variable& var);
+    std::string variableToString(const Variable& var, Class::Type classType);
+    std::string variableTypeToString(const Variable& var);
 
     static std::string visibilityToString(Visibility vis);
 
