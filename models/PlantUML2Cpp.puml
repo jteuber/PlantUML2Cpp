@@ -1,0 +1,47 @@
+@startuml PlantUML2Cpp
+
+set namespaceSeparator ::
+
+class PlantUML2Code
+
+interface AbstractVisitor
+class NoopVisitor
+class ClassBuilder
+
+class Parser
+
+class HeaderGenerator
+entity Config
+
+entity Class
+entity Variable
+entity Method
+entity Parameter
+enum Visibility
+enum Relationship
+enum Type
+
+PlantUML2Code *-- "1" Parser
+PlantUML2Code *-- "1" ClassBuilder
+PlantUML2Code *-- "1" HeaderGenerator
+PlantUML2Code *-- "1" Config
+
+NoopVisitor --|> AbstractVisitor
+ClassBuilder --|> NoopVisitor
+Parser ---> AbstractVisitor
+Parser *-- "1" peg_parser::SyntaxTree
+Parser *-- "1" peg_parser::ParserGenerator
+
+Class *-- "0..*" Variable
+Class *-- "0..*" Method
+Class *-- "1" Type
+Variable *-- "1" Visibility
+Variable *-- "1" Relationship
+Method *-- "0..*" Parameter
+Method *-- "1" Visibility
+
+ClassBuilder *-left- "0..*" Class : generated
+HeaderGenerator -right-> Class : uses
+HeaderGenerator *-left- "1" Config
+
+@enduml
