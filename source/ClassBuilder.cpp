@@ -35,8 +35,8 @@ void ClassBuilder::visitClass(Expression type,
 
     c.namespaceStack = m_namespaceStack;
     splitNamespacedName(name.view(), c.namespaceStack);
-    c.name = c.namespaceStack.top();
-    c.namespaceStack.pop();
+    c.name = c.namespaceStack.back();
+    c.namespaceStack.pop_back();
 
     m_classes.push_back(c);
     m_lastEncounteredClass = --m_classes.end();
@@ -237,13 +237,13 @@ void ClassBuilder::splitNamespacedName(std::string_view name, std::stack<std::st
     if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
         fullName.remove_prefix(1);
         fullName.remove_suffix(1);
-        out.push(std::string(fullName));
+        out.push_back(std::string(fullName));
     } else {
         for (const auto& ns :
              fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
                  return std::string_view(&*rng.begin(), std::ranges::distance(rng));
              })) {
-            out.push(std::string(ns));
+            out.push_back(std::string(ns));
         }
     }
 }

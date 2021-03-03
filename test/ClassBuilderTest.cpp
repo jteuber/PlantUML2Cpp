@@ -361,9 +361,9 @@ TEST(ClassBuilderTest, Namespaces)
     EXPECT_EQ(person.name, "Person");
     EXPECT_EQ(person.type, Class::Type::Class);
     ASSERT_EQ(person.namespaceStack.size(), 2);
-    EXPECT_EQ(person.namespaceStack.top(), "dummy");
-    person.namespaceStack.pop();
-    EXPECT_EQ(person.namespaceStack.top(), "net");
+    EXPECT_EQ(person.namespaceStack.back(), "dummy");
+    person.namespaceStack.pop_back();
+    EXPECT_EQ(person.namespaceStack.back(), "net");
     ASSERT_EQ(person.parents.size(), 1);
     EXPECT_EQ(person.parents[0], ".BaseClass");
 
@@ -398,9 +398,9 @@ TEST(ClassBuilderTest, NamespaceSeperator)
     EXPECT_EQ(foo.name, "foo");
     EXPECT_EQ(foo.type, Class::Type::Class);
     ASSERT_EQ(foo.namespaceStack.size(), 2);
-    EXPECT_EQ(foo.namespaceStack.top(), "X2");
-    foo.namespaceStack.pop();
-    EXPECT_EQ(foo.namespaceStack.top(), "X1");
+    EXPECT_EQ(foo.namespaceStack.back(), "X2");
+    foo.namespaceStack.pop_back();
+    EXPECT_EQ(foo.namespaceStack.back(), "X1");
 }
 
 TEST(ClassBuilderTest, Stereotypes)

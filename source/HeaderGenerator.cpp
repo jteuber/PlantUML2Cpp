@@ -34,6 +34,14 @@ std::string HeaderGenerator::generate(const Class& in)
     // Includes
     ret += generateIncludes(in);
 
+    ret += "\n";
+
+    // open namespaces
+    for (const auto& ns : in.namespaceStack) {
+        ret += "namespace " + ns + " {\n";
+    }
+    ret += "\n";
+
     // Definintion
     std::string classDef = "class";
     if (in.type == Class::Type::Struct) {
@@ -62,6 +70,11 @@ std::string HeaderGenerator::generate(const Class& in)
     }
 
     ret += "\n};\n";
+
+    // close namespaces
+    for (const auto& ns : in.namespaceStack | std::views::reverse) {
+        ret += "} // " + ns + "\n";
+    }
 
     return ret;
 }
