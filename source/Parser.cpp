@@ -156,8 +156,6 @@ Parser::Parser(/* args */)
     g.setStart(g["Diagram"]);
 }
 
-Parser::~Parser() = default;
-
 bool Parser::parse(std::string_view input)
 {
     m_ast = g.parse(input);

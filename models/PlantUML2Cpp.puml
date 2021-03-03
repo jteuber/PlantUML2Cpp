@@ -2,29 +2,120 @@
 
 set namespaceSeparator ::
 
-class PlantUML2Code
+class PlantUML2Cpp {
+    bool run(std::filesystem::path path)
+}
 
-interface AbstractVisitor
+interface AbstractVisitor {
+    visitStart(std::optional<Expression> name)
+    visitStereotype(std::optional<Expression> identifier)
+    -- Containers --
+    visitClass(Expression type, Expression name,\n  std::optional<Expression> stereotype, std::optional<Expression> body)
+    visitEnum(Expression name, std::optional<Expression> body)
+    visitPackage(Expression name, Expression body)
+    visitNamespace(Expression name, Expression body)
+    -- Fields --
+    visitField(Expression valueType, Expression name,\n  std::optional<Expression> visibility)
+    visitExternalField(Expression container, Expression field)  
+    -- Methods --
+    visitParameter(Expression valueType, Expression name)       
+    visitMethod(Expression name, Expression parameters,\n  std::optional<Expression> returnType, std::optional<Expression> visibility)           
+    visitExternalMethod(Expression container, Expression method)
+    -- Visibility --
+    visitPrivateVisibility()
+    visitProtectedVisibility()
+    visitPackagePrivateVisibility()
+    visitPublicVisibility()
+    -- Relationships --
+    visitRelationship(Expression subject,
+                      Expression connector,
+                      Expression object,
+                      std::optional<Expression> objectCardinality,
+                      std::optional<Expression> subjectCardinality,
+                      std::optional<Expression> label)
+    visitExtension()
+    visitComposition()
+    visitAggregation()
+    visitUsage()
+    -- Options --
+    visitSetNamespaceSeparator(Expression separator)
+}
 class NoopVisitor
 class ClassBuilder
 
-class Parser
+class Parser {
+    Parser()
+    bool parse(std::string_view input)
+    void visitAST(AbstractVisitor& visitor)
+}
 
-class HeaderGenerator
-entity Config
+class HeaderGenerator {
+    +std::string generate(const Class& in)
+    -std::string generateMethods(const std::vector<Method>& methods, Visibility vis)
+    -std::string generateMembers(const std::vector<Variable>& members, Visibility vis, Class::Type classType)
+    -std::string generateIncludes(const Class& in)
+    -std::string methodToString(const Method& m)
+    -std::string variableToString(const Variable& var, Class::Type classType)
+    -std::string variableTypeToString(const Variable& var)
+    -std::string visibilityToString(Visibility vis)
+}
+entity Config {
+    std::string memberPrefix
+    std::string indent
+    bool noMemberPrefixForStructs
 
-entity Class
-entity Variable
-entity Method
-entity Parameter
-enum Visibility
-enum Relationship
-enum Type
+    std::unordered_map<std::string, std::string> containerByCardinalityComposition
+    std::unordered_map<std::string, std::string> containerByCardinalityAggregation
 
-PlantUML2Code *-- "1" Parser
-PlantUML2Code *-- "1" ClassBuilder
-PlantUML2Code *-- "1" HeaderGenerator
-PlantUML2Code *-- "1" Config
+    std::array<std::pair<Visibility, std::string>, 6> memberOrder
+
+    std::unordered_map<std::string, std::string> typeToIncludeMap
+}
+
+entity Class {
+    std::string name
+    std::string stereotype
+    std::vector<std::string> parents
+    std::stack<std::string> namespaceStack
+}
+entity Variable {
+    std::string name;
+    std::string type;
+    std::string cardinality;
+}
+entity Method {
+    std::string name;
+    std::string returnType;
+}
+entity Parameter {
+    std::string name;
+    std::string type;
+}
+enum Visibility {
+    Private
+    Protected
+    PackagePrivate
+    Public
+    Unspecified
+}
+enum Relationship {
+    Extension
+    Composition
+    Aggregation
+    Usage
+    Member
+}
+enum ClassType {
+    Abstract
+    Class
+    Interface
+    Struct
+}
+
+PlantUML2Cpp *-- "1" Parser
+PlantUML2Cpp *-- "1" ClassBuilder
+PlantUML2Cpp *-- "1" HeaderGenerator
+PlantUML2Cpp *-- "1" Config
 
 NoopVisitor --|> AbstractVisitor
 ClassBuilder --|> NoopVisitor
@@ -34,7 +125,7 @@ Parser *-- "1" peg_parser::ParserGenerator
 
 Class *-- "0..*" Variable
 Class *-- "0..*" Method
-Class *-- "1" Type
+Class *-- "1" ClassType
 Variable *-- "1" Visibility
 Variable *-- "1" Relationship
 Method *-- "0..*" Parameter

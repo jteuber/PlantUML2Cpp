@@ -8,7 +8,6 @@ class Parser
 {
 public:
     Parser(/* args */);
-    ~Parser();
 
     bool parse(std::string_view input);
     void visitAST(AbstractVisitor& visitor);

@@ -18,11 +18,12 @@ struct Config
         {"", "std::shared_ptr<{}>"}, {"1", "std::shared_ptr<{}>"}, {"0..*", "std::vector<std::shared_ptr<{}>>"}};
 
     std::array<std::pair<Visibility, std::string>, 6> memberOrder = {std::pair{Visibility::Public, "methods"},
-                                                                     std::pair{Visibility::Public, "members"},
+                                                                     std::pair{Visibility::Public, "variables"},
                                                                      std::pair{Visibility::Protected, "methods"},
-                                                                     std::pair{Visibility::Protected, "members"},
+                                                                     std::pair{Visibility::Protected, "variables"},
                                                                      std::pair{Visibility::Private, "methods"},
-                                                                     std::pair{Visibility::Private, "members"}};
+                                                                     std::pair{Visibility::Private, "variables"}};
 
-    std::unordered_map<std::string, std::string> typeToIncludeMap = {{"std::shared_ptr", "memory"}};
+    std::unordered_map<std::string, std::string> typeToIncludeMap = {{"std::shared_ptr", "memory"},
+                                                                     {"std::filesystem::path", "filesystem"}};
 };

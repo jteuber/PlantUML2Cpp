@@ -56,7 +56,7 @@ std::string HeaderGenerator::generate(const Class& in)
     for (const auto& memberIdentifier : m_config->memberOrder) {
         if (memberIdentifier.second == "methods") {
             ret += generateMethods(in.methods, memberIdentifier.first);
-        } else if (memberIdentifier.second == "members") {
+        } else if (memberIdentifier.second == "variables") {
             ret += generateMembers(in.variables, memberIdentifier.first);
         }
     }
