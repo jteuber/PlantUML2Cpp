@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stack>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -50,7 +50,7 @@ struct Class
     std::string name;
     std::string stereotype;
     std::vector<std::string> parents;
-    std::stack<std::string> namespaceStack;
+    std::list<std::string> namespaceStack;
     std::vector<Variable> variables;
     std::vector<Method> methods;
 

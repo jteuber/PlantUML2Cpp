@@ -56,7 +56,7 @@ void ClassBuilder::visitNamespace(Expression name, Expression body)
     splitNamespacedName(name.view(), m_namespaceStack);
     body.evaluate(*this);
     while (m_namespaceStack.size() > size) {
-        m_namespaceStack.pop();
+        m_namespaceStack.pop_back();
     }
 }
 
@@ -231,7 +231,7 @@ std::string_view ClassBuilder::removePadding(std::string_view in)
     return in;
 }
 
-void ClassBuilder::splitNamespacedName(std::string_view name, std::stack<std::string>& out)
+void ClassBuilder::splitNamespacedName(std::string_view name, std::list<std::string>& out)
 {
     auto fullName = removePadding(name);
     if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {

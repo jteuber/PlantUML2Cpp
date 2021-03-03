@@ -27,11 +27,11 @@ bool writeFullFile(const fs::path& filepath, std::string_view contents)
     std::ofstream file(filepath, std::ios_base::out | std::ios_base::app);
     if (file.is_open()) {
         file << contents;
+        return true;
     } else {
         std::cout << "unable to write to file " << filepath << std::endl;
+        return false;
     }
-
-    return input;
 }
 
 bool PlantUML2Cpp::run(fs::path path)
@@ -61,7 +61,7 @@ bool PlantUML2Cpp::run(fs::path path)
                 for (const auto& c : classBuilder.results()) {
                     std::string header = headerGenerator.generate(c);
 
-                    writeFullFile(header, path / "include" / (c.name + ".h"));
+                    writeFullFile(path / "include" / (c.name + ".h"), header);
                 }
             } catch (peg_parser::InterpreterError& err) {
                 std::cout << "unable to parse " << file << std::endl;

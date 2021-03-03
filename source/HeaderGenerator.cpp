@@ -2,10 +2,12 @@
 #include "HeaderGenerator.h"
 
 #include <algorithm>
+#include <assert.h>
 #include <concepts>
 #include <list>
 #include <numeric>
 #include <ranges>
+#include <regex>
 #include <set>
 #include <utility>
 
@@ -65,7 +67,7 @@ std::string HeaderGenerator::generate(const Class& in)
         if (memberIdentifier.second == "methods") {
             ret += generateMethods(in.methods, memberIdentifier.first);
         } else if (memberIdentifier.second == "variables") {
-            ret += generateMembers(in.variables, memberIdentifier.first);
+            ret += generateMembers(in.variables, memberIdentifier.first, in.type);
         }
     }
 
@@ -133,7 +135,7 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
         std::list<std::string> list{type};
         while (!list.empty()) {
             if (std::regex_match(list.front(), templateMatch, templateRegex)) {
-                assert(templateMatch.size() >= 3));
+                assert(templateMatch.size() >= 3);
 
                 std::ssub_match sub_match  = templateMatch[1];
                 std::ssub_match paramMatch = templateMatch[2];
@@ -145,7 +147,7 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
                     list.push_back(paramMatch2.str());
                 }
             } else {
-                usedTypes.insert(*it);
+                usedTypes.insert(list.front());
             }
             list.pop_front();
         }
@@ -165,7 +167,7 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
 
     auto libIncludeStrings =
         libraryIncludes | std::views::transform([this](const std::string& inc) { return "#include <" + inc + ">\n"; });
-    std::string libIncs = std::accumulate(includeStrings.begin(), includeStrings.end(), std::string());
+    std::string libIncs = std::accumulate(libIncludeStrings.begin(), libIncludeStrings.end(), std::string());
 
     auto localIncludeStrings =
         localIncludes | std::views::transform([this](const std::string& inc) { return "#include \"" + inc + "\"\n"; });
@@ -191,7 +193,7 @@ std::string HeaderGenerator::methodToString(const Method& m)
 std::string HeaderGenerator::variableToString(const Variable& var, Class::Type classType)
 {
     std::string varName = var.name;
-    bool needsPrefix    = !(classType == Class::Type::Struct && m_config.noMemberPrefixForStructs);
+    bool needsPrefix    = !(classType == Class::Type::Struct && m_config->noMemberPrefixForStructs);
     if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
         varName = m_config->memberPrefix + varName;
     }
