@@ -24,7 +24,7 @@ std::string readFullFile(const fs::path& filepath)
 bool writeFullFile(const fs::path& filepath, std::string_view contents)
 {
     std::string input;
-    std::ofstream file(filepath, std::ios_base::out | std::ios_base::trunc);
+    std::ofstream file(filepath, std::ios_base::out | std::ios_base::app);
     if (file.is_open()) {
         file << contents;
     } else {
@@ -36,8 +36,7 @@ bool writeFullFile(const fs::path& filepath, std::string_view contents)
 
 bool PlantUML2Cpp::run(fs::path path)
 {
-    auto modelPath   = path / "models";
-    auto includePath = path / "include";
+    auto modelPath = path / "models";
 
     fs::directory_entry modelsDir(modelPath);
     if (!modelsDir.exists()) {
@@ -62,7 +61,7 @@ bool PlantUML2Cpp::run(fs::path path)
                 for (const auto& c : classBuilder.results()) {
                     std::string header = headerGenerator.generate(c);
 
-                    writeFullFile(header, includePath / (c.name + ".h"));
+                    writeFullFile(header, path / "include" / (c.name + ".h"));
                 }
             } catch (peg_parser::InterpreterError& err) {
                 std::cout << "unable to parse " << file << std::endl;
