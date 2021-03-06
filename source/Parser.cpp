@@ -5,6 +5,9 @@
 
 Parser::Parser(/* args */)
 {
+    // For reference you can get plantuml regexes and format them to work with std::regex in bash:
+    // java -jar plantuml.jar -pattern | sed '/^net./d' | sed '/^No/d' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g'
+
     // ========= GENERAL KEYWORDS =========
     g.setSeparator(g["Whitespace"] << "[\t ]");
     g["Identifier"] << "[a-zA-Z.:] [a-zA-Z0-9_.:]*";
@@ -29,6 +32,9 @@ Parser::Parser(/* args */)
     g["Include"] << "'!include' (!'\n' .)*"; // ignore !include
 
     g["Ignored"] << "Comment | Include";
+
+    // ========= CATCHALL =========
+    g["CatchAll"] << "(!'\n' .)*" >> [](auto e, auto&) { std::cout << "unable to parse line:\n" << e.view(); };
 
     // ========= ELEMENTS =========
     g["Private"] << "'-'" >> [](auto e, auto& v) { v.visitPrivateVisibility(); };
@@ -119,7 +125,7 @@ Parser::Parser(/* args */)
 
     // body of containers
     g["ClassBody"] << "OpenBrackets ((MethodDef | FieldDef | "
-                      "Ignored)? '\n')* CloseBrackets";
+                      "Ignored | CatchAll)? '\n')* CloseBrackets";
     g["EnumBody"] << "OpenBrackets (Identifier? '\n')* CloseBrackets";
 
     // simple containers
@@ -141,7 +147,7 @@ Parser::Parser(/* args */)
 
     // ========= NAMESPACES =========
     g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | "
-                 "Package | Ignored)? '\n')*";
+                 "Package | Ignored | CatchAll)? '\n')*";
     g["NamespaceDef"] << "'namespace' Name Color? OpenBrackets Body CloseBrackets" >>
         [](auto e, auto& v) { v.visitNamespace(*e["Name"], *e["Body"]); };
     g["PackageDef"] << "'package' Name (Color | Stereotype)? OpenBrackets Body CloseBrackets" >>
