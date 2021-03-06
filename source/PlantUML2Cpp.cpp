@@ -1,5 +1,6 @@
 #include "HeaderGenerator.h"
 #include "PlantUML2Cpp.h"
+#include "peg_parser/interpreter.h"
 
 #include <array>
 #include <filesystem>
@@ -64,7 +65,9 @@ bool PlantUML2Cpp::run(fs::path path)
                     writeFullFile(path / "include" / (c.name + ".h"), header);
                 }
             } catch (peg_parser::InterpreterError& err) {
-                std::cout << "unable to parse " << file << std::endl;
+                std::cout << "unable to parse " << file << " because of interpreter error: " << err.what() << std::endl;
+            } catch (peg_parser::SyntaxError& err) {
+                std::cout << "unable to parse " << file << " because of syntax error: " << err.what() << std::endl;
             }
         }
     }
