@@ -23,7 +23,7 @@ Parser::Parser(/* args */)
     g["Spot"] << "'(' . ',' Color ')'";
     g["Stereotype"] << "'<<' Spot? Identifier? '>>'" >> [](auto e, auto& v) { v.visitStereotype(e["Identifier"]); };
 
-    g["Endl"] << "'\n'";
+    g["Endl"] << "'\r\n' | '\n'";
     g["OpenBrackets"] << "Endl? '{'";
     g["CloseBrackets"] << "'}'";
 
@@ -34,7 +34,6 @@ Parser::Parser(/* args */)
     g["Ignored"] << "Comment | Include";
 
     // ========= CATCHALL =========
-    g["CatchAll"] << "(!'\n' .)*" >> [](auto e, auto&) { std::cout << "unable to parse line:\n" << e.view(); };
 
     // ========= ELEMENTS =========
     g["Private"] << "'-'" >> [](auto e, auto& v) { v.visitPrivateVisibility(); };
@@ -125,8 +124,8 @@ Parser::Parser(/* args */)
 
     // body of containers
     g["ClassBody"] << "OpenBrackets ((MethodDef | FieldDef | "
-                      "Ignored | CatchAll)? '\n')* CloseBrackets";
-    g["EnumBody"] << "OpenBrackets (Identifier? '\n')* CloseBrackets";
+                      "Ignored)? Endl)* CloseBrackets";
+    g["EnumBody"] << "OpenBrackets (Identifier? Endl)* CloseBrackets";
 
     // simple containers
     g["Class"] << "ClassType Name (Color | Stereotype)? ClassBody?" >>
@@ -147,7 +146,7 @@ Parser::Parser(/* args */)
 
     // ========= NAMESPACES =========
     g["Body"] << "((Setter | Container | Relationship | ExternalDefinitions | "
-                 "Package | Ignored | CatchAll)? '\n')*";
+                 "Package | Ignored)? Endl)*";
     g["NamespaceDef"] << "'namespace' Name Color? OpenBrackets Body CloseBrackets" >>
         [](auto e, auto& v) { v.visitNamespace(*e["Name"], *e["Body"]); };
     g["PackageDef"] << "'package' Name (Color | Stereotype)? OpenBrackets Body CloseBrackets" >>
@@ -155,8 +154,8 @@ Parser::Parser(/* args */)
     g["Package"] << "PackageDef | NamespaceDef";
 
     // ========= DIAGRAM =========
-    g["Start"] << "'@startuml' Name? '\n'" >> [](auto e, auto& v) { v.visitStart(e["Name"]); };
-    g["End"] << "'@enduml' '\n'?";
+    g["Start"] << "'@startuml' Name? Endl" >> [](auto e, auto& v) { v.visitStart(e["Name"]); };
+    g["End"] << "'@enduml' Endl*";
     g["Diagram"] << "Start Body End";
 
     g.setStart(g["Diagram"]);

@@ -53,16 +53,16 @@ bool PlantUML2Cpp::run(fs::path path)
     for (const auto& file : fs::directory_iterator(modelPath)) {
         if (file.is_regular_file() && file.path().extension() == ".puml") {
             std::cout << "parsing file " << file << std::endl;
+            std::string fileContents = readFullFile(file.path());
             try {
-                std::string fileContents = readFullFile(file.path());
-                parser.parse(fileContents);
+                if (parser.parse(fileContents)) {
+                    parser.visitAST(classBuilder);
 
-                parser.visitAST(classBuilder);
+                    for (const auto& c : classBuilder.results()) {
+                        std::string header = headerGenerator.generate(c);
 
-                for (const auto& c : classBuilder.results()) {
-                    std::string header = headerGenerator.generate(c);
-
-                    writeFullFile(path / "include" / (c.name + ".h"), header);
+                        writeFullFile(path / "include" / (c.name + ".h"), header);
+                    }
                 }
             } catch (peg_parser::InterpreterError& err) {
                 std::cout << "unable to parse " << file << " because of interpreter error: " << err.what() << std::endl;
