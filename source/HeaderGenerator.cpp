@@ -71,7 +71,7 @@ std::string HeaderGenerator::generate(const Class& in)
         }
     }
 
-    ret += "\n};\n";
+    ret += "};\n";
 
     // close namespaces
     for (const auto& ns : in.namespaceStack | std::views::reverse) {
@@ -91,7 +91,7 @@ std::string HeaderGenerator::generateMethods(const std::vector<Method>& methods,
         ret += std::accumulate(methodStings.begin(), methodStings.end(), std::string());
     }
 
-    return ret + "\n";
+    return ret;
 }
 
 std::string
@@ -107,7 +107,7 @@ HeaderGenerator::generateMembers(const std::vector<Variable>& members, Visibilit
         ret += std::accumulate(memberStrings.begin(), memberStrings.end(), std::string());
     }
 
-    return ret + "\n";
+    return ret;
 }
 
 std::string HeaderGenerator::generateIncludes(const Class& in)
@@ -182,7 +182,11 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
         localIncludes | std::views::transform([this](const std::string& inc) { return "#include \"" + inc + "\"\n"; });
     std::string localIncs = std::accumulate(localIncludeStrings.begin(), localIncludeStrings.end(), std::string());
 
-    return libIncs + "\n" + localIncs;
+    if (!libIncs.empty() && !localIncs.empty()) {
+        libIncs += "\n";
+    }
+
+    return libIncs + localIncs;
 }
 
 std::string HeaderGenerator::methodToString(const Method& m)
@@ -235,10 +239,12 @@ std::string HeaderGenerator::visibilityToString(Visibility vis)
 {
     switch (vis) {
     case Visibility::Protected:
-        return "protected:\n";
+        return "\nprotected:\n";
     case Visibility::Private:
-        return "private:\n";
+        return "\nprivate:\n";
+    case Visibility::Public:
+        return "\npublic:\n";
     default:
-        return "public:\n";
+        return "";
     }
 }
