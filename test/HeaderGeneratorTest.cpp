@@ -22,7 +22,7 @@ TEST(HeaderGenerator, EmptyClass)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*empty" + ws + "\\{" + ws + "\\};(.|\n)*";
+    std::string regex = ws + "class[ \t]*empty" + ws + "\\{" + ws + "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
@@ -47,7 +47,7 @@ TEST(HeaderGenerator, SinglePublicMethod)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws + "public:" + ws + "void" + ws +
+    std::string regex = ws + "class[ \t]*simpleClass" + ws + "\\{" + ws + "public:" + ws + "void" + ws +
                         "simpleMethod\\(\\);" + ws + "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
@@ -73,7 +73,7 @@ TEST(HeaderGenerator, SinglePrivateMethod)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws + "private:" + ws + "void" + ws +
+    std::string regex = ws + "class[ \t]*simpleClass" + ws + "\\{" + ws + "private:" + ws + "void" + ws +
                         "simpleMethod\\(\\);" + ws + "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
@@ -99,7 +99,7 @@ TEST(HeaderGenerator, SingleProtectedMethod)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws + "protected:" + ws + "void" + ws +
+    std::string regex = ws + "class[ \t]*simpleClass" + ws + "\\{" + ws + "protected:" + ws + "void" + ws +
                         "simpleMethod\\(\\);" + ws + "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
@@ -135,7 +135,7 @@ TEST(HeaderGenerator, AllKindsOfMethods)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    std::string regex = ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
     regex += "public:" + ws + "void" + ws + "simplePublicMethod\\(\\);" + ws;
     regex += "protected:" + ws + "void" + ws + "simpleProtectedMethod\\(\\);" + ws;
     regex += "private:" + ws + "void" + ws + "simplePrivateMethod\\(\\);" + ws;
@@ -175,7 +175,7 @@ TEST(HeaderGenerator, AllKindsOfMembers)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    std::string regex = ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
     regex += "public:" + ws + "int" + ws + "m_simplePublicMember;" + ws;
     regex += "protected:" + ws + "int" + ws + "m_simpleProtectedMember;" + ws;
     regex += "private:" + ws + "int" + ws + "m_simplePrivateMember;" + ws;
@@ -215,7 +215,7 @@ TEST(HeaderGenerator, MembersInStruct)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "struct[ \t]*simpleStruct" + ws + "\\{" + ws;
+    std::string regex = ws + "struct[ \t]*simpleStruct" + ws + "\\{" + ws;
     regex += "public:" + ws + "int" + ws + "simplePublicMember;" + ws;
     regex += "protected:" + ws + "int" + ws + "simpleProtectedMember;" + ws;
     regex += "private:" + ws + "int" + ws + "simplePrivateMember;" + ws;
@@ -272,15 +272,15 @@ TEST(HeaderGenerator, MethodsAndMembers)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    std::string regex = ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
     regex += "public:" + ws + "void" + ws + "simplePublicMethod\\(\\);" + ws;
-    regex += "public:" + ws + "int" + ws + "simplePublicMember;" + ws;
+    regex += "public:" + ws + "int" + ws + "m_simplePublicMember;" + ws;
     regex += "protected:" + ws + "void" + ws + "simpleProtectedMethod\\(\\);" + ws;
-    regex += "protected:" + ws + "int" + ws + "simpleProtectedMember;" + ws;
+    regex += "protected:" + ws + "int" + ws + "m_simpleProtectedMember;" + ws;
     regex += "private:" + ws + "void" + ws + "simplePrivateMethod\\(\\);" + ws;
     regex += "void" + ws + "simplePrivateMethod2\\(\\);" + ws;
-    regex += "private:" + ws + "int" + ws + "simplePrivateMember;" + ws;
-    regex += "int" + ws + "simplePrivateMember2;" + ws;
+    regex += "private:" + ws + "int" + ws + "m_simplePrivateMember;" + ws;
+    regex += "int" + ws + "m_simplePrivateMember2;" + ws;
     regex += "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
@@ -314,10 +314,12 @@ TEST(HeaderGenerator, CompositionMember)
     auto output = sut.generate(input);
 
     // Assert
-    std::string regex = "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    std::string regex = ws + R"(\#include \<memory\>)" + ws + R"(\#include \<vector\>)" + ws;
+    regex += R"(\#include "ComplexType")" + ws + R"(\#include "OtherComplexType")" + ws;
+    regex += ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
     regex += "public:" + ws;
-    regex += "std::shared_ptr<ComplexType>" + ws + "simpleComposition;" + ws;
-    regex += "std::vector<OtherComplexType>" + ws + "manyComposition;" + ws;
+    regex += "std::shared_ptr<ComplexType>" + ws + "m_simpleComposition;" + ws;
+    regex += "std::vector<OtherComplexType>" + ws + "m_manyComposition;" + ws;
     regex += "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;

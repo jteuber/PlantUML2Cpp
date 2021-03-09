@@ -127,6 +127,15 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
         }
     }
 
+    // remove all types that don't need including
+    rawUsedTypes.erase("void");
+    rawUsedTypes.erase("bool");
+    rawUsedTypes.erase("int");
+    rawUsedTypes.erase("float");
+    rawUsedTypes.erase("double");
+    rawUsedTypes.erase("uint");
+    rawUsedTypes.erase("unsigned int");
+
     // split all template types
     std::set<std::string> usedTypes;
     const std::regex templateRegex("([a-zA-Z:_]+)<([a-zA-Z:_<>]+)[, ]*([a-zA-Z:_<>]+)?>");
@@ -142,7 +151,7 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
                 usedTypes.insert(sub_match.str());
                 list.push_back(paramMatch.str());
 
-                if (templateMatch.size() == 4) {
+                if (templateMatch[3].length() > 0) {
                     std::ssub_match paramMatch2 = templateMatch[3];
                     list.push_back(paramMatch2.str());
                 }
@@ -159,7 +168,7 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
         if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
             libraryIncludes.insert(it->second);
         } else if (auto ns = type.find_last_of("::"); ns != std::string::npos) {
-            libraryIncludes.insert(type.substr(ns));
+            libraryIncludes.insert(type.substr(ns + 1));
         } else {
             localIncludes.insert(type);
         }
@@ -197,7 +206,7 @@ std::string HeaderGenerator::variableToString(const Variable& var, Class::Type c
     if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
         varName = m_config->memberPrefix + varName;
     }
-    return variableTypeToString(var) + " " + varName + ";\n";
+    return m_config->indent + variableTypeToString(var) + " " + varName + ";\n";
 }
 
 std::string HeaderGenerator::variableTypeToString(const Variable& var)
@@ -208,17 +217,17 @@ std::string HeaderGenerator::variableTypeToString(const Variable& var)
         if (containerIt != m_config->containerByCardinalityAggregation.end()) {
             return fmt::format(containerIt->second, var.type);
         }
-        return m_config->indent + var.type;
+        return var.type;
     }
     case Relationship::Composition: {
         auto containerIt = m_config->containerByCardinalityComposition.find(var.cardinality);
         if (containerIt != m_config->containerByCardinalityComposition.end()) {
             return fmt::format(containerIt->second, var.type);
         }
-        return m_config->indent + var.type;
+        return var.type;
     }
     default:
-        return m_config->indent + var.type;
+        return var.type;
     }
 }
 

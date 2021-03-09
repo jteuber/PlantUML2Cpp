@@ -13,7 +13,7 @@ public:
     bool run(std::filesystem::path path = std::filesystem::current_path());
 
 private:
-    std::shared_ptr<Config> config;
+    std::shared_ptr<Config> config = std::make_shared<Config>();
     Parser parser;
     ClassBuilder classBuilder;
     HeaderGenerator headerGenerator{config};

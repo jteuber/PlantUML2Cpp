@@ -15,7 +15,7 @@ Parser::Parser(/* args */)
     g["Name"] << "Identifier | QuotedName";
     g["FieldTypename"] << "[a-zA-Z] [a-zA-Z0-9_.:<>]* '[]'?";
 
-    g["ColorName"] << "'#' (!(' ' | ')' | '\n') .)* | Identifier";
+    g["ColorName"] << "'#' (!(' ' | ')' | Endl) .)* | Identifier";
     g["Gradient"] << "'|' | '/' | '-' | '\\\\'";
     g["Color"] << "ColorName (Gradient ColorName)?";
 
@@ -28,12 +28,10 @@ Parser::Parser(/* args */)
     g["CloseBrackets"] << "'}'";
 
     // ========= COMMENTS =========
-    g["Comment"] << "'\\'' (!'\n' .)*";
-    g["Include"] << "'!include' (!'\n' .)*"; // ignore !include
+    g["Comment"] << "'\\'' (!Endl .)*";
+    g["Include"] << "'!include' (!Endl .)*"; // ignore !include
 
     g["Ignored"] << "Comment | Include";
-
-    // ========= CATCHALL =========
 
     // ========= ELEMENTS =========
     g["Private"] << "'-'" >> [](auto e, auto& v) { v.visitPrivateVisibility(); };
@@ -80,9 +78,10 @@ Parser::Parser(/* args */)
     g["OpenTriLeft"] << "'<'";
     g["OpenTriRight"] << "'>'";
 
-    g["Line"] << "'-'* '[hidden]'? '-'*";
+    g["LineModifiers"] << "'[hidden]' | 'left' | 'right' | 'up' | 'down'";
+    g["Line"] << "'-'* LineModifiers? '-'*";
 
-    g["Label"] << "(!('>' | '\n') .)*";
+    g["Label"] << "(!('>' | Endl) .)*";
 
     g["Object"] << "Identifier";
     g["Subject"] << "Identifier";
@@ -139,7 +138,7 @@ Parser::Parser(/* args */)
 
     // ========= SETTERS =========
     g["Set"] << "'set'";
-    g["Separator"] << "(!'\n' .)*";
+    g["Separator"] << "(!Endl .)*";
     g["SetNamespace"] << "Set 'namespaceSeparator' Separator" >>
         [](auto e, auto& v) { v.visitSetNamespaceSeparator(e[1]); };
     g["Setter"] << "SetNamespace";
@@ -164,6 +163,9 @@ Parser::Parser(/* args */)
 bool Parser::parse(std::string_view input)
 {
     m_ast = g.parse(input);
+    if (!m_ast->valid || m_ast->end < input.size()) {
+        std::cout << "parser error" << std::endl;
+    }
     return m_ast->valid && m_ast->end >= input.size();
 }
 

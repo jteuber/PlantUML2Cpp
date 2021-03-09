@@ -57,7 +57,7 @@ private:
     // members
     std::vector<Class> m_classes;
     std::list<std::string> m_namespaceStack;
-    Visibility m_lastEncounteredVisibility;
+    Visibility m_lastEncounteredVisibility = Visibility::Public;
     Relationship m_lastRelationship;
     std::vector<Class>::iterator m_lastEncounteredClass = m_classes.end();
 
