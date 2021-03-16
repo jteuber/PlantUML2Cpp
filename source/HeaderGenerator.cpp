@@ -138,7 +138,9 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
 
     // split all template types
     std::set<std::string> usedTypes;
-    const std::regex templateRegex("([a-zA-Z:_]+)<([a-zA-Z:_<>]+)[, ]*([a-zA-Z:_<>]+)?>");
+    std::string templateRegexString = "([a-zA-Z:_]+)(?:<([a-zA-Z:_]+)[, ]*([a-zA-Z:_]+)?>)?";
+    templateRegexString = "([a-zA-Z:_]+)(?:<" + templateRegexString + "[, ]*(?:" + templateRegexString + ")?>)?";
+    const std::regex templateRegex(templateRegexString);
     std::smatch templateMatch;
     for (const auto& type : rawUsedTypes) {
         std::list<std::string> list{type};
@@ -148,14 +150,17 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
 
                 std::ssub_match sub_match  = templateMatch[1];
                 std::ssub_match paramMatch = templateMatch[2];
-                usedTypes.insert(sub_match.str());
+                if (sub_match.length() > 0)
+                    usedTypes.insert(sub_match.str());
                 list.push_back(paramMatch.str());
 
-                if (templateMatch[3].length() > 0) {
-                    std::ssub_match paramMatch2 = templateMatch[3];
+                int i = 3;
+                while (templateMatch[i].length() > 0) {
+                    std::ssub_match paramMatch2 = templateMatch[i];
                     list.push_back(paramMatch2.str());
+                    ++i;
                 }
-            } else {
+            } else if (!list.front().empty()) {
                 usedTypes.insert(list.front());
             }
             list.pop_front();

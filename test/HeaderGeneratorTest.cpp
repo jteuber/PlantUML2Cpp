@@ -324,3 +324,33 @@ TEST(HeaderGenerator, CompositionMember)
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
+
+TEST(HeaderGenerator, ComplexTemplates)
+{
+    // Arrange
+    auto config = std::make_shared<Config>();
+    HeaderGenerator sut(config);
+
+    Class input;
+    input.name = "simpleClass";
+    input.type = Class::Type::Class;
+
+    Variable member;
+    member.name       = "complexTemplate";
+    member.type       = "std::vector<std::pair<Visibility, std::string>>";
+    member.visibility = Visibility::Public;
+    input.variables.push_back(member);
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = ws + R"(\#include \<pair\>)" + ws + R"(\#include \<string\>)" + ws;
+    regex += R"(\#include \<vector\>)" + ws + R"(\#include "Visibility")" + ws;
+    regex += ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    regex += "public:" + ws;
+    regex += "std::vector<std::pair<Visibility, std::string>>" + ws + "m_complexTemplate;" + ws;
+    regex += "\\};(.|\n)*";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}
