@@ -66,8 +66,8 @@ void ClassBuilder::visitField(Expression valueType, Expression name, std::option
         Variable var;
         auto& c = *m_lastEncounteredClass;
 
-        var.name   = name.view();
-        var.type   = valueType.view();
+        var.name   = prepareNameString(name);
+        var.type   = prepareNameString(valueType);
         var.source = Relationship::Member;
 
         if (visibility) {
@@ -92,8 +92,8 @@ void ClassBuilder::visitParameter(Expression valueType, Expression name)
 {
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
-        param.name = name.view();
-        param.type = valueType.view();
+        param.name = prepareNameString(name);
+        param.type = prepareNameString(valueType);
         m_lastEncounteredClass->methods.back().parameters.push_back(param);
     }
 }
@@ -107,8 +107,8 @@ void ClassBuilder::visitMethod(Expression name,
         Method method;
         auto& c = *m_lastEncounteredClass;
 
-        method.name       = name.view();
-        method.returnType = returnType ? returnType->view() : "void";
+        method.name       = prepareNameString(name);
+        method.returnType = returnType ? prepareNameString(*returnType) : "void";
 
         if (visibility) {
             visibility->evaluate(*this);

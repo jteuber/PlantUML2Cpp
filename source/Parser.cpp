@@ -13,7 +13,8 @@ Parser::Parser(/* args */)
     g["Identifier"] << "[a-zA-Z.:] [a-zA-Z0-9_.:]*";
     g.setProgramRule("QuotedName", peg_parser::presets::createStringProgram("\"", "\""), [](auto e, auto& v) {});
     g["Name"] << "Identifier | QuotedName";
-    g["FieldTypename"] << "[a-zA-Z] [a-zA-Z0-9_.:<>]* '[]'?";
+    g["SimpleType"] << "[a-zA-Z] [a-zA-Z0-9_.:]* '&'?";
+    g["FieldTypename"] << "SimpleType '<' FieldTypename (',' (FieldTypename | [0-9]+))* '>' | SimpleType '[]'?";
 
     g["ColorName"] << "'#' (!(' ' | ')' | Endl) .)* | Identifier";
     g["Gradient"] << "'|' | '/' | '-' | '\\\\'";
