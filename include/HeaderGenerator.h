@@ -19,6 +19,7 @@ private:
     std::string methodToString(const Method& m);
     std::string variableToString(const Variable& var, Class::Type classType);
     std::string variableTypeToString(const Variable& var);
+    std::string umlToCppType(const std::string& umlType);
 
     static std::string visibilityToString(Visibility vis);
 

@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <cctype>
 #include <concepts>
 #include <list>
 #include <numeric>
 #include <ranges>
 #include <regex>
 #include <set>
+#include <string_view>
 #include <utility>
 
 #include <fmt/core.h>
@@ -32,6 +34,9 @@ auto filterOnVisibility(Visibility vis)
 std::string HeaderGenerator::generate(const Class& in)
 {
     std::string ret;
+
+    // pragme once
+    ret += "#pragma once\n\n";
 
     // Includes
     ret += generateIncludes(in);
@@ -121,9 +126,9 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
         rawUsedTypes.insert(variableTypeToString(v));
     }
     for (const auto& m : in.methods) {
-        rawUsedTypes.insert(m.returnType);
+        rawUsedTypes.insert(umlToCppType(m.returnType));
         for (const auto& p : m.parameters) {
-            rawUsedTypes.insert(p.type);
+            rawUsedTypes.insert(umlToCppType(p.type));
         }
     }
 
@@ -173,9 +178,9 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
         if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
             libraryIncludes.insert(it->second);
         } else if (auto ns = type.find_last_of("::"); ns != std::string::npos) {
-            libraryIncludes.insert(type.substr(ns + 1));
+            libraryIncludes.insert(type.substr(ns + 1) + ".h");
         } else {
-            localIncludes.insert(type);
+            localIncludes.insert(type + ".h");
         }
     }
 
@@ -196,13 +201,14 @@ std::string HeaderGenerator::generateIncludes(const Class& in)
 
 std::string HeaderGenerator::methodToString(const Method& m)
 {
-    std::string ret = m_config->indent + m.returnType + " " + m.name + "(";
+    std::string ret = m_config->indent + umlToCppType(m.returnType) + " " + m.name + "(";
     if (!m.parameters.empty()) {
-        ret += std::accumulate(
-            m.parameters.begin(),
-            m.parameters.end(),
-            std::string(),
-            [](const std::string& acc, const Parameter& param) { return acc + param.type + " " + param.name + ", "; });
+        ret += std::accumulate(m.parameters.begin(),
+                               m.parameters.end(),
+                               std::string(),
+                               [this](const std::string& acc, const Parameter& param) {
+                                   return acc + umlToCppType(param.type) + " " + param.name + ", ";
+                               });
         ret.erase(ret.length() - 2);
     }
     return ret + ");\n";
@@ -211,7 +217,12 @@ std::string HeaderGenerator::methodToString(const Method& m)
 std::string HeaderGenerator::variableToString(const Variable& var, Class::Type classType)
 {
     std::string varName = var.name;
-    bool needsPrefix    = !(classType == Class::Type::Struct && m_config->noMemberPrefixForStructs);
+    if (varName.empty()) {
+        varName    = var.type;
+        varName[0] = std::tolower(varName[0]);
+    }
+
+    bool needsPrefix = !(classType == Class::Type::Struct && m_config->noMemberPrefixForStructs);
     if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
         varName = m_config->memberPrefix + varName;
     }
@@ -220,24 +231,35 @@ std::string HeaderGenerator::variableToString(const Variable& var, Class::Type c
 
 std::string HeaderGenerator::variableTypeToString(const Variable& var)
 {
+    std::string varType = umlToCppType(var.type);
     switch (var.source) {
     case Relationship::Aggregation: {
         auto containerIt = m_config->containerByCardinalityAggregation.find(var.cardinality);
         if (containerIt != m_config->containerByCardinalityAggregation.end()) {
-            return fmt::format(containerIt->second, var.type);
+            return fmt::format(containerIt->second, varType);
         }
-        return var.type;
+        return varType;
     }
     case Relationship::Composition: {
         auto containerIt = m_config->containerByCardinalityComposition.find(var.cardinality);
         if (containerIt != m_config->containerByCardinalityComposition.end()) {
-            return fmt::format(containerIt->second, var.type);
+            return fmt::format(containerIt->second, varType);
         }
-        return var.type;
+        return varType;
     }
     default:
-        return var.type;
+        return varType;
     }
+}
+
+std::string HeaderGenerator::umlToCppType(const std::string& umlType)
+{
+    auto it = m_config->umlToCppTypeMap.find(umlType);
+    if (it != m_config->umlToCppTypeMap.end()) {
+        return it->second;
+    }
+
+    return umlType;
 }
 
 std::string HeaderGenerator::visibilityToString(Visibility vis)
