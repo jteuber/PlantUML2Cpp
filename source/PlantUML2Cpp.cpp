@@ -24,15 +24,16 @@ std::string readFullFile(const fs::path& filepath)
 
 bool writeFullFile(const fs::path& filepath, std::string_view contents)
 {
-    std::string input;
-    std::ofstream file(filepath, std::ios_base::out | std::ios_base::app);
-    if (file.is_open()) {
-        file << contents;
-        return true;
-    } else {
+    if (!fs::directory_entry(filepath).exists()) {
+        std::ofstream file(filepath, std::ios_base::out | std::ios_base::app);
+        if (file.is_open()) {
+            file << contents;
+            return true;
+        }
+
         std::cout << "unable to write to file " << filepath << std::endl;
-        return false;
     }
+    return false;
 }
 
 bool PlantUML2Cpp::run(fs::path path)
