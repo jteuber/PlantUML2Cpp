@@ -1,65 +1,29 @@
 #pragma once
 
 #include "Class.h"
-#include "NoopVisitor.h"
+#include "PlantUml/AbstractVisitor.h"
+#include "PlantUml/ModelElement.h"
 
-class ClassBuilder : public NoopVisitor
+class ClassBuilder : public PlantUml::AbstractVisitor
 {
 public:
     const std::vector<Class>& results();
 
-    void visitStereotype(std::optional<Expression> identifier) override;
-
-    // Containers
-    void visitClass(Expression type,
-                    Expression name,
-                    std::optional<Expression> stereotype,
-                    std::optional<Expression> body) override;
-    void visitNamespace(Expression name, Expression body) override;
-
-    // Fields and methods
-    void visitField(Expression valueType, Expression name, std::optional<Expression> visibility) override;
-    void visitExternalField(Expression container, Expression field) override;
-
-    void visitParameter(Expression valueType, Expression name) override;
-    void visitMethod(Expression name,
-                     Expression parameters,
-                     std::optional<Expression> returnType,
-                     std::optional<Expression> visibility) override;
-    void visitExternalMethod(Expression container, Expression method) override;
-
-    void visitPrivateVisibility() override;
-    void visitProtectedVisibility() override;
-    void visitPackagePrivateVisibility() override;
-    void visitPublicVisibility() override;
-
-    // Relationships aka connectors
-    void visitRelationship(Expression subject,
-                           Expression connector,
-                           Expression object,
-                           std::optional<Expression> objectCardinality,
-                           std::optional<Expression> subjectCardinality,
-                           std::optional<Expression> label) override;
-    void visitExtension() override;
-    void visitComposition() override;
-    void visitAggregation() override;
-    void visitUsage() override;
-
-    // Options
-    void visitSetNamespaceSeparator(Expression separator) override;
+    bool visit(const PlantUml::Variable& v) override;
+    bool visit(const PlantUml::Method& m) override;
+    bool visit(const PlantUml::Relationship& r) override;
+    bool visit(const PlantUml::Container& c) override;
+    bool visit(const PlantUml::Element& e) override;
+    bool visit(const PlantUml::Note& n) override;
+    bool visit(const PlantUml::Separator& s) override;
+    bool visit(const PlantUml::Enumerator& e) override;
+    bool visit(const PlantUml::Parameter& p) override;
+    bool visit(const PlantUml::End& e) override;
 
 private:
-    // helpers
-    static std::string_view prepareNameString(Expression e);
-    static std::string_view removePadding(std::string_view in);
-    void splitNamespacedName(std::string_view name, std::list<std::string>& out);
-
-    // members
     std::vector<Class> m_classes;
     std::list<std::string> m_namespaceStack;
-    Visibility m_lastEncounteredVisibility = Visibility::Public;
-    Relationship m_lastRelationship;
+    std::list<size_t> m_namespaceSizes;
     std::vector<Class>::iterator m_lastEncounteredClass = m_classes.end();
-
-    std::string namespaceDelimiter = ".";
+    bool m_lastClassFromExternalDef                     = false;
 };

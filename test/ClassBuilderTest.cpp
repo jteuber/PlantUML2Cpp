@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 
 #include "ClassBuilder.h"
-#include "Parser.h"
+#include "PlantUml/Parser.h"
 
-void act(Parser& parser, ClassBuilder& sut, std::string_view puml)
+void act(PlantUml::Parser& parser, ClassBuilder& sut, std::string_view puml)
 {
     ASSERT_TRUE(parser.parse(puml));
     parser.visitAST(sut);
@@ -13,7 +13,7 @@ TEST(ClassBuilderTest, EmptyDiagram)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -30,7 +30,7 @@ TEST(ClassBuilderTest, SingleAbstract)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -52,7 +52,7 @@ TEST(ClassBuilderTest, AllSimpleContainers)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -86,7 +86,7 @@ TEST(ClassBuilderTest, EntityWithEmptyBody)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -109,7 +109,7 @@ TEST(ClassBuilderTest, EntityWithSingleVariable)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -137,7 +137,7 @@ TEST(ClassBuilderTest, ClassWithTwoMethods)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -174,7 +174,7 @@ TEST(ClassBuilderTest, Inheritance)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -198,7 +198,7 @@ TEST(ClassBuilderTest, Composition)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -224,7 +224,7 @@ TEST(ClassBuilderTest, Aggregation)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -250,7 +250,7 @@ TEST(ClassBuilderTest, LabelsOnRelations)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -290,7 +290,7 @@ TEST(ClassBuilderTest, ExternalMethodsAndVariables)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -333,7 +333,7 @@ TEST(ClassBuilderTest, Namespaces)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -376,7 +376,7 @@ TEST(ClassBuilderTest, NamespaceSeperator)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml
@@ -407,7 +407,7 @@ TEST(ClassBuilderTest, Stereotypes)
 {
     // Arrange
     ClassBuilder sut;
-    Parser parser;
+    PlantUml::Parser parser;
 
     static constexpr auto puml =
         R"(@startuml

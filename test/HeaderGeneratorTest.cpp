@@ -4,7 +4,6 @@
 
 #include "Class.h"
 #include "HeaderGenerator.h"
-#include "Parser.h"
 
 const std::string ws = "( |\t|\n)*";
 

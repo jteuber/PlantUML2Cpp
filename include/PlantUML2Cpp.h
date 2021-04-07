@@ -5,7 +5,7 @@
 
 #include "ClassBuilder.h"
 #include "HeaderGenerator.h"
-#include "Parser.h"
+#include "PlantUml/Parser.h"
 
 class PlantUML2Cpp
 {
@@ -14,7 +14,7 @@ public:
 
 private:
     std::shared_ptr<Config> config = std::make_shared<Config>();
-    Parser parser;
+    PlantUml::Parser parser;
     ClassBuilder classBuilder;
     HeaderGenerator headerGenerator{config};
 };

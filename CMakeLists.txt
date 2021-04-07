@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include/)
 file(GLOB SRC_FILES
 	"source/*.cpp"
+	"source/PlantUml/*.cpp"
 )
 
 add_executable(PlantUML2Cpp ${SRC_FILES})

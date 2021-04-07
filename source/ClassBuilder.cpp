@@ -1,4 +1,5 @@
 #include "ClassBuilder.h"
+#include "PlantUml/ModelElement.h"
 
 #include <algorithm>
 #include <iostream>
@@ -9,175 +10,77 @@ const std::vector<Class>& ClassBuilder::results()
     return m_classes;
 }
 
-void ClassBuilder::visitStereotype(std::optional<Expression> identifier)
+bool ClassBuilder::visit(const PlantUml::Variable& v)
 {
-    if (identifier && m_lastEncounteredClass != m_classes.end()) {
-        m_lastEncounteredClass->stereotype = prepareNameString(*identifier);
-    }
-}
-
-void ClassBuilder::visitClass(Expression type,
-                              Expression name,
-                              std::optional<Expression> stereotype,
-                              std::optional<Expression> body)
-{
-    Class c;
-
-    if (type.view().starts_with("abstract")) {
-        c.type = Class::Type::Abstract;
-    } else if (type.view() == "class") {
-        c.type = Class::Type::Class;
-    } else if (type.view() == "entity") {
-        c.type = Class::Type::Struct;
-    } else if (type.view() == "interface") {
-        c.type = Class::Type::Interface;
+    if (!v.element.empty()) {
+        m_lastEncounteredClass = std::ranges::find(m_classes, v.element.back(), &Class::name);
     }
 
-    c.namespaceStack = m_namespaceStack;
-    splitNamespacedName(name.view(), c.namespaceStack);
-    c.name = c.namespaceStack.back();
-    c.namespaceStack.pop_back();
-
-    m_classes.push_back(c);
-    m_lastEncounteredClass = --m_classes.end();
-
-    if (stereotype) {
-        stereotype->evaluate(*this);
-    }
-    if (body) {
-        body->evaluate(*this);
-    }
-    m_lastEncounteredClass = m_classes.end();
-}
-
-void ClassBuilder::visitNamespace(Expression name, Expression body)
-{
-    auto size = m_namespaceStack.size();
-    splitNamespacedName(name.view(), m_namespaceStack);
-    body.evaluate(*this);
-    while (m_namespaceStack.size() > size) {
-        m_namespaceStack.pop_back();
-    }
-}
-
-void ClassBuilder::visitField(Expression valueType, Expression name, std::optional<Expression> visibility)
-{
     if (m_lastEncounteredClass != m_classes.end()) {
         Variable var;
         auto& c = *m_lastEncounteredClass;
 
-        var.name   = prepareNameString(name);
-        var.type   = prepareNameString(valueType);
-        var.source = Relationship::Member;
+        var.name       = v.name;
+        var.type       = v.type.back();
+        var.source     = Relationship::Member;
+        var.visibility = static_cast<Visibility>(v.visibility);
 
-        if (visibility) {
-            visibility->evaluate(*this);
-            var.visibility = m_lastEncounteredVisibility;
-        } else if (c.type == Class::Type::Interface) {
+        if (c.type == Class::Type::Interface) {
             std::cout << "ERROR: Interface with variable encountered" << std::endl;
         }
 
         c.variables.push_back(var);
     }
-}
 
-void ClassBuilder::visitExternalField(Expression container, Expression field)
-{
-    m_lastEncounteredClass = std::ranges::find(m_classes, container.view(), &Class::name);
-    field.evaluate(*this);
-    m_lastEncounteredClass = m_classes.end();
-}
-
-void ClassBuilder::visitParameter(Expression valueType, Expression name)
-{
-    if (m_lastEncounteredClass != m_classes.end()) {
-        Parameter param;
-        param.name = prepareNameString(name);
-        param.type = prepareNameString(valueType);
-        m_lastEncounteredClass->methods.back().parameters.push_back(param);
+    if (!v.element.empty()) {
+        m_lastEncounteredClass = m_classes.end();
     }
+
+    return true;
 }
 
-void ClassBuilder::visitMethod(Expression name,
-                               Expression parameters,
-                               std::optional<Expression> returnType,
-                               std::optional<Expression> visibility)
+bool ClassBuilder::visit(const PlantUml::Method& m)
 {
+    if (!m.element.empty()) {
+        m_lastEncounteredClass     = std::ranges::find(m_classes, m.element.back(), &Class::name);
+        m_lastClassFromExternalDef = true;
+    }
+
     if (m_lastEncounteredClass != m_classes.end()) {
         Method method;
         auto& c = *m_lastEncounteredClass;
 
-        method.name       = prepareNameString(name);
-        method.returnType = returnType ? prepareNameString(*returnType) : "void";
+        method.name       = m.name;
+        method.returnType = m.returnType.empty() ? "void" : m.returnType.back();
+        method.visibility = static_cast<Visibility>(m.visibility);
 
-        if (visibility) {
-            visibility->evaluate(*this);
-            method.visibility = m_lastEncounteredVisibility;
-        } else if (c.type == Class::Type::Struct) {
+        if (c.type == Class::Type::Struct) {
             std::cout << "ERROR: Struct with method encountered" << std::endl;
         }
 
         c.methods.push_back(method);
-
-        parameters.evaluate(*this);
     }
+
+    return true;
 }
 
-void ClassBuilder::visitExternalMethod(Expression container, Expression method)
+bool ClassBuilder::visit(const PlantUml::Relationship& r)
 {
-    m_lastEncounteredClass = std::ranges::find(m_classes, container.view(), &Class::name);
-    method.evaluate(*this);
-    m_lastEncounteredClass = m_classes.end();
-}
-
-void ClassBuilder::visitPrivateVisibility()
-{
-    m_lastEncounteredVisibility = Visibility::Private;
-}
-
-void ClassBuilder::visitProtectedVisibility()
-{
-    m_lastEncounteredVisibility = Visibility::Protected;
-}
-
-void ClassBuilder::visitPackagePrivateVisibility()
-{
-    m_lastEncounteredVisibility = Visibility::PackagePrivate;
-}
-
-void ClassBuilder::visitPublicVisibility()
-{
-    m_lastEncounteredVisibility = Visibility::Public;
-}
-
-void ClassBuilder::visitRelationship(Expression subject,
-                                     Expression connector,
-                                     Expression object,
-                                     std::optional<Expression> objectCardinality,
-                                     std::optional<Expression> /*subjectCardinality*/,
-                                     std::optional<Expression> label)
-{
-    connector.evaluate(*this);
-
-    m_lastEncounteredClass = std::ranges::find(m_classes, prepareNameString(subject), &Class::name);
+    m_lastEncounteredClass = std::ranges::find(m_classes, r.subject.back(), &Class::name);
 
     if (m_lastEncounteredClass != m_classes.end()) {
-        switch (m_lastRelationship) {
-        case Relationship::Extension:
-            m_lastEncounteredClass->parents.push_back(std::string(prepareNameString(object)));
+        switch (r.type) {
+        case PlantUml::RelationshipType::Extension:
+            m_lastEncounteredClass->parents.push_back(r.object.back());
             break;
 
-        case Relationship::Composition:
-        case Relationship::Aggregation: {
+        case PlantUml::RelationshipType::Composition:
+        case PlantUml::RelationshipType::Aggregation: {
             Variable var;
-            var.type   = prepareNameString(object);
-            var.source = m_lastRelationship;
-            if (objectCardinality) {
-                var.cardinality = prepareNameString(*objectCardinality);
-            }
-            if (label) {
-                var.name = prepareNameString(*label);
-            }
+            var.type        = r.object.back();
+            var.source      = static_cast<Relationship>(r.type);
+            var.cardinality = r.objectCardinality;
+            var.name        = r.label;
             m_lastEncounteredClass->variables.push_back(var);
             break;
         }
@@ -185,65 +88,91 @@ void ClassBuilder::visitRelationship(Expression subject,
             break;
         }
     }
+
+    return true;
 }
 
-void ClassBuilder::visitExtension()
+bool ClassBuilder::visit(const PlantUml::Container& c)
 {
-    m_lastRelationship = Relationship::Extension;
-}
-
-void ClassBuilder::visitComposition()
-{
-    m_lastRelationship = Relationship::Composition;
-}
-
-void ClassBuilder::visitAggregation()
-{
-    m_lastRelationship = Relationship::Aggregation;
-}
-
-void ClassBuilder::visitUsage()
-{
-    m_lastRelationship = Relationship::Usage;
-}
-
-void ClassBuilder::visitSetNamespaceSeparator(Expression separator)
-{
-    namespaceDelimiter = separator.string();
-}
-
-std::string_view ClassBuilder::prepareNameString(Expression e)
-{
-    auto name = removePadding(e.view());
-    // remove double quotes
-    if (name[0] == '"' && name[name.size() - 1] == '"') {
-        name.remove_prefix(1);
-        name.remove_suffix(1);
+    if (c.type == PlantUml::ContainerType::Namespace) {
+        m_namespaceSizes.push_back(m_namespaceStack.size());
+        m_namespaceStack.insert(m_namespaceStack.end(), c.name.begin(), c.name.end());
     }
-    return name;
+
+    return true;
 }
 
-std::string_view ClassBuilder::removePadding(std::string_view in)
+bool ClassBuilder::visit(const PlantUml::Element& e)
 {
-    // remove leading and trailing spaces
-    in.remove_prefix(std::min(in.find_first_not_of(' '), in.size()));
-    in.remove_suffix(in.size() - std::min(in.find_last_not_of(' ') + 1, in.size()));
-    return in;
-}
+    Class c;
 
-void ClassBuilder::splitNamespacedName(std::string_view name, std::list<std::string>& out)
-{
-    auto fullName = removePadding(name);
-    if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
-        fullName.remove_prefix(1);
-        fullName.remove_suffix(1);
-        out.push_back(std::string(fullName));
+    if (e.type == PlantUml::ElementType::Abstract) {
+        c.type = Class::Type::Abstract;
+    } else if (e.type == PlantUml::ElementType::Class) {
+        c.type = Class::Type::Class;
+    } else if (e.type == PlantUml::ElementType::Entity) {
+        c.type = Class::Type::Struct;
+    } else if (e.type == PlantUml::ElementType::Interface) {
+        c.type = Class::Type::Interface;
     } else {
-        for (const auto& ns :
-             fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
-                 return std::string_view(&*rng.begin(), std::ranges::distance(rng));
-             })) {
-            out.push_back(std::string(ns));
+        return false;
+    }
+
+    c.namespaceStack = m_namespaceStack;
+    c.name           = e.name.back();
+    c.namespaceStack.insert(c.namespaceStack.end(), e.name.begin(), e.name.end());
+    c.namespaceStack.pop_back();
+    c.stereotype = e.stereotype;
+
+    m_classes.push_back(c);
+    m_lastEncounteredClass = --m_classes.end();
+
+    return true;
+}
+
+bool ClassBuilder::visit(const PlantUml::Note& /*n*/)
+{
+    return false;
+}
+
+bool ClassBuilder::visit(const PlantUml::Separator& /*s*/)
+{
+    return false;
+}
+
+bool ClassBuilder::visit(const PlantUml::Enumerator& /*e*/)
+{
+    return false;
+}
+
+bool ClassBuilder::visit(const PlantUml::Parameter& p)
+{
+    if (m_lastEncounteredClass != m_classes.end()) {
+        Parameter param;
+        param.name = p.name;
+        param.type = p.type.back();
+        m_lastEncounteredClass->methods.back().parameters.push_back(param);
+    }
+
+    return true;
+}
+
+bool ClassBuilder::visit(const PlantUml::End& e)
+{
+    if (e.type == PlantUml::EndType::Container) {
+        auto size = m_namespaceSizes.back();
+        while (m_namespaceStack.size() > size) {
+            m_namespaceStack.pop_back();
+        }
+        m_namespaceSizes.pop_back();
+    } else if (e.type == PlantUml::EndType::Element) {
+        m_lastEncounteredClass = m_classes.end();
+    } else if (e.type == PlantUml::EndType::Method) {
+        if (m_lastClassFromExternalDef) {
+            m_lastEncounteredClass     = m_classes.end();
+            m_lastClassFromExternalDef = false;
         }
     }
+
+    return true;
 }
