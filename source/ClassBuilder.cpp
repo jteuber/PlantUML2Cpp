@@ -159,7 +159,7 @@ bool ClassBuilder::visit(const PlantUml::Parameter& p)
 
 bool ClassBuilder::visit(const PlantUml::End& e)
 {
-    if (e.type == PlantUml::EndType::Container) {
+    if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
         while (m_namespaceStack.size() > size) {
             m_namespaceStack.pop_back();

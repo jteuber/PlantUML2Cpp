@@ -32,10 +32,6 @@ Parser::Parser(/* args */)
     g["Gradient"] << "'|' | '/' | '-' | '\\\\'";
     g["Color"] << "ColorName (Gradient ColorName)?";
 
-    // stereotypes
-    g["Spot"] << "'(' . ',' Color ')'";
-    g["Stereotype"] << "'<<' Spot? Identifier? '>>'"; // >> [](auto e) { v.visitStereotype(e["Identifier"]); };
-
     g["Endl"] << "'\r\n' | '\n'" >> [](auto /*e*/) { return SyntaxNode{std::string()}; };
     g["OpenBrackets"] << "Endl? '{'";
     g["CloseBrackets"] << "'}'";
@@ -175,7 +171,7 @@ Parser::Parser(/* args */)
 
     // ========= VARIABLE =========
     g["VariableExplicit"] << "'{field}' Identifier+";
-    g["VariableImplicit"] << "Visibility? Identifier ':' FieldTypename | Visibility? FieldTypename Identifier?" >>
+    g["VariableImplicit"] << "Visibility? Identifier ':' FieldTypename | Visibility? FieldTypename Identifier" >>
         [this](auto e) {
             Variable var = Variable{toName(e["Identifier"]), toNamespace(e["FieldTypename"])};
             var.visibility =
@@ -227,18 +223,27 @@ Parser::Parser(/* args */)
         [](auto e) { return e[0].evaluate(); };
     g["IgnoredType"] << "'circle' | '()' | 'diamond' | '<>'";
 
+    // stereotypes
+    g["SpotLetter"] << "[A-Z]";
+    g["Spot"] << "'(' SpotLetter ',' Color ')'" >> [](auto e) { return SyntaxNode{e["SpotLetter"]->string()}; };
+
     // body of containers
     g["ElementBody"]
             << "((Method | Variable | Enumerator | Ignored | WARN_Unrecognized_Line)? WARN_Extepted_EOL? Endl)*" >>
         [this](auto e) { return evaluateBody(e); };
 
+    g["Implementing"] << " Identifier";
+    g["Extending"] << "Identifier";
+
     // simple containers
-    g["ElementDef"] << "ElementType Name (Color | Stereotype)? (OpenBrackets ElementBody CloseBrackets)?" >>
+    g["ElementDef"] << "ElementType Name ('<<' Spot? Identifier? '>>')? ('implements' Implementing | 'extends' "
+                       "Extending | Color)? (OpenBrackets ElementBody CloseBrackets)?" >>
         [this](auto e) {
             Element elem{toNamespace(e["Name"]),
-                         toName(e["Stereotype"]),
-                         {},
-                         {},
+                         toName(e["Identifier"]),
+                         e["Spot"] ? std::get<std::string>(e["Spot"]->evaluate().element)[0] : ' ',
+                         toNamespace(e["Implementing"]),
+                         toNamespace(e["Extending"]),
                          std::get<ElementType>(e["ElementType"]->evaluate().element)};
             SyntaxNode n{elem};
             if (e["ElementBody"]) {
@@ -247,7 +252,8 @@ Parser::Parser(/* args */)
             n.children.push_back(SyntaxNode{End{EndType::Element}});
             return n;
         };
-    g["IgnoredDef"] << "IgnoredType Name (Color | Stereotype)?" >> [](auto /*e*/) { return SyntaxNode{std::string()}; };
+    g["IgnoredDef"] << "IgnoredType Name (Color | '<<' Spot? Identifier? '>>')?" >>
+        [](auto /*e*/) { return SyntaxNode{std::string()}; };
 
     // collector rule
     g["Element"] << "ElementDef | IgnoredDef";
@@ -256,7 +262,7 @@ Parser::Parser(/* args */)
     g["Package"] << "'package' Name (Color | Stereotype)? OpenBrackets Body CloseBrackets" >> [this](auto e) {
         auto n     = SyntaxNode{Container{toNamespace(e["Name"]), "", ContainerType::Package}};
         n.children = std::move(e["Body"]->evaluate().children);
-        n.children.emplace_back(End{EndType::Container});
+        n.children.emplace_back(End{EndType::Package});
         return n;
     };
 
@@ -264,7 +270,7 @@ Parser::Parser(/* args */)
     g["Namespace"] << "'namespace' Name Color? OpenBrackets Body CloseBrackets" >> [this](auto e) {
         auto n     = SyntaxNode{Container{toNamespace(e["Name"]), "", ContainerType::Namespace}};
         n.children = std::move(e["Body"]->evaluate().children);
-        n.children.emplace_back(End{EndType::Container});
+        n.children.emplace_back(End{EndType::Namespace});
         return n;
     };
 
@@ -275,7 +281,7 @@ Parser::Parser(/* args */)
     g["Start"] << "Endl* '@startuml' Name? Endl" >> [this](auto e) {
         return SyntaxNode{Container{toNamespace(e["Name"]), "", ContainerType::Document}};
     };
-    g["End"] << "'@enduml' Endl*" >> [](auto /*e*/) { return SyntaxNode{End{EndType::Container}}; };
+    g["End"] << "'@enduml' Endl*" >> [](auto /*e*/) { return SyntaxNode{End{EndType::Document}}; };
     g["Diagram"] << "Start Body End" >> [](auto e) {
         SyntaxNode n = e["Start"]->evaluate();
         n.children   = std::move(e["Body"]->evaluate().children);

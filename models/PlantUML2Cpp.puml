@@ -48,6 +48,7 @@ namespace PlantUml {
     class Element {
         +name : list<string>
         +stereotype : string
+        +spotLetter : char
         +implements : list<string>
         +extends : list<string>
     }
@@ -114,7 +115,9 @@ namespace PlantUml {
     class End
     enum EndType
     {
-        Container
+        Document
+        Package
+        Namespace
         Element
         Method
     }

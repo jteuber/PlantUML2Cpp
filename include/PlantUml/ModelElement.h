@@ -45,7 +45,9 @@ enum class Modifier
 };
 enum class EndType
 {
-    Container,
+    Document,
+    Package,
+    Namespace,
     Element,
     Method
 };
@@ -63,6 +65,7 @@ struct Element
 {
     std::list<std::string> name;
     std::string stereotype;
+    char spotLetter;
     std::list<std::string> implements;
     std::list<std::string> extends;
     ElementType type;

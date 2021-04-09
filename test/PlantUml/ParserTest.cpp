@@ -70,9 +70,9 @@ abstract        name
 @enduml)";
 
     Container c{{}, "", ContainerType::Document};
-    Element e{{"name"}, "", {}, {}, ElementType::Abstract};
+    Element e{{"name"}, "", ' ', {}, {}, ElementType::Abstract};
     End ee{EndType::Element};
-    End ec{EndType::Container};
+    End ec{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(c));
@@ -99,9 +99,9 @@ abstract        name
 @enduml)";
 
     Container c{{}, "", ContainerType::Document};
-    Element e{{"name"}, "", {}, {}, ElementType::Abstract};
+    Element e{{"name"}, "", ' ', {}, {}, ElementType::Abstract};
     End ee{EndType::Element};
-    End ec{EndType::Container};
+    End ec{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(c));
@@ -136,13 +136,13 @@ enum            enum
 interface       interface
 @enduml)";
 
-    Element a{{"abstract"}, "", {}, {}, ElementType::Abstract};
-    Element ac{{"abstract class"}, "", {}, {}, ElementType::Abstract};
-    Element an{{"annotation"}, "", {}, {}, ElementType::Annotation};
-    Element c{{"class"}, "", {}, {}, ElementType::Class};
-    Element ent{{"entity"}, "", {}, {}, ElementType::Entity};
-    Element enu{{"enum"}, "", {}, {}, ElementType::Enum};
-    Element i{{"interface"}, "", {}, {}, ElementType::Interface};
+    Element a{{"abstract"}, "", ' ', {}, {}, ElementType::Abstract};
+    Element ac{{"abstract class"}, "", ' ', {}, {}, ElementType::Abstract};
+    Element an{{"annotation"}, "", ' ', {}, {}, ElementType::Annotation};
+    Element c{{"class"}, "", ' ', {}, {}, ElementType::Class};
+    Element ent{{"entity"}, "", ' ', {}, {}, ElementType::Entity};
+    Element enu{{"enum"}, "", ' ', {}, {}, ElementType::Enum};
+    Element i{{"interface"}, "", ' ', {}, {}, ElementType::Interface};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(a));
@@ -171,9 +171,9 @@ entity test { }
 @enduml)";
 
     Container c{{}, "", ContainerType::Document};
-    Element e{{"test"}, "", {}, {}, ElementType::Entity};
+    Element e{{"test"}, "", ' ', {}, {}, ElementType::Entity};
     End ee{EndType::Element};
-    End ec{EndType::Container};
+    End ec{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(c));
@@ -200,10 +200,10 @@ entity test {
 }
 @enduml)";
 
-    Element e{{"test"}, "", {}, {}, ElementType::Entity};
+    Element e{{"test"}, "", ' ', {}, {}, ElementType::Entity};
     Variable v{"variable", {"var"}, {}, Visibility::Unspecified, Modifier::None};
     End ee{EndType::Element};
-    End ec{EndType::Container};
+    End ec{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(e));
@@ -231,7 +231,7 @@ class test {
 }
 @enduml)";
 
-    Element e{{"test"}, "", {}, {}, ElementType::Class};
+    Element e{{"test"}, "", ' ', {}, {}, ElementType::Class};
     Method m1{"method", {"var"}, {}, Visibility::Unspecified, Modifier::None};
     Method m2{"method2", {"var"}, {}, Visibility::Unspecified, Modifier::None};
     Parameter p{"input", {"bool"}};
@@ -354,7 +354,7 @@ TEST(ParserTest, IncludesAndComments)
 @enduml)";
 
     Container c{{}, "", ContainerType::Document};
-    End ec{EndType::Container};
+    End ec{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(An<const Variable&>())).Times(0);
@@ -425,13 +425,15 @@ package "net.sourceforge.plantuml" {
     Container c{{}, "", ContainerType::Document};
     Container p1{{"Classic Collections"}, "", ContainerType::Package};
     Container p2{{"net.sourceforge.plantuml"}, "", ContainerType::Package};
-    End ec{EndType::Container};
+    End ep{EndType::Package};
+    End ed{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(c));
     EXPECT_CALL(visitor, visit(p1));
     EXPECT_CALL(visitor, visit(p2));
-    EXPECT_CALL(visitor, visit(ec)).Times(3);
+    EXPECT_CALL(visitor, visit(ep)).Times(2);
+    EXPECT_CALL(visitor, visit(ed)).Times(1);
 
     // Act
     act(parser, visitor, puml);
@@ -457,13 +459,15 @@ namespace "net.foo" {
     Container c{{}, "", ContainerType::Document};
     Container ns1{{"net"}, "", ContainerType::Namespace};
     Container ns2{{"net.foo"}, "", ContainerType::Namespace};
-    End ec{EndType::Container};
+    End ens{EndType::Namespace};
+    End ed{EndType::Document};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(c));
     EXPECT_CALL(visitor, visit(ns1));
     EXPECT_CALL(visitor, visit(ns2));
-    EXPECT_CALL(visitor, visit(ec)).Times(3);
+    EXPECT_CALL(visitor, visit(ens)).Times(2);
+    EXPECT_CALL(visitor, visit(ed)).Times(1);
 
     // Act
     act(parser, visitor, puml);
@@ -487,10 +491,108 @@ class X1::X2::foo {
 
 @enduml)";
 
-    Element e{{"X1", "X2", "foo"}, "", {}, {}, ElementType::Class};
+    Element e{{"X1", "X2", "foo"}, "", ' ', {}, {}, ElementType::Class};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(e));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
+TEST(ParserTest, Enum)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+enum TimeUnit {
+  DAYS
+  HOURS
+  MINUTES
+}
+
+@enduml)";
+
+    Element e{{"TimeUnit"}, "", ' ', {}, {}, ElementType::Enum};
+    Enumerator en1{"DAYS"};
+    Enumerator en2{"HOURS"};
+    Enumerator en3{"MINUTES"};
+
+    // Assert Calls
+    EXPECT_CALL(visitor, visit(e));
+    EXPECT_CALL(visitor, visit(en1));
+    EXPECT_CALL(visitor, visit(en2));
+    EXPECT_CALL(visitor, visit(en3));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
+TEST(ParserTest, Stereotypes)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+class System << (S,#FF7700) Singleton >>
+class Date << (D,orchid) >>
+
+entity test << (T,white) Template >>
+{
+    test : var
+}
+
+@enduml)";
+
+    Element e1{{"System"}, "Singleton", 'S', {}, {}, ElementType::Class};
+    Element e2{{"Date"}, "", 'D', {}, {}, ElementType::Class};
+    Element e3{{"test"}, "Template", 'T', {}, {}, ElementType::Entity};
+
+    // Assert Calls
+    EXPECT_CALL(visitor, visit(e1));
+    EXPECT_CALL(visitor, visit(e2));
+    EXPECT_CALL(visitor, visit(e3));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
+TEST(ParserTest, ImplementsExtends)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+interface Iface
+
+class Impl implements Iface
+class Ext extends Impl
+
+@enduml)";
+
+    Element e1{{"Iface"}, "", ' ', {}, {}, ElementType::Interface};
+    Element e2{{"Impl"}, "", ' ', {"Iface"}, {}, ElementType::Class};
+    Element e3{{"Ext"}, "", ' ', {}, {"Impl"}, ElementType::Class};
+
+    // Assert Calls
+    EXPECT_CALL(visitor, visit(e1));
+    EXPECT_CALL(visitor, visit(e2));
+    EXPECT_CALL(visitor, visit(e3));
 
     // Act
     act(parser, visitor, puml);
