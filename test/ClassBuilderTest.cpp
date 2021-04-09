@@ -3,6 +3,8 @@
 #include "ClassBuilder.h"
 #include "PlantUml/Parser.h"
 
+namespace puml = PlantUml;
+
 void act(PlantUml::Parser& parser, ClassBuilder& sut, std::string_view puml)
 {
     ASSERT_TRUE(parser.parse(puml));
@@ -13,14 +15,13 @@ TEST(ClassBuilderTest, EmptyDiagram)
 {
     // Arrange
     ClassBuilder sut;
-    PlantUml::Parser parser;
 
-    static constexpr auto puml =
-        R"(@startuml
-@enduml)";
+    puml::Container c{{}, "", puml::ContainerType::Document};
+    puml::End ec{puml::EndType::Document};
 
     // Act
-    act(parser, sut, puml);
+    sut.visit(c);
+    sut.visit(ec);
 
     // Assert
     EXPECT_TRUE(sut.results().empty());
@@ -30,15 +31,17 @@ TEST(ClassBuilderTest, SingleAbstract)
 {
     // Arrange
     ClassBuilder sut;
-    PlantUml::Parser parser;
 
-    static constexpr auto puml =
-        R"(@startuml
-abstract        name
-@enduml)";
+    puml::Container c{{}, "", puml::ContainerType::Document};
+    puml::Element e{{"name"}, "", ' ', {}, {}, puml::ElementType::Abstract};
+    puml::End ee{puml::EndType::Element};
+    puml::End ec{puml::EndType::Document};
 
     // Act
-    act(parser, sut, puml);
+    sut.visit(c);
+    sut.visit(e);
+    sut.visit(ee);
+    sut.visit(ec);
 
     // Assert
     ASSERT_EQ(sut.results().size(), 1);
