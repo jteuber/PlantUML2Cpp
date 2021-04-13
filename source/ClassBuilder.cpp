@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <ranges>
 
 const std::vector<Class>& ClassBuilder::results()
@@ -70,9 +71,27 @@ bool ClassBuilder::visit(const PlantUml::Relationship& r)
 
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (r.type) {
-        case PlantUml::RelationshipType::Extension:
-            m_lastEncounteredClass->parents.push_back(r.object.back());
+        case PlantUml::RelationshipType::Extension: {
+            if (r.object.front().empty()) {
+                m_lastEncounteredClass->parents.push_back(r.object.back());
+            } else {
+                std::string parentNS;
+                if (!m_namespaceStack.empty()) {
+                    parentNS =
+                        std::accumulate(++m_namespaceStack.begin(),
+                                        m_namespaceStack.end(),
+                                        m_namespaceStack.front(),
+                                        [](const auto& a, const auto& b) -> std::string { return a + "::" + b; });
+                }
+                std::string dep = std::accumulate(
+                    r.object.begin(), r.object.end(), parentNS, [](const auto& a, const auto& b) -> std::string {
+                        return a + (a.empty() ? "" : "::") + b;
+                    });
+
+                m_lastEncounteredClass->parents.push_back(dep);
+            }
             break;
+        }
 
         case PlantUml::RelationshipType::Composition:
         case PlantUml::RelationshipType::Aggregation: {

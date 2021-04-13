@@ -6,6 +6,7 @@
 #include <bits/ranges_algobase.h>
 #include <iostream>
 #include <iterator>
+#include <ranges>
 #include <stack>
 #include <variant>
 
@@ -323,7 +324,7 @@ void Parser::visitAST(AbstractVisitor& visitor)
 
         bool visitChildren = std::visit([&visitor](auto&& arg) -> bool { return visitor.visit(arg); }, top->element);
         if (visitChildren) {
-            for (const auto& child : top->children) {
+            for (const auto& child : top->children | std::views::reverse) {
                 nodeStack.push(&child);
             }
         }
@@ -361,13 +362,13 @@ std::list<std::string> Parser::toNamespace(Expression e)
     if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
         fullName.remove_prefix(1);
         fullName.remove_suffix(1);
-        out.push_back(std::string(fullName));
+        out.emplace_back(fullName);
     } else {
         for (const auto& ns :
              fullName | std::ranges::views::split(namespaceDelimiter) | std::ranges::views::transform([](auto&& rng) {
                  return std::string_view(&*rng.begin(), std::ranges::distance(rng));
              })) {
-            out.push_back(std::string(ns));
+            out.emplace_back(ns);
         }
     }
 

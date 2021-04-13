@@ -368,7 +368,7 @@ TEST(ClassBuilderTest, Namespaces)
     person.namespaceStack.pop_back();
     EXPECT_EQ(person.namespaceStack.back(), "net");
     ASSERT_EQ(person.parents.size(), 1);
-    EXPECT_EQ(person.parents[0], ".BaseClass");
+    EXPECT_EQ(person.parents[0], "BaseClass");
 
     EXPECT_EQ(sut.results()[2].name, "BaseClass2");
     EXPECT_EQ(sut.results()[2].type, Class::Type::Class);
