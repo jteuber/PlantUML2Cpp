@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <ranges>
 
 namespace fs = std::filesystem;
@@ -24,7 +25,11 @@ std::string readFullFile(const fs::path& filepath)
 
 bool writeFullFile(const fs::path& filepath, std::string_view contents)
 {
-    if (!fs::directory_entry(filepath).exists()) {
+    if (!fs::exists(filepath)) {
+        std::cout << "writing to file " << filepath << std::endl;
+
+        fs::create_directory(filepath.parent_path());
+
         std::ofstream file(filepath, std::ios_base::out | std::ios_base::app);
         if (file.is_open()) {
             file << contents;
@@ -59,10 +64,16 @@ bool PlantUML2Cpp::run(fs::path path)
             if (parser.parse(fileContents)) {
                 parser.visitAST(classBuilder);
 
+                fs::create_directory(path / "include");
                 for (const auto& c : classBuilder.results()) {
                     std::string header = headerGenerator.generate(c);
 
-                    writeFullFile(path / "include" / (c.name + ".h"), header);
+                    auto nsPath = std::accumulate(
+                        c.namespaceStack.begin(), c.namespaceStack.end(), fs::path(), [](const auto& a, const auto& b) {
+                            return fs::path(a) / fs::path(b);
+                        });
+
+                    writeFullFile(path / "include" / nsPath / (c.name + ".h"), header);
                 }
             }
         }
