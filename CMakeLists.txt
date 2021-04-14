@@ -8,6 +8,7 @@ include_directories(include/)
 file(GLOB SRC_FILES
 	"source/*.cpp"
 	"source/PlantUml/*.cpp"
+	"source/Cpp/*.cpp"
 )
 
 add_executable(PlantUML2Cpp ${SRC_FILES})

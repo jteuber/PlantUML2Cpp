@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 
+namespace Cpp {
+
 struct Config
 {
     std::string memberPrefix      = "m_";
@@ -39,3 +41,5 @@ struct Config
                                                                     {"list", "std::list"},
                                                                     {"umap", "std::unordered_map"}};
 };
+
+} // namespace Cpp

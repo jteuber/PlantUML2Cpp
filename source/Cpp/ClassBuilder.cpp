@@ -1,10 +1,12 @@
-#include "ClassBuilder.h"
+#include "Cpp/ClassBuilder.h"
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
 #include <iostream>
 #include <numeric>
 #include <ranges>
+
+namespace Cpp {
 
 const std::vector<Class>& ClassBuilder::results()
 {
@@ -195,3 +197,5 @@ bool ClassBuilder::visit(const PlantUml::End& e)
 
     return true;
 }
+
+} // namespace Cpp

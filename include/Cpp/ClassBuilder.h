@@ -4,6 +4,8 @@
 #include "PlantUml/AbstractVisitor.h"
 #include "PlantUml/ModelElement.h"
 
+namespace Cpp {
+
 class ClassBuilder : public PlantUml::AbstractVisitor
 {
 public:
@@ -27,3 +29,5 @@ private:
     std::vector<Class>::iterator m_lastEncounteredClass = m_classes.end();
     bool m_lastClassFromExternalDef                     = false;
 };
+
+} // namespace Cpp

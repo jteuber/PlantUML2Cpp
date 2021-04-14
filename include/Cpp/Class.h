@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+namespace Cpp {
+
 enum class Visibility
 {
     Private,
@@ -62,3 +64,5 @@ struct Class
         Struct
     } type = Type::Class;
 };
+
+} // namespace Cpp

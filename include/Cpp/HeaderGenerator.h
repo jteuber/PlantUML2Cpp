@@ -2,8 +2,10 @@
 
 #include <memory>
 
-#include "Class.h"
-#include "Config.h"
+#include "Cpp/Class.h"
+#include "Cpp/Config.h"
+
+namespace Cpp {
 
 class HeaderGenerator
 {
@@ -26,3 +28,5 @@ private:
 private:
     std::shared_ptr<Config> m_config;
 };
+
+} // namespace Cpp

@@ -1,4 +1,4 @@
-#include "HeaderGenerator.h"
+#include "Cpp/HeaderGenerator.h"
 #include "PlantUML2Cpp.h"
 #include "peg_parser/interpreter.h"
 

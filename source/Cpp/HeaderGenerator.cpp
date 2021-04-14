@@ -1,5 +1,4 @@
-#include "Class.h"
-#include "HeaderGenerator.h"
+#include "Cpp/HeaderGenerator.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -14,6 +13,8 @@
 #include <utility>
 
 #include <fmt/core.h>
+
+namespace Cpp {
 
 template <typename T>
 concept HasVisibility = requires(T a)
@@ -275,3 +276,5 @@ std::string HeaderGenerator::visibilityToString(Visibility vis)
         return "";
     }
 }
+
+} // namespace Cpp

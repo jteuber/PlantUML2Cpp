@@ -2,8 +2,8 @@
 
 #include <regex>
 
-#include "Class.h"
-#include "HeaderGenerator.h"
+#include "Cpp/Class.h"
+#include "Cpp/HeaderGenerator.h"
 
 const std::string ws     = "( |\t|\n)*";
 const std::string header = "#pragma once" + ws;
@@ -11,12 +11,12 @@ const std::string header = "#pragma once" + ws;
 TEST(HeaderGenerator, EmptyClass)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Class input;
+    Cpp::Class input;
     input.name = "empty";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
 
     // Act
     auto output = sut.generate(input);
@@ -30,17 +30,17 @@ TEST(HeaderGenerator, EmptyClass)
 TEST(HeaderGenerator, SinglePublicMethod)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Method method;
+    Cpp::Method method;
     method.name       = "simpleMethod";
     method.returnType = "void";
-    method.visibility = Visibility::Public;
+    method.visibility = Cpp::Visibility ::Public;
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
     input.methods.push_back(method);
 
     // Act
@@ -56,17 +56,17 @@ TEST(HeaderGenerator, SinglePublicMethod)
 TEST(HeaderGenerator, SinglePrivateMethod)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Method method;
+    Cpp::Method method;
     method.name       = "simpleMethod";
     method.returnType = "void";
-    method.visibility = Visibility::Private;
+    method.visibility = Cpp::Visibility ::Private;
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
     input.methods.push_back(method);
 
     // Act
@@ -82,17 +82,17 @@ TEST(HeaderGenerator, SinglePrivateMethod)
 TEST(HeaderGenerator, SingleProtectedMethod)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Method method;
+    Cpp::Method method;
     method.name       = "simpleMethod";
     method.returnType = "void";
-    method.visibility = Visibility::Protected;
+    method.visibility = Cpp::Visibility ::Protected;
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
     input.methods.push_back(method);
 
     // Act
@@ -108,27 +108,27 @@ TEST(HeaderGenerator, SingleProtectedMethod)
 TEST(HeaderGenerator, AllKindsOfMethods)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Method method;
+    Cpp::Method method;
     method.name       = "simplePublicMethod";
     method.returnType = "void";
-    method.visibility = Visibility::Public;
+    method.visibility = Cpp::Visibility ::Public;
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
     input.methods.push_back(method);
 
     method.name       = "simplePrivateMethod";
-    method.visibility = Visibility::Private;
+    method.visibility = Cpp::Visibility ::Private;
     input.methods.push_back(method);
     method.name = "simplePrivateMethod2";
     input.methods.push_back(method);
 
     method.name       = "simpleProtectedMethod";
-    method.visibility = Visibility::Protected;
+    method.visibility = Cpp::Visibility ::Protected;
     input.methods.push_back(method);
 
     // Act
@@ -148,27 +148,27 @@ TEST(HeaderGenerator, AllKindsOfMethods)
 TEST(HeaderGenerator, AllKindsOfMembers)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Variable member;
+    Cpp::Variable member;
     member.name       = "simplePublicMember";
     member.type       = "int";
-    member.visibility = Visibility::Public;
+    member.visibility = Cpp::Visibility ::Public;
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
     input.variables.push_back(member);
 
     member.name       = "simplePrivateMember";
-    member.visibility = Visibility::Private;
+    member.visibility = Cpp::Visibility ::Private;
     input.variables.push_back(member);
     member.name = "simplePrivateMember2";
     input.variables.push_back(member);
 
     member.name       = "simpleProtectedMember";
-    member.visibility = Visibility::Protected;
+    member.visibility = Cpp::Visibility ::Protected;
     input.variables.push_back(member);
 
     // Act
@@ -188,27 +188,27 @@ TEST(HeaderGenerator, AllKindsOfMembers)
 TEST(HeaderGenerator, MembersInStruct)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Variable member;
+    Cpp::Variable member;
     member.name       = "simplePublicMember";
     member.type       = "int";
-    member.visibility = Visibility::Public;
+    member.visibility = Cpp::Visibility ::Public;
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleStruct";
-    input.type = Class::Type::Struct;
+    input.type = Cpp::Class::Type::Struct;
     input.variables.push_back(member);
 
     member.name       = "simplePrivateMember";
-    member.visibility = Visibility::Private;
+    member.visibility = Cpp::Visibility ::Private;
     input.variables.push_back(member);
     member.name = "simplePrivateMember2";
     input.variables.push_back(member);
 
     member.name       = "simpleProtectedMember";
-    member.visibility = Visibility::Protected;
+    member.visibility = Cpp::Visibility ::Protected;
     input.variables.push_back(member);
 
     // Act
@@ -228,44 +228,44 @@ TEST(HeaderGenerator, MembersInStruct)
 TEST(HeaderGenerator, MethodsAndMembers)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
 
-    Variable member;
+    Cpp::Variable member;
     member.name       = "simplePublicMember";
     member.type       = "int";
-    member.visibility = Visibility::Public;
+    member.visibility = Cpp::Visibility ::Public;
     input.variables.push_back(member);
 
     member.name       = "simplePrivateMember";
-    member.visibility = Visibility::Private;
+    member.visibility = Cpp::Visibility ::Private;
     input.variables.push_back(member);
 
     member.name = "simplePrivateMember2";
     input.variables.push_back(member);
 
     member.name       = "simpleProtectedMember";
-    member.visibility = Visibility::Protected;
+    member.visibility = Cpp::Visibility ::Protected;
     input.variables.push_back(member);
 
-    Method method;
+    Cpp::Method method;
     method.name       = "simplePublicMethod";
     method.returnType = "void";
-    method.visibility = Visibility::Public;
+    method.visibility = Cpp::Visibility ::Public;
     input.methods.push_back(method);
 
     method.name       = "simplePrivateMethod";
-    method.visibility = Visibility::Private;
+    method.visibility = Cpp::Visibility ::Private;
     input.methods.push_back(method);
     method.name = "simplePrivateMethod2";
     input.methods.push_back(method);
 
     method.name       = "simpleProtectedMethod";
-    method.visibility = Visibility::Protected;
+    method.visibility = Cpp::Visibility ::Protected;
     input.methods.push_back(method);
 
     // Act
@@ -289,24 +289,24 @@ TEST(HeaderGenerator, MethodsAndMembers)
 TEST(HeaderGenerator, CompositionMember)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
 
-    Variable member;
+    Cpp::Variable member;
     member.name       = "simpleComposition";
     member.type       = "ComplexType";
-    member.visibility = Visibility::Public;
-    member.source     = Relationship::Composition;
+    member.visibility = Cpp::Visibility ::Public;
+    member.source     = Cpp::Relationship::Composition;
     input.variables.push_back(member);
 
     member.name        = "manyComposition";
     member.type        = "OtherComplexType";
-    member.visibility  = Visibility::Public;
-    member.source      = Relationship::Composition;
+    member.visibility  = Cpp::Visibility ::Public;
+    member.source      = Cpp::Relationship::Composition;
     member.cardinality = "0..*";
     input.variables.push_back(member);
 
@@ -328,17 +328,17 @@ TEST(HeaderGenerator, CompositionMember)
 TEST(HeaderGenerator, ComplexTemplates)
 {
     // Arrange
-    auto config = std::make_shared<Config>();
-    HeaderGenerator sut(config);
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
 
-    Class input;
+    Cpp::Class input;
     input.name = "simpleClass";
-    input.type = Class::Type::Class;
+    input.type = Cpp::Class::Type::Class;
 
-    Variable member;
+    Cpp::Variable member;
     member.name       = "complexTemplate";
-    member.type       = "std::vector<std::pair<Visibility, std::string>>";
-    member.visibility = Visibility::Public;
+    member.type       = "std::vector<std::pair<Visibility , std::string>>";
+    member.visibility = Cpp::Visibility ::Public;
     input.variables.push_back(member);
 
     // Act
@@ -349,7 +349,7 @@ TEST(HeaderGenerator, ComplexTemplates)
     regex += R"(\#include \<vector\>)" + ws + R"(\#include "Visibility.h")" + ws;
     regex += ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
     regex += "public:" + ws;
-    regex += "std::vector<std::pair<Visibility, std::string>>" + ws + "m_complexTemplate;" + ws;
+    regex += "std::vector<std::pair<Visibility , std::string>>" + ws + "m_complexTemplate;" + ws;
     regex += "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
