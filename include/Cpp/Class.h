@@ -2,18 +2,10 @@
 
 #include <list>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace Cpp {
-
-enum class Visibility
-{
-    Private,
-    Protected,
-    PackagePrivate,
-    Public,
-    Unspecified
-};
 
 enum class Relationship
 {
@@ -28,9 +20,9 @@ struct Variable
 {
     std::string name;
     std::string type;
-    std::string cardinality;
-    Visibility visibility = Visibility::Unspecified;
-    Relationship source;
+    std::string comment;
+    bool isConst  = false;
+    bool isStatic = false;
 };
 
 struct Parameter
@@ -43,26 +35,35 @@ struct Method
 {
     std::string name;
     std::string returnType;
+    std::string comment;
+    bool isAbstract = false;
+    bool isConst    = false;
+    bool isStatic   = false;
     std::vector<Parameter> parameters;
-    Visibility visibility = Visibility::Unspecified;
 };
+
+struct VisibilityKeyword
+{
+    std::string name;
+};
+
+struct Separator
+{
+    std::string text;
+};
+
+using BodyElement = std::variant<std::string, Variable, Method, VisibilityKeyword, Separator>;
 
 struct Class
 {
     std::string name;
-    std::string stereotype;
-    std::vector<std::string> parents;
-    std::list<std::string> namespaceStack;
-    std::vector<Variable> variables;
-    std::vector<Method> methods;
-
-    enum class Type
-    {
-        Abstract,
-        Class,
-        Interface,
-        Struct
-    } type = Type::Class;
+    std::string comment;
+    bool isInterface = false;
+    bool isStruct    = false;
+    std::list<std::string> namespaces;
+    std::vector<std::string> inherits;
+    std::vector<std::string> includes;
+    std::vector<BodyElement> body;
 };
 
 } // namespace Cpp

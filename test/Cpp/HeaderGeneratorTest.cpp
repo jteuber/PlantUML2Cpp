@@ -354,3 +354,62 @@ TEST(HeaderGenerator, ComplexTemplates)
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
+
+TEST(HeaderGenerator, TemplateWithBuiltinType)
+{
+    // Arrange
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
+
+    Cpp::Class input;
+    input.name = "simpleClass";
+    input.type = Cpp::Class::Type::Class;
+
+    Cpp::Variable member;
+    member.name       = "template";
+    member.type       = "vector<int>";
+    member.visibility = Cpp::Visibility ::Public;
+    input.variables.push_back(member);
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = header + R"(\#include \<vector\>)" + ws;
+    regex += "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    regex += "public:" + ws;
+    regex += "std::vector<int>" + ws + "m_template;" + ws;
+    regex += "\\};(.|\n)*";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}
+
+TEST(HeaderGenerator, UmlTypeTemplates)
+{
+    // Arrange
+    auto config = std::make_shared<Cpp::Config>();
+    Cpp::HeaderGenerator sut(config);
+
+    Cpp::Class input;
+    input.name = "simpleClass";
+    input.type = Cpp::Class::Type::Class;
+
+    Cpp::Variable member;
+    member.name       = "complexTemplate";
+    member.type       = "vector<string>";
+    member.visibility = Cpp::Visibility ::Public;
+    input.variables.push_back(member);
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = header + R"(\#include \<string\>)" + ws;
+    regex += R"(\#include \<vector\>)" + ws;
+    regex += "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    regex += "public:" + ws;
+    regex += "std::vector<std::string>" + ws + "m_complexTemplate;" + ws;
+    regex += "\\};(.|\n)*";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}

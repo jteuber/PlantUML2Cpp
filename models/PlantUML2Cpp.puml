@@ -9,7 +9,8 @@ class PlantUML2Cpp {
 }
 
 PlantUML2Cpp *-- "1" PlantUml.Parser
-PlantUML2Cpp *-- "1" Cpp.ClassBuilder
+PlantUML2Cpp *-- "1" Cpp.ClassTranslator
+PlantUML2Cpp *-- "1" Cpp.ClassOptimizer
 PlantUML2Cpp *-- "1" Cpp.HeaderGenerator
 PlantUML2Cpp *-- "1" Cpp.Config
 
@@ -155,11 +156,27 @@ namespace PlantUml {
     Parser *-up- "1" peg_parser.ParserGenerator
 }
 
-' TODO: go for Interpreter -> Optimizer -> CodeGenerator
+' TODO: go for Translator -> PostProcessor -> Optimizer -> CodeGenerator
 
 namespace Cpp {
 
-    class ClassBuilder
+    class ClassTranslator {
+        +visit(Variable v)     : bool
+        +visit(Method m)       : bool
+        +visit(Relationship r) : bool
+        +visit(Container c)    : bool
+        +visit(Element e)      : bool
+        +visit(Note n)         : bool
+        +visit(Separator s)    : bool
+        +visit(Keyword k)      : bool
+        +visit(Parameter p)    : bool
+        +visit(End e)          : bool
+    }
+    ClassTranslator --|> PlantUml.AbstractVisitor
+
+    class ClassOptimizer {
+        +optimize(vector<Class>& classes)
+    }
 
     class HeaderGenerator {
         +string generate(Class in)
@@ -184,10 +201,10 @@ namespace Cpp {
 
     class Class {
         +name : string
+        +comment : string
+        +isStruct : bool
         +namespaces : list<string>
         +inherits : vector<string>
-        +isStruct : bool
-        +comment : string
         +includes : vector<string>
     }
     class BodyElement << (V,#FF55AA) >>
@@ -208,37 +225,40 @@ namespace Cpp {
         +returnType : string
         +comment : string
         +isAbstract : bool
-        +isStatic : bool
         +isConst : bool
+        +isStatic : bool
     }
     class Parameter {
         +name : string
         +type : string
     }
 
-    class Enum {
-        +name  : string
-        +namespaces : list<string>
-        +comment : string
-    }
-    class Keyword {
-        +name : string
-    }
+    ' class Enum {
+    '     +name  : string
+    '     +namespaces : list<string>
+    '     +comment : string
+    ' }
+    ' class Keyword {
+    '     +name : string
+    ' }
 
-    ClassBuilder --|> PlantUml.AbstractVisitor
+    
+    ClassOptimizer <- ClassTranslator
+    HeaderGenerator <- ClassOptimizer
 
-    Class *-- "0..*" BodyElement
+    Class *-- "0..*" BodyElement : body
     BodyElement *-- Method
     BodyElement *-- Variable
     BodyElement *-- VisibilityKeyword
     BodyElement *-- Separator
-    Method *-- "0..*" Parameter
+    Method *-- "0..*" Parameter : parameters
 
-    Enum *-- Keyword
+    ' Enum *-- Keyword
 
-    ClassBuilder *-- "0..*" Class : generated
+    ClassTranslator *-- "0..*" Class : generated
     HeaderGenerator --> Class : uses
-    HeaderGenerator *- "1" Config
+    ClassOptimizer --> Class : uses
+    HeaderGenerator *-- "1" Config
 }
 
 @enduml
