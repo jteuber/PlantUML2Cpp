@@ -37,12 +37,6 @@ enum class Visibility
     Public,
     Unspecified
 };
-enum class Modifier
-{
-    None,
-    Abstract,
-    Static
-};
 enum class EndType
 {
     Document,
@@ -84,6 +78,7 @@ struct Parameter
 {
     std::string name;
     std::list<std::string> type;
+    bool isConst;
 
     auto operator<=>(const Parameter&) const = default;
 };
@@ -94,7 +89,9 @@ struct Method
     std::list<std::string> returnType;
     std::list<std::string> element;
     Visibility visibility;
-    Modifier modifier;
+    bool isAbstract;
+    bool isConst;
+    bool isStatic;
 
     auto operator<=>(const Method&) const = default;
 };
@@ -134,7 +131,8 @@ struct Variable
     std::list<std::string> type;
     std::list<std::string> element;
     Visibility visibility;
-    Modifier modifier;
+    bool isConst;
+    bool isStatic;
 
     auto operator<=>(const Variable&) const = default;
 };
@@ -160,8 +158,7 @@ using ModelElement = std::variant<std::string,
                                   ContainerType,
                                   ElementType,
                                   RelationshipType,
-                                  Visibility,
-                                  Modifier>;
+                                  Visibility>;
 
 struct SyntaxNode
 {

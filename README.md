@@ -13,3 +13,10 @@ For this tool to function properly, or just to make my life easier, I had to mak
     * If you put `class Class1` in front, `Class1` will be generated, inheriting from `Class2`, but `Class2` itself will not be generated
     * This is mostly to make explicit what classes you are actually interested in
     * Also, the order is important: first define your classes and then the relationships between them
+* Don't do things that make absolutely no sense in C++
+    * Like abstract variables!
+
+Additions to the syntax:
+* Const methods, parameters and variables:
+    * If you add "const" before or after the typename the variable or parameter will be marked as const and generated accordingly
+    * For methods add the const directly after the parameter list

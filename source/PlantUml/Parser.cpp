@@ -44,6 +44,11 @@ Parser::Parser(/* args */)
     g["Public"] << "'+'" >> [](auto /*e*/) { return SyntaxNode{Visibility::Public}; };
     g["Visibility"] << "Private | Protected | PackagePrivate | Public";
 
+    // modifiers
+    g["Static"] << "'{static}'";
+    g["Abstract"] << "'{abstract}'";
+    g["Const"] << "'const'";
+
     // ========= COMMENTS =========
     g["Comment"] << "'\\'' (!Endl .)*";
     g["Include"] << "'!include' (!Endl .)*"; // ignore !include
@@ -74,9 +79,11 @@ Parser::Parser(/* args */)
     g["Setter"] << "SetNamespace";
 
     // ========= PARAMETER =========
-    g["Parameter"] << "Identifier ':' FieldTypename | FieldTypename Identifier" >> [this](auto e) {
-        return SyntaxNode{Parameter{toName(e["Identifier"]), toNamespace(e["FieldTypename"])}};
-    };
+    g["Parameter"] << "Identifier ':' Const? FieldTypename Const? | Const? FieldTypename Const? Identifier" >>
+        [this](auto e) {
+            return SyntaxNode{
+                Parameter{toName(e["Identifier"]), toNamespace(e["FieldTypename"]), e["Const"].has_value()}};
+        };
 
     // parameter list
     g["ParamList"] << "'(' (Parameter (',' Parameter)*)? ')'" >> [this](auto e) { return evaluateBody(e); };
@@ -172,11 +179,14 @@ Parser::Parser(/* args */)
 
     // ========= VARIABLE =========
     g["VariableExplicit"] << "'{field}' Identifier+";
-    g["VariableImplicit"] << "Visibility? Identifier ':' FieldTypename | Visibility? FieldTypename Identifier" >>
+    g["VariableImplicit"] << "Static? Visibility? Identifier ':' Const? FieldTypename Const? Static? | Static? "
+                             "Visibility? Const? FieldTypename Const? Identifier Static?" >>
         [this](auto e) {
             Variable var = Variable{toName(e["Identifier"]), toNamespace(e["FieldTypename"])};
             var.visibility =
                 e["Visibility"] ? std::get<Visibility>(e["Visibility"]->evaluate().element) : Visibility::Unspecified;
+            var.isConst  = e["Const"].has_value();
+            var.isStatic = e["Static"].has_value();
             return SyntaxNode{var};
         };
     g["Variable"] << "VariableExplicit | VariableImplicit";
@@ -191,14 +201,18 @@ Parser::Parser(/* args */)
 
     // ========= METHOD =========
     g["MethodExplicit"] << "'{method}' Identifier+";
-    g["MethodImplicit"] << "Visibility? FieldTypename Identifier ParamList | Visibility? Identifier ParamList (':' "
-                           "FieldTypename)?" >>
+    g["MethodImplicit"] << "Static? Abstract? Static? Visibility? FieldTypename Identifier ParamList Const? Static? "
+                           "Abstract? Static? | Static? Abstract? Static? Visibility? Identifier ParamList Const? (':' "
+                           "FieldTypename)? Static? Abstract? Static?" >>
         [this](auto e) {
             Method m = Method{toName(e["Identifier"]), toNamespace(e["FieldTypename"])};
             m.visibility =
                 e["Visibility"] ? std::get<Visibility>(e["Visibility"]->evaluate().element) : Visibility::Unspecified;
-            auto n     = SyntaxNode{m};
-            n.children = std::move(e["ParamList"]->evaluate().children);
+            m.isAbstract = e["Abstract"].has_value();
+            m.isConst    = e["Const"].has_value();
+            m.isStatic   = e["Static"].has_value();
+            auto n       = SyntaxNode{m};
+            n.children   = std::move(e["ParamList"]->evaluate().children);
             return n;
         };
     g["Method"] << "MethodExplicit | MethodImplicit";
