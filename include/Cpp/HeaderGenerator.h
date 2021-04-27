@@ -3,8 +3,9 @@
 #include <memory>
 #include <set>
 
+#include "Config.h"
+
 #include "Cpp/Class.h"
-#include "Cpp/Config.h"
 
 namespace Cpp {
 

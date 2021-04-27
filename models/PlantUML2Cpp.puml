@@ -5,14 +5,23 @@
 
 class PlantUML2Cpp {
     bool run(filesystem::path path)
-    
+}
+
+class Config {
+    +string memberPrefix
+    +string indent
+    +bool noMemberPrefixForStructs
+    +umap<string, string> containerByCardinalityComposition
+    +umap<string, string> containerByCardinalityAggregation
+    +vector<pair<Visibility, string>> memberOrder
+    +umap<string, string> typeToIncludeMap
 }
 
 PlantUML2Cpp *-- "1" PlantUml.Parser
 PlantUML2Cpp *-- "1" Cpp.ClassTranslator
-PlantUML2Cpp *-- "1" Cpp.ClassOptimizer
-PlantUML2Cpp *-- "1" Cpp.HeaderGenerator
-PlantUML2Cpp *-- "1" Cpp.Config
+PlantUML2Cpp *-- "1" Cpp.ClassPostProcessor
+PlantUML2Cpp *-- "1" Cpp.ClassGenerator
+PlantUML2Cpp *-left- "1" Config
 
 namespace PlantUml {
 
@@ -156,7 +165,7 @@ namespace PlantUml {
     Parser *-up- "1" peg_parser.ParserGenerator
 }
 
-' TODO: go for Translator -> PostProcessor -> Optimizer -> CodeGenerator
+' TODO: go for Translator -> PostProcessor -> CodeGenerator
 
 namespace Cpp {
 
@@ -174,8 +183,19 @@ namespace Cpp {
     }
     ClassTranslator --|> PlantUml.AbstractVisitor
 
-    class ClassOptimizer {
-        +optimize(vector<Class>& classes)
+    class ClassPostProcessor {
+        +process(vector<Class>& classes)
+    }
+
+    class IncludeGatherer
+    class IncludeOptimizer
+
+    ClassPostProcessor *-- IncludeGatherer
+    ClassPostProcessor *-- IncludeOptimizer
+    IncludeOptimizer <- IncludeGatherer
+
+    class ClassGenerator {
+        +generate(Class c)
     }
 
     class HeaderGenerator {
@@ -189,15 +209,12 @@ namespace Cpp {
         -string visibilityToString(Visibility vis)
     }
 
-    class Config {
-        +string memberPrefix
-        +string indent
-        +bool noMemberPrefixForStructs
-        +umap<string, string> containerByCardinalityComposition
-        +umap<string, string> containerByCardinalityAggregation
-        +vector<pair<Visibility, string>> memberOrder
-        +umap<string, string> typeToIncludeMap
+    class SourceGenerator {
+        +string generate(Class in)
     }
+
+    ClassGenerator *-- HeaderGenerator
+    ClassGenerator *-- SourceGenerator
 
     class Class {
         +name : string
@@ -243,8 +260,8 @@ namespace Cpp {
     ' }
 
     
-    ClassOptimizer <- ClassTranslator
-    HeaderGenerator <- ClassOptimizer
+    ClassPostProcessor <- ClassTranslator
+    ClassGenerator <- ClassPostProcessor
 
     Class *-- "0..*" BodyElement : body
     BodyElement *-- Method
@@ -256,9 +273,6 @@ namespace Cpp {
     ' Enum *-- Keyword
 
     ClassTranslator *-- "0..*" Class : generated
-    HeaderGenerator --> Class : uses
-    ClassOptimizer --> Class : uses
-    HeaderGenerator *-- "1" Config
 }
 
 @enduml

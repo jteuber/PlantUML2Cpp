@@ -1,4 +1,4 @@
-#include "Cpp/ClassBuilder.h"
+#include "Cpp/ClassTranslator.h"
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
@@ -13,12 +13,12 @@
 
 namespace Cpp {
 
-const std::vector<Class>& ClassBuilder::results()
+const std::vector<Class>& ClassTranslator::results()
 {
     return m_classes;
 }
 
-bool ClassBuilder::visit(const PlantUml::Variable& v)
+bool ClassTranslator::visit(const PlantUml::Variable& v)
 {
     if (!v.element.empty()) {
         m_lastEncounteredClass = std::ranges::find(m_classes, v.element.back(), &Class::name);
@@ -48,7 +48,7 @@ bool ClassBuilder::visit(const PlantUml::Variable& v)
     return true;
 }
 
-bool ClassBuilder::visit(const PlantUml::Method& m)
+bool ClassTranslator::visit(const PlantUml::Method& m)
 {
     if (!m.element.empty()) {
         m_lastEncounteredClass     = std::ranges::find(m_classes, m.element.back(), &Class::name);
@@ -76,7 +76,7 @@ bool ClassBuilder::visit(const PlantUml::Method& m)
     return true;
 }
 
-bool ClassBuilder::visit(const PlantUml::Relationship& r)
+bool ClassTranslator::visit(const PlantUml::Relationship& r)
 {
     m_lastEncounteredClass = std::ranges::find(m_classes, r.subject.back(), &Class::name);
 
@@ -121,7 +121,7 @@ bool ClassBuilder::visit(const PlantUml::Relationship& r)
     return true;
 }
 
-bool ClassBuilder::visit(const PlantUml::Container& c)
+bool ClassTranslator::visit(const PlantUml::Container& c)
 {
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
@@ -131,7 +131,7 @@ bool ClassBuilder::visit(const PlantUml::Container& c)
     return true;
 }
 
-bool ClassBuilder::visit(const PlantUml::Element& e)
+bool ClassTranslator::visit(const PlantUml::Element& e)
 {
     if (e.type != PlantUml::ElementType::Class && e.type != PlantUml::ElementType::Entity &&
         e.type != PlantUml::ElementType::Interface) {
@@ -162,22 +162,22 @@ bool ClassBuilder::visit(const PlantUml::Element& e)
     return true;
 }
 
-bool ClassBuilder::visit(const PlantUml::Note& /*n*/)
+bool ClassTranslator::visit(const PlantUml::Note& /*n*/)
 {
     return false;
 }
 
-bool ClassBuilder::visit(const PlantUml::Separator& /*s*/)
+bool ClassTranslator::visit(const PlantUml::Separator& /*s*/)
 {
     return false;
 }
 
-bool ClassBuilder::visit(const PlantUml::Enumerator& /*e*/)
+bool ClassTranslator::visit(const PlantUml::Enumerator& /*e*/)
 {
     return false;
 }
 
-bool ClassBuilder::visit(const PlantUml::Parameter& p)
+bool ClassTranslator::visit(const PlantUml::Parameter& p)
 {
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
@@ -189,7 +189,7 @@ bool ClassBuilder::visit(const PlantUml::Parameter& p)
     return true;
 }
 
-bool ClassBuilder::visit(const PlantUml::End& e)
+bool ClassTranslator::visit(const PlantUml::End& e)
 {
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
@@ -209,7 +209,7 @@ bool ClassBuilder::visit(const PlantUml::End& e)
     return true;
 }
 
-std::string ClassBuilder::generateIncludes(const Class& in)
+std::string ClassTranslator::generateIncludes(const Class& in)
 {
     // record all used types
     std::set<std::string> rawUsedTypes;
@@ -269,7 +269,7 @@ std::string ClassBuilder::generateIncludes(const Class& in)
     return libIncs + localIncs;
 }
 
-std::string ClassBuilder::methodToString(const Method& m)
+std::string ClassTranslator::methodToString(const Method& m)
 {
     std::string ret = m_config->indent + umlToCppType(m.returnType) + " " + m.name + "(";
     if (!m.parameters.empty()) {
@@ -284,7 +284,7 @@ std::string ClassBuilder::methodToString(const Method& m)
     return ret + ");\n";
 }
 
-std::string ClassBuilder::variableToString(const Variable& var, Class::Type classType)
+std::string ClassTranslator::variableToString(const Variable& var, Class::Type classType)
 {
     std::string varName = var.name;
     if (varName.empty()) {
@@ -299,7 +299,7 @@ std::string ClassBuilder::variableToString(const Variable& var, Class::Type clas
     return m_config->indent + variableTypeToString(var) + " " + varName + ";\n";
 }
 
-std::string ClassBuilder::variableTypeToString(const Variable& var)
+std::string ClassTranslator::variableTypeToString(const Variable& var)
 {
     std::string varType = umlToCppType(var.type);
     switch (var.source) {
@@ -322,7 +322,7 @@ std::string ClassBuilder::variableTypeToString(const Variable& var)
     }
 }
 
-std::string ClassBuilder::umlToCppType(std::string umlType)
+std::string ClassTranslator::umlToCppType(std::string umlType)
 {
     auto tempSet = decomposeType(umlType);
     for (auto type : tempSet) {
@@ -335,7 +335,7 @@ std::string ClassBuilder::umlToCppType(std::string umlType)
     return umlType;
 }
 
-std::set<std::string> ClassBuilder::decomposeType(const std::string& type)
+std::set<std::string> ClassTranslator::decomposeType(const std::string& type)
 {
     std::set<std::string> usedTypes;
     std::string templateRegexString = "([a-zA-Z:_]+)(?:<([a-zA-Z:_]+)[, ]*([a-zA-Z:_]+)?>)?";
@@ -368,7 +368,7 @@ std::set<std::string> ClassBuilder::decomposeType(const std::string& type)
     return usedTypes;
 }
 
-std::string ClassBuilder::visibilityToString(PlantUml::Visibility vis)
+std::string ClassTranslator::visibilityToString(PlantUml::Visibility vis)
 {
     switch (vis) {
     case PlantUml::Visibility::Protected:

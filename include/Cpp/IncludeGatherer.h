@@ -4,28 +4,13 @@
 #include <set>
 
 #include "Cpp/Class.h"
-#include "Cpp/Config.h"
-
-#include "PlantUml/AbstractVisitor.h"
-#include "PlantUml/ModelElement.h"
 
 namespace Cpp {
 
-class ClassBuilder : public PlantUml::AbstractVisitor
+class IncludeGatherer
 {
 public:
-    const std::vector<Class>& results();
-
-    bool visit(const PlantUml::Variable& v) override;
-    bool visit(const PlantUml::Method& m) override;
-    bool visit(const PlantUml::Relationship& r) override;
-    bool visit(const PlantUml::Container& c) override;
-    bool visit(const PlantUml::Element& e) override;
-    bool visit(const PlantUml::Note& n) override;
-    bool visit(const PlantUml::Separator& s) override;
-    bool visit(const PlantUml::Enumerator& e) override;
-    bool visit(const PlantUml::Parameter& p) override;
-    bool visit(const PlantUml::End& e) override;
+    void gather(Class& c);
 
 private:
     // helper methods
