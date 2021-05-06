@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "Cpp/ClassBuilder.h"
+#include "Cpp/ClassTranslator.h"
 #include "Cpp/HeaderGenerator.h"
 #include "PlantUml/Parser.h"
 
@@ -13,8 +13,8 @@ public:
     bool run(std::filesystem::path path = std::filesystem::current_path());
 
 private:
-    std::shared_ptr<Cpp::Config> config = std::make_shared<Cpp::Config>();
+    std::shared_ptr<Config> config = std::make_shared<Config>();
     PlantUml::Parser parser;
-    Cpp::ClassBuilder classBuilder;
-    Cpp::HeaderGenerator headerGenerator{config};
+    Cpp::ClassTranslator classBuilder{config};
+    Cpp::HeaderGenerator headerGenerator;
 };

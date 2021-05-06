@@ -26,6 +26,7 @@ private:
     static std::string toName(std::optional<Expression> e);
     static std::string_view removePadding(std::string_view in);
 
+    std::list<std::string> toNamespace(std::string_view sv);
     std::list<std::string> toNamespace(Expression e);
     std::list<std::string> toNamespace(std::optional<Expression> e);
 

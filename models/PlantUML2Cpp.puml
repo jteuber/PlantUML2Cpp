@@ -13,7 +13,6 @@ class Config {
     +bool noMemberPrefixForStructs
     +umap<string, string> containerByCardinalityComposition
     +umap<string, string> containerByCardinalityAggregation
-    +vector<pair<Visibility, string>> memberOrder
     +umap<string, string> typeToIncludeMap
 }
 
@@ -73,23 +72,28 @@ namespace PlantUml {
 
     class Variable {
         +name : string
-        +type : list<string>
+        +type : Type
         +element : list<string>
     }
     class Method {
         +name : string
-        +returnType : list<string>
+        +returnType : Type
         +element : list<string>
     }
     class Parameter {
         +name : string
-        +type : list<string>
+        +type : Type
     }
     class Separator {
         +text : string
     }
     class Enumerator {
         +name : string
+    }
+    class Type
+    {
+        +list<string> base;
+        +vector<Type> templateParams;
     }
     class Relationship {
         +subject : list<string> 
@@ -143,6 +147,7 @@ namespace PlantUml {
     ModelElement *-up- Separator
     ModelElement *-up- Enumerator
     ModelElement *-up- Parameter
+    ModelElement *-up- Type
     ModelElement *-- Container
     ModelElement *-- Element
     ModelElement *-- Relationship
@@ -221,7 +226,7 @@ namespace Cpp {
         +comment : string
         +isStruct : bool
         +namespaces : list<string>
-        +inherits : vector<string>
+        +inherits : set<string>
         +includes : vector<string>
     }
     class BodyElement << (V,#FF55AA) >>

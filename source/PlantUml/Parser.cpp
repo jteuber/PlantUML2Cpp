@@ -26,8 +26,19 @@ Parser::Parser(/* args */)
         return SyntaxNode{e.string()};
     });
     g["Name"] << "Identifier | QuotedName";
-    g["SimpleType"] << "[a-zA-Z] [a-zA-Z0-9_.:]* '&'?";
-    g["FieldTypename"] << "SimpleType '<' FieldTypename (',' (FieldTypename | [0-9]+))* '>' | SimpleType '[]'?";
+    g["SimpleType"] << "[a-zA-Z] [a-zA-Z0-9_.:]* '[]'? '&'?" >> [](auto /*e*/) { return SyntaxNode{std::string()}; };
+    ;
+    g["TemplateParam"] << "FieldTypename | [0-9]+";
+    g["FieldTypename"] << "SimpleType ('<' TemplateParam (',' TemplateParam)* '>')?" >> [this](auto e) {
+        Type t{toNamespace(e["SimpleType"]->view())};
+        for (auto expr : e) {
+            SyntaxNode n = expr.evaluate();
+            if (std::holds_alternative<Type>(n.element)) {
+                t.templateParams.push_back(std::get<Type>(n.element));
+            }
+        }
+        return SyntaxNode{t};
+    };
 
     g["ColorName"] << "'#' (!(' ' | ')' | Endl) .)* | Identifier";
     g["Gradient"] << "'|' | '/' | '-' | '\\\\'";
@@ -81,8 +92,9 @@ Parser::Parser(/* args */)
     // ========= PARAMETER =========
     g["Parameter"] << "Identifier ':' Const? FieldTypename Const? | Const? FieldTypename Const? Identifier" >>
         [this](auto e) {
-            return SyntaxNode{
-                Parameter{toName(e["Identifier"]), toNamespace(e["FieldTypename"]), e["Const"].has_value()}};
+            return SyntaxNode{Parameter{toName(e["Identifier"]),
+                                        std::get<Type>(e["FieldTypename"]->evaluate().element),
+                                        e["Const"].has_value()}};
         };
 
     // parameter list
@@ -182,7 +194,7 @@ Parser::Parser(/* args */)
     g["VariableImplicit"] << "Static? Visibility? Identifier ':' Const? FieldTypename Const? Static? | Static? "
                              "Visibility? Const? FieldTypename Const? Identifier Static?" >>
         [this](auto e) {
-            Variable var = Variable{toName(e["Identifier"]), toNamespace(e["FieldTypename"])};
+            Variable var = Variable{toName(e["Identifier"]), std::get<Type>(e["FieldTypename"]->evaluate().element)};
             var.visibility =
                 e["Visibility"] ? std::get<Visibility>(e["Visibility"]->evaluate().element) : Visibility::Unspecified;
             var.isConst  = e["Const"].has_value();
@@ -205,7 +217,10 @@ Parser::Parser(/* args */)
                            "Abstract? Static? | Static? Abstract? Static? Visibility? Identifier ParamList Const? (':' "
                            "FieldTypename)? Static? Abstract? Static?" >>
         [this](auto e) {
-            Method m = Method{toName(e["Identifier"]), toNamespace(e["FieldTypename"])};
+            Method m = Method{toName(e["Identifier"])};
+            if (e["FieldTypename"]) {
+                m.returnType = std::get<Type>(e["FieldTypename"]->evaluate().element);
+            }
             m.visibility =
                 e["Visibility"] ? std::get<Visibility>(e["Visibility"]->evaluate().element) : Visibility::Unspecified;
             m.isAbstract = e["Abstract"].has_value();
@@ -369,10 +384,10 @@ std::string_view Parser::removePadding(std::string_view in)
     return in;
 }
 
-std::list<std::string> Parser::toNamespace(Expression e)
+std::list<std::string> Parser::toNamespace(std::string_view sv)
 {
     std::list<std::string> out;
-    auto fullName = removePadding(e.view());
+    auto fullName = removePadding(sv);
     if (fullName[0] == '"' && fullName[fullName.size() - 1] == '"') {
         fullName.remove_prefix(1);
         fullName.remove_suffix(1);
@@ -387,6 +402,11 @@ std::list<std::string> Parser::toNamespace(Expression e)
     }
 
     return out;
+}
+
+std::list<std::string> Parser::toNamespace(Expression e)
+{
+    return toNamespace(e.view());
 }
 
 std::list<std::string> Parser::toNamespace(std::optional<Expression> e)

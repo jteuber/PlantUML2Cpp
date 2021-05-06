@@ -201,7 +201,7 @@ entity test {
 @enduml)";
 
     Element e{{"test"}, "", ' ', {}, {}, ElementType::Entity};
-    Variable v{"variable", {"var"}, {}, Visibility::Unspecified, Modifier::None};
+    Variable v{"variable", {{"var"}}, {}, Visibility::Unspecified, false, false};
     End ee{EndType::Element};
     End ec{EndType::Document};
 
@@ -232,9 +232,9 @@ class test {
 @enduml)";
 
     Element e{{"test"}, "", ' ', {}, {}, ElementType::Class};
-    Method m1{"method", {"var"}, {}, Visibility::Unspecified, Modifier::None};
-    Method m2{"method2", {"var"}, {}, Visibility::Unspecified, Modifier::None};
-    Parameter p{"input", {"bool"}};
+    Method m1{"method", {{"var"}}, {}, Visibility::Unspecified, false, false};
+    Method m2{"method2", {{"var"}}, {}, Visibility::Unspecified, false, false};
+    Parameter p{"input", {{"bool"}}};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(e));
@@ -389,9 +389,9 @@ ArrayList : Object[] elementData
 ArrayList : size() : int
 @enduml)";
 
-    Method m1{"equals", {}, {"Object"}, Visibility::Unspecified, Modifier::None};
-    Variable v{"elementData", {"Object[]"}, {"ArrayList"}, Visibility::Unspecified, Modifier::None};
-    Method m2{"size", {"int"}, {"ArrayList"}, Visibility::Unspecified, Modifier::None};
+    Method m1{"equals", Type{}, {"Object"}, Visibility::Unspecified, false, false};
+    Variable v{"elementData", {{"Object[]"}}, {"ArrayList"}, Visibility::Unspecified, false, false};
+    Method m2{"size", {{"int"}}, {"ArrayList"}, Visibility::Unspecified, false, false};
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(m1));

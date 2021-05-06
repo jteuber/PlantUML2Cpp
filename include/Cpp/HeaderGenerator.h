@@ -3,8 +3,6 @@
 #include <memory>
 #include <set>
 
-#include "Config.h"
-
 #include "Cpp/Class.h"
 
 namespace Cpp {
@@ -12,13 +10,13 @@ namespace Cpp {
 class HeaderGenerator
 {
 public:
-    explicit HeaderGenerator(std::shared_ptr<Config> config);
+    explicit HeaderGenerator();
 
     std::string generate(const Class& in);
 
-private:
-    std::string generateMethods(const std::vector<Method>& methods, Visibility vis);
-    std::string generateMembers(const std::vector<Variable>& members, Visibility vis, Class::Type classType);
+    // private:
+    //    std::string generateMethods(const std::vector<Method>& methods, Visibility vis);
+    //    std::string generateMembers(const std::vector<Variable>& members, Visibility vis, Class::Type classType);
 };
 
 } // namespace Cpp

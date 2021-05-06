@@ -2,6 +2,7 @@
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
+#include <assert.h>
 #include <iostream>
 #include <numeric>
 #include <ranges>
@@ -12,6 +13,10 @@
 #include <fmt/core.h>
 
 namespace Cpp {
+
+ClassTranslator::ClassTranslator(std::shared_ptr<Config> config)
+    : m_config(config)
+{}
 
 const std::vector<Class>& ClassTranslator::results()
 {
@@ -34,7 +39,7 @@ bool ClassTranslator::visit(const PlantUml::Variable& v)
         }
 
         var.name     = v.name;
-        var.type     = v.type.back();
+        var.type     = umlToCppType(v.type);
         var.isConst  = v.isConst;
         var.isStatic = v.isStatic;
 
@@ -65,7 +70,7 @@ bool ClassTranslator::visit(const PlantUml::Method& m)
         }
 
         method.name       = m.name;
-        method.returnType = m.returnType.empty() ? "void" : m.returnType.back();
+        method.returnType = umlToCppType(m.returnType);
         method.isAbstract = m.isAbstract;
         method.isConst    = m.isConst;
         method.isStatic   = m.isStatic;
@@ -104,12 +109,29 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
             break;
         }
 
-        case PlantUml::RelationshipType::Composition:
+        case PlantUml::RelationshipType::Composition: {
+            Variable var;
+            if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
+                containerIt != m_config->containerByCardinalityComposition.end()) {
+                var.type = Type{fmt::format(containerIt->second, r.object.back())};
+            } else {
+                var.type = Type{r.object.back()};
+            }
+
+            var.name = r.label;
+            m_lastEncounteredClass->body.emplace_back(var);
+            break;
+        }
         case PlantUml::RelationshipType::Aggregation: {
             Variable var;
-            var.name = r.label;
-            var.type = r.object.back();
+            if (auto containerIt = m_config->containerByCardinalityAggregation.find(r.objectCardinality);
+                containerIt != m_config->containerByCardinalityAggregation.end()) {
+                var.type = Type{fmt::format(containerIt->second, r.object.back())};
+            } else {
+                var.type = Type{r.object.back()};
+            }
 
+            var.name = r.label;
             m_lastEncounteredClass->body.emplace_back(var);
             break;
         }
@@ -134,14 +156,14 @@ bool ClassTranslator::visit(const PlantUml::Container& c)
 bool ClassTranslator::visit(const PlantUml::Element& e)
 {
     if (e.type != PlantUml::ElementType::Class && e.type != PlantUml::ElementType::Entity &&
-        e.type != PlantUml::ElementType::Interface) {
+        e.type != PlantUml::ElementType::Interface && e.type != PlantUml::ElementType::Abstract) {
         return false;
     }
 
     Class c;
     if (e.type == PlantUml::ElementType::Interface) {
         c.isInterface = true;
-    } else if (e.spotLetter == 'S') {
+    } else if (e.spotLetter == 'S' || e.type == PlantUml::ElementType::Entity) {
         c.isStruct = true;
     }
 
@@ -177,12 +199,14 @@ bool ClassTranslator::visit(const PlantUml::Enumerator& /*e*/)
     return false;
 }
 
+bool ClassTranslator::visit(const PlantUml::Type& t) {}
+
 bool ClassTranslator::visit(const PlantUml::Parameter& p)
 {
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
         param.name = p.name;
-        param.type = p.type.back();
+        param.type = umlToCppType(p.type);
         std::get<Method>(m_lastEncounteredClass->body.back()).parameters.push_back(param);
     }
 
@@ -209,163 +233,60 @@ bool ClassTranslator::visit(const PlantUml::End& e)
     return true;
 }
 
-std::string ClassTranslator::generateIncludes(const Class& in)
+// std::string ClassTranslator::processType(const std::string& umlType) {}
+
+// std::string ClassTranslator::methodToString(const Method& m)
+//{
+//    std::string ret = m_config->indent + umlToCppType(m.returnType) + " " + m.name + "(";
+//    if (!m.parameters.empty()) {
+//        ret += std::accumulate(m.parameters.begin(),
+//                               m.parameters.end(),
+//                               std::string(),
+//                               [this](const std::string& acc, const Parameter& param) {
+//                                   return acc + umlToCppType(param.type) + " " + param.name + ", ";
+//                               });
+//        ret.erase(ret.length() - 2);
+//    }
+//    return ret + ");\n";
+//}
+
+// std::string ClassTranslator::variableToString(const Variable& var, Class::Type classType)
+//{
+//    std::string varName = var.name;
+//    if (varName.empty()) {
+//        varName    = var.type;
+//        varName[0] = std::tolower(varName[0]);
+//    }
+
+//    bool needsPrefix = !(classType == Class::Type::Struct && m_config->noMemberPrefixForStructs);
+//    if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
+//        varName = m_config->memberPrefix + varName;
+//    }
+//    return m_config->indent + variableTypeToString(var) + " " + varName + ";\n";
+//}
+
+Type ClassTranslator::umlToCppType(PlantUml::Type umlType)
 {
-    // record all used types
-    std::set<std::string> rawUsedTypes;
-    for (const auto& p : in.parents) {
-        rawUsedTypes.insert(p);
-    }
-    for (const auto& v : in.variables) {
-        rawUsedTypes.insert(variableTypeToString(v));
-    }
-    for (const auto& m : in.methods) {
-        rawUsedTypes.insert(umlToCppType(m.returnType));
-        for (const auto& p : m.parameters) {
-            rawUsedTypes.insert(umlToCppType(p.type));
-        }
+    Type out;
+
+    auto it = m_config->umlToCppTypeMap.find(umlType.base.back());
+    if (it != m_config->umlToCppTypeMap.end()) {
+        out.base = it->second;
+    } else {
+        out.base = umlType.base.back();
     }
 
-    // split all template types
-    std::set<std::string> usedTypes;
-    for (const auto& type : rawUsedTypes) {
-        auto tempSet = decomposeType(type);
-        usedTypes.insert(tempSet.begin(), tempSet.end());
+    if (out.base.empty())
+        out.base = "void";
+
+    for (auto ns : umlType.base | std::views::reverse | std::views::drop(1))
+        out.base = ns + "::" + out.base;
+
+    for (auto& param : umlType.templateParams) {
+        out.templateParams.push_back(umlToCppType(param));
     }
 
-    // remove all types that don't need including
-    usedTypes.erase("void");
-    usedTypes.erase("bool");
-    usedTypes.erase("int");
-    usedTypes.erase("float");
-    usedTypes.erase("double");
-    usedTypes.erase("uint");
-    usedTypes.erase("unsigned int");
-
-    std::set<std::string> libraryIncludes;
-    std::set<std::string> localIncludes;
-    for (const auto& type : usedTypes) {
-        if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
-            libraryIncludes.insert(it->second);
-        } else if (auto ns = type.find_last_of("::"); ns != std::string::npos) {
-            libraryIncludes.insert(type.substr(ns + 1) + ".h");
-        } else {
-            localIncludes.insert(type + ".h");
-        }
-    }
-
-    auto libIncludeStrings =
-        libraryIncludes | std::views::transform([this](const std::string& inc) { return "#include <" + inc + ">\n"; });
-    std::string libIncs = std::accumulate(libIncludeStrings.begin(), libIncludeStrings.end(), std::string());
-
-    auto localIncludeStrings =
-        localIncludes | std::views::transform([this](const std::string& inc) { return "#include \"" + inc + "\"\n"; });
-    std::string localIncs = std::accumulate(localIncludeStrings.begin(), localIncludeStrings.end(), std::string());
-
-    if (!libIncs.empty() && !localIncs.empty()) {
-        libIncs += "\n";
-    }
-
-    return libIncs + localIncs;
-}
-
-std::string ClassTranslator::methodToString(const Method& m)
-{
-    std::string ret = m_config->indent + umlToCppType(m.returnType) + " " + m.name + "(";
-    if (!m.parameters.empty()) {
-        ret += std::accumulate(m.parameters.begin(),
-                               m.parameters.end(),
-                               std::string(),
-                               [this](const std::string& acc, const Parameter& param) {
-                                   return acc + umlToCppType(param.type) + " " + param.name + ", ";
-                               });
-        ret.erase(ret.length() - 2);
-    }
-    return ret + ");\n";
-}
-
-std::string ClassTranslator::variableToString(const Variable& var, Class::Type classType)
-{
-    std::string varName = var.name;
-    if (varName.empty()) {
-        varName    = var.type;
-        varName[0] = std::tolower(varName[0]);
-    }
-
-    bool needsPrefix = !(classType == Class::Type::Struct && m_config->noMemberPrefixForStructs);
-    if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
-        varName = m_config->memberPrefix + varName;
-    }
-    return m_config->indent + variableTypeToString(var) + " " + varName + ";\n";
-}
-
-std::string ClassTranslator::variableTypeToString(const Variable& var)
-{
-    std::string varType = umlToCppType(var.type);
-    switch (var.source) {
-    case Relationship::Aggregation: {
-        auto containerIt = m_config->containerByCardinalityAggregation.find(var.cardinality);
-        if (containerIt != m_config->containerByCardinalityAggregation.end()) {
-            return fmt::format(containerIt->second, varType);
-        }
-        return varType;
-    }
-    case Relationship::Composition: {
-        auto containerIt = m_config->containerByCardinalityComposition.find(var.cardinality);
-        if (containerIt != m_config->containerByCardinalityComposition.end()) {
-            return fmt::format(containerIt->second, varType);
-        }
-        return varType;
-    }
-    default:
-        return varType;
-    }
-}
-
-std::string ClassTranslator::umlToCppType(std::string umlType)
-{
-    auto tempSet = decomposeType(umlType);
-    for (auto type : tempSet) {
-        auto it = m_config->umlToCppTypeMap.find(type);
-        if (it != m_config->umlToCppTypeMap.end()) {
-            umlType = std::regex_replace(umlType, std::regex(type), it->second);
-        }
-    }
-
-    return umlType;
-}
-
-std::set<std::string> ClassTranslator::decomposeType(const std::string& type)
-{
-    std::set<std::string> usedTypes;
-    std::string templateRegexString = "([a-zA-Z:_]+)(?:<([a-zA-Z:_]+)[, ]*([a-zA-Z:_]+)?>)?";
-    templateRegexString = "([a-zA-Z:_]+)(?:<" + templateRegexString + "[, ]*(?:" + templateRegexString + ")?>)?";
-    const std::regex templateRegex(templateRegexString);
-    std::smatch templateMatch;
-    std::list<std::string> list{type};
-    while (!list.empty()) {
-        if (std::regex_match(list.front(), templateMatch, templateRegex)) {
-            assert(templateMatch.size() >= 3);
-
-            std::ssub_match sub_match  = templateMatch[1];
-            std::ssub_match paramMatch = templateMatch[2];
-            if (sub_match.length() > 0)
-                usedTypes.insert(sub_match.str());
-            list.push_back(paramMatch.str());
-
-            int i = 3;
-            while (templateMatch[i].length() > 0) {
-                std::ssub_match paramMatch2 = templateMatch[i];
-                list.push_back(paramMatch2.str());
-                ++i;
-            }
-        } else if (!list.front().empty()) {
-            usedTypes.insert(list.front());
-        }
-        list.pop_front();
-    }
-
-    return usedTypes;
+    return out;
 }
 
 std::string ClassTranslator::visibilityToString(PlantUml::Visibility vis)

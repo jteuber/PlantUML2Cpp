@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <set>
 #include <string>
 #include <variant>
 #include <vector>
@@ -16,10 +17,18 @@ enum class Relationship
     Member
 };
 
+struct Type
+{
+    std::string base;
+    std::vector<Type> templateParams;
+
+    auto operator<=>(const Type&) const = default;
+};
+
 struct Variable
 {
     std::string name;
-    std::string type;
+    Type type;
     std::string comment;
     bool isConst  = false;
     bool isStatic = false;
@@ -28,13 +37,13 @@ struct Variable
 struct Parameter
 {
     std::string name;
-    std::string type;
+    Type type;
 };
 
 struct Method
 {
     std::string name;
-    std::string returnType;
+    Type returnType;
     std::string comment;
     bool isAbstract = false;
     bool isConst    = false;
@@ -62,7 +71,7 @@ struct Class
     bool isStruct    = false;
     std::list<std::string> namespaces;
     std::vector<std::string> inherits;
-    std::vector<std::string> includes;
+    std::set<std::string> includes;
     std::vector<BodyElement> body;
 };
 

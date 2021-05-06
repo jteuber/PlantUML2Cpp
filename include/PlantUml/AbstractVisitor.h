@@ -16,6 +16,7 @@ public:
     virtual bool visit(const Note& n)         = 0;
     virtual bool visit(const Separator& s)    = 0;
     virtual bool visit(const Enumerator& e)   = 0;
+    virtual bool visit(const Type& t)         = 0;
     virtual bool visit(const Parameter& p)    = 0;
     virtual bool visit(const End& e)          = 0;
 
@@ -36,10 +37,6 @@ public:
         return false;
     };
     virtual bool visit(const Visibility& /*ct*/) final
-    {
-        return false;
-    };
-    virtual bool visit(const Modifier& /*ct*/) final
     {
         return false;
     };

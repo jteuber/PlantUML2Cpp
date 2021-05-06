@@ -6,12 +6,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include/)
 file(GLOB SRC_FILES
-	"source/*.cpp"
-	"source/PlantUml/*.cpp"
-	"source/Cpp/*.cpp"
+    "source/*.cpp"
+    "source/PlantUml/*.cpp"
+    "source/Cpp/*.cpp"
+)
+file(GLOB HEADER_FILES
+    "include/*.h"
+    "include/PlantUml/*.h"
+    "include/Cpp/*.h"
 )
 
-add_executable(PlantUML2Cpp ${SRC_FILES})
+add_executable(PlantUML2Cpp ${SRC_FILES} ${HEADER_FILES})
 
 add_library(PlantUML2Cpp-static STATIC ${SRC_FILES})
 

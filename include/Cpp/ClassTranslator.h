@@ -3,8 +3,8 @@
 #include <memory>
 #include <set>
 
+#include "Config.h"
 #include "Cpp/Class.h"
-#include "Cpp/Config.h"
 
 #include "PlantUml/AbstractVisitor.h"
 #include "PlantUml/ModelElement.h"
@@ -14,6 +14,7 @@ namespace Cpp {
 class ClassTranslator : public PlantUml::AbstractVisitor
 {
 public:
+    ClassTranslator(std::shared_ptr<Config> config);
     const std::vector<Class>& results();
 
     bool visit(const PlantUml::Variable& v) override;
@@ -24,17 +25,19 @@ public:
     bool visit(const PlantUml::Note& n) override;
     bool visit(const PlantUml::Separator& s) override;
     bool visit(const PlantUml::Enumerator& e) override;
+    bool visit(const PlantUml::Type& t) override;
     bool visit(const PlantUml::Parameter& p) override;
     bool visit(const PlantUml::End& e) override;
 
 private:
     // helper methods
-    std::string generateIncludes(const Class& in);
-    std::string methodToString(const Method& m);
-    std::string variableToString(const Variable& var, Class::Type classType);
-    std::string variableTypeToString(const Variable& var);
-    std::string umlToCppType(std::string umlType);
-    std::set<std::string> decomposeType(const std::string& type);
+    //    std::string processType(const std::string& umlType);
+    //    std::string generateIncludes(const Class& in);
+    //    std::string methodToString(const Method& m);
+    //    std::string variableToString(const Variable& var, PlantUml::ElementType classType)bcd;
+    std::string variableTypeToString(const PlantUml::Variable& var, PlantUml::RelationshipType relationship);
+    Type umlToCppType(PlantUml::Type umlType);
+    Type decomposeType(std::string_view type);
 
     static std::string visibilityToString(PlantUml::Visibility vis);
 

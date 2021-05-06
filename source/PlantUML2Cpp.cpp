@@ -1,5 +1,5 @@
-#include "Cpp/HeaderGenerator.h"
 #include "PlantUML2Cpp.h"
+#include "Cpp/HeaderGenerator.h"
 #include "peg_parser/interpreter.h"
 
 #include <array>
@@ -69,7 +69,7 @@ bool PlantUML2Cpp::run(fs::path path)
                     std::string header = headerGenerator.generate(c);
 
                     auto nsPath = std::accumulate(
-                        c.namespaceStack.begin(), c.namespaceStack.end(), fs::path(), [](const auto& a, const auto& b) {
+                        c.namespaces.begin(), c.namespaces.end(), fs::path(), [](const auto& a, const auto& b) {
                             return fs::path(a) / fs::path(b);
                         });
 

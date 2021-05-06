@@ -74,10 +74,18 @@ struct Enumerator
     auto operator<=>(const Enumerator&) const = default;
 };
 
+struct Type
+{
+    std::list<std::string> base;
+    std::vector<Type> templateParams;
+
+    auto operator<=>(const Type&) const = default;
+};
+
 struct Parameter
 {
     std::string name;
-    std::list<std::string> type;
+    Type type;
     bool isConst;
 
     auto operator<=>(const Parameter&) const = default;
@@ -86,7 +94,7 @@ struct Parameter
 struct Method
 {
     std::string name;
-    std::list<std::string> returnType;
+    Type returnType;
     std::list<std::string> element;
     Visibility visibility;
     bool isAbstract;
@@ -128,7 +136,7 @@ struct Separator
 struct Variable
 {
     std::string name;
-    std::list<std::string> type;
+    Type type;
     std::list<std::string> element;
     Visibility visibility;
     bool isConst;
@@ -148,6 +156,7 @@ using ModelElement = std::variant<std::string,
                                   Note,
                                   Separator,
                                   Enumerator,
+                                  Type,
                                   Parameter,
                                   Container,
                                   Element,
