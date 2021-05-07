@@ -600,4 +600,38 @@ class Ext extends Impl
     // Assert Results
 }
 
+TEST(ParserTest, TemplateVars)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+class test {
+    variable : std.vector<std.string>
+    map : std.map<std.string, int>
+}
+@enduml)";
+
+    Element e{{"test"}, "", ' ', {}, {}, ElementType::Class};
+    Variable v{"variable", {{"std", "vector"}, {Type{{"std", "string"}}}}, {}, Visibility::Unspecified, false, false};
+    Variable m{
+        "map", {{"std", "map"}, {Type{{"std", "string"}}, Type{{"int"}}}}, {}, Visibility::Unspecified, false, false};
+    End ee{EndType::Element};
+    End ec{EndType::Document};
+
+    // Assert Calls
+    EXPECT_CALL(visitor, visit(e));
+    EXPECT_CALL(visitor, visit(v));
+    EXPECT_CALL(visitor, visit(m));
+    EXPECT_CALL(visitor, visit(ee));
+    EXPECT_CALL(visitor, visit(ec));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
 } // namespace PlantUml

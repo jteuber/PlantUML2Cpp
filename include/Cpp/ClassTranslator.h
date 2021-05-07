@@ -31,10 +31,6 @@ public:
 
 private:
     // helper methods
-    //    std::string processType(const std::string& umlType);
-    //    std::string generateIncludes(const Class& in);
-    //    std::string methodToString(const Method& m);
-    //    std::string variableToString(const Variable& var, PlantUml::ElementType classType)bcd;
     std::string variableTypeToString(const PlantUml::Variable& var, PlantUml::RelationshipType relationship);
     Type umlToCppType(PlantUml::Type umlType);
     Type decomposeType(std::string_view type);

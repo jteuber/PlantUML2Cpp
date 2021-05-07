@@ -233,54 +233,21 @@ bool ClassTranslator::visit(const PlantUml::End& e)
     return true;
 }
 
-// std::string ClassTranslator::processType(const std::string& umlType) {}
-
-// std::string ClassTranslator::methodToString(const Method& m)
-//{
-//    std::string ret = m_config->indent + umlToCppType(m.returnType) + " " + m.name + "(";
-//    if (!m.parameters.empty()) {
-//        ret += std::accumulate(m.parameters.begin(),
-//                               m.parameters.end(),
-//                               std::string(),
-//                               [this](const std::string& acc, const Parameter& param) {
-//                                   return acc + umlToCppType(param.type) + " " + param.name + ", ";
-//                               });
-//        ret.erase(ret.length() - 2);
-//    }
-//    return ret + ");\n";
-//}
-
-// std::string ClassTranslator::variableToString(const Variable& var, Class::Type classType)
-//{
-//    std::string varName = var.name;
-//    if (varName.empty()) {
-//        varName    = var.type;
-//        varName[0] = std::tolower(varName[0]);
-//    }
-
-//    bool needsPrefix = !(classType == Class::Type::Struct && m_config->noMemberPrefixForStructs);
-//    if (needsPrefix && !varName.starts_with(m_config->memberPrefix)) {
-//        varName = m_config->memberPrefix + varName;
-//    }
-//    return m_config->indent + variableTypeToString(var) + " " + varName + ";\n";
-//}
-
 Type ClassTranslator::umlToCppType(PlantUml::Type umlType)
 {
     Type out;
 
-    auto it = m_config->umlToCppTypeMap.find(umlType.base.back());
+    out.base = umlType.base.back();
+    for (auto ns : umlType.base | std::views::reverse | std::views::drop(1))
+        out.base = ns + "::" + out.base;
+
+    auto it = m_config->umlToCppTypeMap.find(out.base);
     if (it != m_config->umlToCppTypeMap.end()) {
         out.base = it->second;
-    } else {
-        out.base = umlType.base.back();
     }
 
     if (out.base.empty())
         out.base = "void";
-
-    for (auto ns : umlType.base | std::views::reverse | std::views::drop(1))
-        out.base = ns + "::" + out.base;
 
     for (auto& param : umlType.templateParams) {
         out.templateParams.push_back(umlToCppType(param));

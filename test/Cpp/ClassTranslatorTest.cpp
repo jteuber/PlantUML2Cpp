@@ -416,3 +416,44 @@ TEST(ClassTranslatorTest, Stereotypes)
     EXPECT_EQ(system.name, "SystemData");
     EXPECT_TRUE(system.isStruct);
 }
+
+TEST(ClassTranslatorTest, Templates)
+{
+    // Arrange
+    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+
+    puml::Element e{{"test"}, "", ' ', {}, {}, puml::ElementType::Class};
+    puml::Variable v{
+        "variable", {{"vector"}, {puml::Type{{"string"}}}}, {}, puml::Visibility::Unspecified, false, false};
+    puml::Variable m{"map",
+                     {{"std", "map"}, {puml::Type{{"std", "string"}}, puml::Type{{"int"}}}},
+                     {},
+                     puml::Visibility::Unspecified,
+                     false,
+                     false};
+    puml::End ee{puml::EndType::Element};
+    puml::End ec{puml::EndType::Document};
+
+    // Act
+    sut.visit(e);
+    sut.visit(v);
+    sut.visit(m);
+    sut.visit(ee);
+    sut.visit(ec);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 1);
+
+    EXPECT_EQ(sut.results()[0].name, "test");
+    EXPECT_EQ(sut.results()[0].isInterface, false);
+    EXPECT_EQ(sut.results()[0].isStruct, false);
+
+    ASSERT_EQ(sut.results()[0].body.size(), 2);
+    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).name, "variable");
+    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).type,
+              (Cpp::Type{"std::vector", {Cpp::Type{"std::string"}}}));
+
+    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[1]).name, "map");
+    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[1]).type,
+              (Cpp::Type{"std::map", {Cpp::Type{"std::string"}, Cpp::Type{"int"}}}));
+}
