@@ -40,19 +40,17 @@ void IncludeGatherer::gather(Class& c)
     usedTypes.erase("uint");
     usedTypes.erase("unsigned int");
 
-    std::set<std::string> libraryIncludes;
-    std::set<std::string> localIncludes;
     for (const auto& type : usedTypes) {
         if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
-            libraryIncludes.insert(it->second);
+            c.externalIncludes.insert(it->second);
         } else if (auto ns = type.find_last_of("::"); ns != std::string::npos) {
-            libraryIncludes.insert(type.substr(ns + 1) + ".h");
+            c.externalIncludes.insert(type.substr(ns + 1) + ".h");
         } else {
-            localIncludes.insert(type + ".h");
+            c.localIncludes.insert(type + ".h");
         }
     }
 
-    auto libIncludeStrings =
+    /*auto libIncludeStrings =
         libraryIncludes | std::views::transform([this](const std::string& inc) { return "#include <" + inc + ">\n"; });
     std::string libIncs = std::accumulate(libIncludeStrings.begin(), libIncludeStrings.end(), std::string());
 
@@ -62,7 +60,7 @@ void IncludeGatherer::gather(Class& c)
 
     if (!libIncs.empty() && !localIncs.empty()) {
         libIncs += "\n";
-    }
+    }*/
 }
 
 std::set<std::string> IncludeGatherer::decomposeType(const Type& type)

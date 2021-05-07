@@ -71,7 +71,8 @@ struct Class
     bool isStruct    = false;
     std::list<std::string> namespaces;
     std::vector<std::string> inherits;
-    std::set<std::string> includes;
+    std::set<std::string> localIncludes;
+    std::set<std::string> externalIncludes;
     std::vector<BodyElement> body;
 };
 
