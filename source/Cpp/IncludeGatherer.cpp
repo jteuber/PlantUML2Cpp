@@ -49,18 +49,6 @@ void IncludeGatherer::gather(Class& c)
             c.localIncludes.insert(type + ".h");
         }
     }
-
-    /*auto libIncludeStrings =
-        libraryIncludes | std::views::transform([this](const std::string& inc) { return "#include <" + inc + ">\n"; });
-    std::string libIncs = std::accumulate(libIncludeStrings.begin(), libIncludeStrings.end(), std::string());
-
-    auto localIncludeStrings =
-        localIncludes | std::views::transform([this](const std::string& inc) { return "#include \"" + inc + "\"\n"; });
-    std::string localIncs = std::accumulate(localIncludeStrings.begin(), localIncludeStrings.end(), std::string());
-
-    if (!libIncs.empty() && !localIncs.empty()) {
-        libIncs += "\n";
-    }*/
 }
 
 std::set<std::string> IncludeGatherer::decomposeType(const Type& type)

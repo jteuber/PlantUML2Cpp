@@ -24,91 +24,135 @@ namespace Cpp {
 //    return std::views::filter([vis](const T& m) { return m.visibility == vis; });
 //}
 
-HeaderGenerator::HeaderGenerator() {}
+HeaderGenerator::HeaderGenerator(std::shared_ptr<Config> config)
+    : m_config(config)
+{}
 
 std::string HeaderGenerator::generate(const Class& in)
 {
+    // setup
+    m_variablePrefix = in.isStruct && m_config->noMemberPrefixForStructs ? "" : m_config->memberPrefix;
+
     std::string ret;
 
     // pragme once
     ret += "#pragma once\n\n";
 
     // Includes
-    //    ret += generateIncludes(in);
+    ret += generateIncludes(in);
 
-    //    ret += "\n";
+    ret += "\n";
 
-    //    // open namespaces
-    //    for (const auto& ns : in.namespaceStack) {
-    //        ret += "namespace " + ns + " {\n";
-    //    }
-    //    ret += "\n";
+    // open namespaces
+    for (const auto& ns : in.namespaces) {
+        ret += "namespace " + ns + " {\n";
+    }
+    ret += "\n";
 
-    //    // Definintion
-    //    std::string classDef = "class";
-    //    if (in.type == Class::Type::Struct) {
-    //        classDef = "struct";
-    //    }
+    // Definintion
+    std::string classDef = "class";
+    if (in.isStruct) {
+        classDef = "struct";
+    }
 
-    //    classDef += " " + in.name;
+    classDef += " " + in.name;
 
-    //    if (!in.parents.empty()) {
-    //        classDef += " : public ";
-    //        classDef = std::accumulate(
-    //            in.parents.begin(), in.parents.end(), classDef, [](const std::string& acc, const std::string& parent)
-    //            {
-    //                return acc + parent + ", ";
-    //            });
-    //        classDef.erase(classDef.length() - 2);
-    //    }
-    //    ret += classDef + "\n{\n";
+    if (!in.inherits.empty()) {
+        classDef += " : public ";
+        classDef = std::accumulate(
+            in.inherits.begin(), in.inherits.end(), classDef, [](const std::string& acc, const std::string& parent) {
+                return acc + parent + ", ";
+            });
+        classDef.erase(classDef.length() - 2);
+    }
+    ret += classDef + "\n{\n";
 
-    //    // Body: methods
-    //    for (const auto& memberIdentifier : m_config->memberOrder) {
-    //        if (memberIdentifier.second == "methods") {
-    //            ret += generateMethods(in.methods, memberIdentifier.first);
-    //        } else if (memberIdentifier.second == "variables") {
-    //            ret += generateMembers(in.variables, memberIdentifier.first, in.type);
-    //        }
-    //    }
+    // Body
+    for (const auto& elem : in.body) {
+        ret += std::visit([this](auto&& arg) -> std::string { return toString(arg); }, elem);
+        ret += "\n";
+    }
 
-    //    ret += "};\n";
+    ret += "};\n";
 
-    //    // close namespaces
-    //    for (const auto& ns : in.namespaceStack | std::views::reverse) {
-    //        ret += "} // " + ns + "\n";
-    //    }
+    // close namespaces
+    for (const auto& ns : in.namespaces | std::views::reverse) {
+        ret += "} // " + ns + "\n";
+    }
 
     return ret;
 }
 
-// std::string HeaderGenerator::generateMethods(const std::vector<Method>& methods, Visibility vis)
-//{
-//    std::string ret;
-//    auto methodView = methods | filterOnVisibility<Method>(vis);
-//    if (methodView.begin() != methodView.end()) {
-//        ret += visibilityToString(vis);
-//        auto methodStings = methodView | std::views::transform([this](const Method& m) { return methodToString(m); });
-//        ret += std::accumulate(methodStings.begin(), methodStings.end(), std::string());
-//    }
+std::string HeaderGenerator::generateIncludes(const Class& in)
+{
+    auto libIncludeStrings =
+        in.externalIncludes | std::views::transform([](const std::string& inc) { return "#include <" + inc + ">\n"; });
+    std::string libIncs = std::accumulate(libIncludeStrings.begin(), libIncludeStrings.end(), std::string());
 
-//    return ret;
-//}
+    auto localIncludeStrings =
+        in.localIncludes | std::views::transform([](const std::string& inc) { return "#include \"" + inc + "\"\n"; });
+    std::string localIncs = std::accumulate(localIncludeStrings.begin(), localIncludeStrings.end(), std::string());
 
-// std::string
-// HeaderGenerator::generateMembers(const std::vector<Variable>& members, Visibility vis, Class::Type classType)
-//{
-//    std::string ret;
-//    auto memberView = members | filterOnVisibility<Variable>(vis);
-//    if (memberView.begin() != memberView.end()) {
-//        ret += visibilityToString(vis);
-//        auto memberStrings = memberView | std::views::transform([this, classType](const Variable& var) {
-//                                 return variableToString(var, classType);
-//                             });
-//        ret += std::accumulate(memberStrings.begin(), memberStrings.end(), std::string());
-//    }
+    if (!libIncs.empty() && !localIncs.empty()) {
+        libIncs += "\n";
+    }
 
-//    return ret;
-//}
+    return libIncs + localIncs;
+}
+
+std::string HeaderGenerator::toString(const std::string& s)
+{
+    return s;
+}
+
+std::string HeaderGenerator::toString(const Variable& var)
+{
+    std::string varName = var.name;
+    if (varName.empty()) {
+        varName    = var.type.base;
+        varName[0] = std::tolower(varName[0]);
+    }
+
+    varName = m_variablePrefix + varName;
+    return m_config->indent + typeToString(var.type) + " " + varName + ";\n";
+}
+
+std::string HeaderGenerator::toString(const Method& m)
+{
+    std::string ret = m_config->indent + typeToString(m.returnType) + " " + m.name + "(";
+    if (!m.parameters.empty()) {
+        ret += std::accumulate(m.parameters.begin(),
+                               m.parameters.end(),
+                               std::string(),
+                               [this](const std::string& acc, const Parameter& param) {
+                                   return acc + typeToString(param.type) + " " + param.name + ", ";
+                               });
+        ret.erase(ret.length() - 2);
+    }
+    return ret + ");\n";
+}
+
+std::string HeaderGenerator::toString(const VisibilityKeyword& s)
+{
+    return s.name;
+}
+
+std::string HeaderGenerator::toString(const Separator& s)
+{
+    return "// " + s.text;
+}
+
+std::string HeaderGenerator::typeToString(const Type& t)
+{
+    std::string templ;
+    for (const auto& param : t.templateParams)
+        templ += typeToString(param) + ", ";
+    if (!t.templateParams.empty()) {
+        templ.erase(templ.length() - 2);
+        templ = "<" + templ + ">";
+    }
+
+    return t.base + templ;
+}
 
 } // namespace Cpp

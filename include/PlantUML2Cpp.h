@@ -16,5 +16,5 @@ private:
     std::shared_ptr<Config> config = std::make_shared<Config>();
     PlantUml::Parser parser;
     Cpp::ClassTranslator classBuilder{config};
-    Cpp::HeaderGenerator headerGenerator;
+    Cpp::HeaderGenerator headerGenerator{config};
 };
