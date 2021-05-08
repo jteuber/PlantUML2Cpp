@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "Cpp/ClassPostProcessor.h"
 #include "Cpp/ClassTranslator.h"
 #include "Cpp/HeaderGenerator.h"
 #include "PlantUml/Parser.h"
@@ -15,6 +16,7 @@ public:
 private:
     std::shared_ptr<Config> config = std::make_shared<Config>();
     PlantUml::Parser parser;
-    Cpp::ClassTranslator classBuilder{config};
+    Cpp::ClassTranslator classTranslator{config};
+    Cpp::ClassPostProcessor classPostProcessor{config};
     Cpp::HeaderGenerator headerGenerator{config};
 };

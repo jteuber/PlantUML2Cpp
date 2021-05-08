@@ -15,7 +15,7 @@ class ClassTranslator : public PlantUml::AbstractVisitor
 {
 public:
     ClassTranslator(std::shared_ptr<Config> config);
-    const std::vector<Class>& results();
+    std::vector<Class>& results();
 
     bool visit(const PlantUml::Variable& v) override;
     bool visit(const PlantUml::Method& m) override;

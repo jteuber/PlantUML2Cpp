@@ -62,10 +62,12 @@ bool PlantUML2Cpp::run(fs::path path)
             std::string fileContents = readFullFile(file.path());
 
             if (parser.parse(fileContents)) {
-                parser.visitAST(classBuilder);
+                parser.visitAST(classTranslator);
+
+                classPostProcessor.process(classTranslator.results());
 
                 fs::create_directory(path / "include");
-                for (const auto& c : classBuilder.results()) {
+                for (const auto& c : classTranslator.results()) {
                     std::string header = headerGenerator.generate(c);
 
                     auto nsPath = std::accumulate(

@@ -12,11 +12,14 @@ namespace Cpp {
 class ClassPostProcessor
 {
 public:
+    ClassPostProcessor(std::shared_ptr<Config> config);
     void process(std::vector<Class>& classes);
 
 private:
-    IncludeGatherer gatherer;
-    IncludeOptimizer optimizer;
+    std::shared_ptr<Config> m_config;
+
+    IncludeGatherer m_gatherer;
+    // IncludeOptimizer m_optimizer;
 };
 
 } // namespace Cpp

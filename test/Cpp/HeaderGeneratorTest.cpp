@@ -8,8 +8,8 @@
 
 namespace Cpp {
 
-const std::string ws     = "( |\t|\n)*";
-const std::string header = "#pragma once" + ws;
+static const std::string ws     = "( |\t|\n)*";
+static const std::string header = "#pragma once" + ws;
 
 TEST(HeaderGenerator, EmptyClass)
 {

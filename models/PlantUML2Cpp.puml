@@ -227,7 +227,8 @@ namespace Cpp {
         +isStruct : bool
         +namespaces : list<string>
         +inherits : set<string>
-        +includes : vector<string>
+        +externalIncludes : vector<string>
+        +localIncludes : vector<string>
     }
     class BodyElement << (V,#FF55AA) >>
     class VisibilityKeyword {
