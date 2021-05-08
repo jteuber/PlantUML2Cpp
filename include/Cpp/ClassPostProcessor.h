@@ -6,6 +6,7 @@
 #include "Cpp/Class.h"
 #include "Cpp/IncludeGatherer.h"
 #include "Cpp/IncludeOptimizer.h"
+#include "Cpp/MemberSorter.h"
 
 namespace Cpp {
 
@@ -20,6 +21,7 @@ private:
 
     IncludeGatherer m_gatherer;
     // IncludeOptimizer m_optimizer;
+    MemberSorter m_sorter;
 };
 
 } // namespace Cpp

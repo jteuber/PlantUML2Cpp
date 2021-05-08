@@ -9,5 +9,6 @@ void Cpp::ClassPostProcessor::process(std::vector<Cpp::Class>& classes)
 {
     for (auto& c : classes) {
         m_gatherer.gather(c);
+        m_sorter.sort(c);
     }
 }

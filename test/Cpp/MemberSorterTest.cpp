@@ -1,0 +1,29 @@
+#include "gtest/gtest.h"
+
+#include "Cpp/MemberSorter.h"
+
+namespace Cpp {
+
+TEST(MemberSorterTest, NoPrimitives)
+{
+    // Arrange
+    MemberSorter sut;
+
+    Class test{"Test"};
+    test.body.emplace_back(Variable{"var1", {"int"}});
+    test.body.emplace_back(Variable{"var2", {"float"}});
+    test.body.emplace_back(Method{"var3", {"unsigned int"}});
+    test.body.emplace_back(Variable{"var4", {"double"}});
+    test.body.emplace_back(Method{"var4", {"bool"}});
+
+    // Act
+    sut.sort(test);
+
+    // Assert
+    EXPECT_EQ(test.body.size(), 8);
+    EXPECT_EQ(std::get<VisibilityKeyword>(test.body[2]).name, "public:");
+    EXPECT_EQ(std::get<VisibilityKeyword>(test.body[4]).name, "private:");
+    EXPECT_EQ(std::get<VisibilityKeyword>(test.body[6]).name, "public:");
+}
+
+} // namespace Cpp
