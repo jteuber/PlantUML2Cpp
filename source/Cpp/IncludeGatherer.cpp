@@ -19,11 +19,13 @@ void IncludeGatherer::gather(Class& c)
     }
     for (const auto& v : c.body) {
         if (std::holds_alternative<Variable>(v)) {
-            auto var  = std::get<Variable>(v);
-            usedTypes = decomposeType(var.type);
+            auto var    = std::get<Variable>(v);
+            auto retSet = decomposeType(var.type);
+            usedTypes.insert(retSet.begin(), retSet.end());
         } else if (std::holds_alternative<Method>(v)) {
-            auto m    = std::get<Method>(v);
-            usedTypes = decomposeType(m.returnType);
+            auto m      = std::get<Method>(v);
+            auto retSet = decomposeType(m.returnType);
+            usedTypes.insert(retSet.begin(), retSet.end());
             for (const auto& p : m.parameters) {
                 auto retSet = decomposeType(p.type);
                 usedTypes.insert(retSet.begin(), retSet.end());
