@@ -77,7 +77,7 @@ std::string HeaderGenerator::generate(const Class& in)
 
     // close namespaces
     for (const auto& ns : in.namespaces | std::views::reverse) {
-        ret += "} // " + ns + "\n";
+        ret += "} // namespace " + ns + "\n";
     }
 
     return ret;

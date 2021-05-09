@@ -23,24 +23,6 @@ std::string readFullFile(const fs::path& filepath)
     return input;
 }
 
-bool writeFullFile(const fs::path& filepath, std::string_view contents)
-{
-    if (!fs::exists(filepath)) {
-        std::cout << "writing to file " << filepath << std::endl;
-
-        fs::create_directory(filepath.parent_path());
-
-        std::ofstream file(filepath, std::ios_base::out | std::ios_base::app);
-        if (file.is_open()) {
-            file << contents;
-            return true;
-        }
-
-        std::cout << "unable to write to file " << filepath << std::endl;
-    }
-    return false;
-}
-
 bool PlantUML2Cpp::run(fs::path path)
 {
     auto modelPath = path / "models";
@@ -66,16 +48,8 @@ bool PlantUML2Cpp::run(fs::path path)
 
                 classPostProcessor.process(classTranslator.results());
 
-                fs::create_directory(path / "include");
                 for (const auto& c : classTranslator.results()) {
-                    std::string header = headerGenerator.generate(c);
-
-                    auto nsPath = std::accumulate(
-                        c.namespaces.begin(), c.namespaces.end(), fs::path(), [](const auto& a, const auto& b) {
-                            return fs::path(a) / fs::path(b);
-                        });
-
-                    writeFullFile(path / "include" / nsPath / (c.name + ".h"), header);
+                    classGenerator.generate(path, c);
                 }
             }
         }
