@@ -251,4 +251,38 @@ TEST(HeaderGenerator, ComplexTemplates)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
+TEST(HeaderGenerator, ComplexMethods)
+{
+    // Arrange
+    auto config = std::make_shared<Config>();
+    HeaderGenerator sut(config);
+
+    Class input;
+    input.name             = "simpleClass";
+    input.externalIncludes = {"pair", "string", "vector"};
+    input.localIncludes    = {"Visibility.h"};
+
+    Method method;
+    method.name       = "complexMethod";
+    method.returnType = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
+    method.parameters = {{"param1", Type{"std::vector", {Type{"int"}}}},
+                         {"param2", Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
+    input.body.push_back(method);
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = header + R"(\#include \<pair\>)" + ws + R"(\#include \<string\>)" + ws;
+    regex += R"(\#include \<vector\>)" + ws + R"(\#include "Visibility.h")" + ws;
+    regex += ws + "class[ \t]*simpleClass" + ws + "\\{" + ws;
+    regex += "std::vector<std::pair<Visibility, std::string>>" + ws + "complexMethod\\(" + ws;
+    regex += "std::vector<int>" + ws + "param1," + ws;
+    regex += "std::pair<Visibility, std::string>" + ws + "param2" + ws;
+    regex += "\\);" + ws;
+    regex += "\\};(.|\n)*";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}
+
 } // namespace Cpp
