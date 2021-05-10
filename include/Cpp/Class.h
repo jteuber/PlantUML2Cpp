@@ -8,15 +8,6 @@
 
 namespace Cpp {
 
-enum class Relationship
-{
-    Extension,
-    Composition,
-    Aggregation,
-    Usage,
-    Member
-};
-
 struct Type
 {
     std::string base;
