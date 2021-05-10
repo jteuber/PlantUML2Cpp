@@ -18,13 +18,16 @@ void ClassGenerator::generate(fs::path basePath, const Class& c)
             return fs::path(a) / fs::path(b);
         });
 
-    fs::create_directory(basePath / "include");
+    fs::create_directory(basePath / m_config->includeFolderName);
+    fs::create_directory(basePath / m_config->sourceFolderName);
 
     std::string header = m_headerGenerator.generate(c);
     writeFullFile(basePath / m_config->includeFolderName / nsPath / (c.name + ".h"), header);
 
     std::string source = m_sourceGenerator.generate(c);
-    writeFullFile(basePath / m_config->sourceFolderName / nsPath / (c.name + ".cpp"), source);
+    if (!source.empty()) {
+        writeFullFile(basePath / m_config->sourceFolderName / nsPath / (c.name + ".cpp"), source);
+    }
 }
 
 bool ClassGenerator::writeFullFile(const fs::path& filepath, std::string_view contents)
