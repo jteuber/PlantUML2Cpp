@@ -199,7 +199,10 @@ bool ClassTranslator::visit(const PlantUml::Enumerator& /*e*/)
     return false;
 }
 
-bool ClassTranslator::visit(const PlantUml::Type& t) {}
+bool ClassTranslator::visit(const PlantUml::Type& /*t*/)
+{
+    return false;
+}
 
 bool ClassTranslator::visit(const PlantUml::Parameter& p)
 {
