@@ -285,4 +285,38 @@ TEST(HeaderGenerator, ComplexMethods)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
+TEST(HeaderGenerator, Interface)
+{
+    // Arrange
+    auto config = std::make_shared<Config>();
+    HeaderGenerator sut(config);
+
+    Class input;
+    input.name        = "simpleInterface";
+    input.isInterface = true;
+
+    Method method;
+    method.name       = "complexMethod";
+    method.returnType = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
+    method.parameters = {{"param1", Type{"std::vector", {Type{"int"}}}},
+                         {"param2", Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
+    method.isAbstract = true;
+    input.body.push_back(method);
+    input.body.emplace_back(Method{"method", Type{"int"}, "", true});
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = header + "class[ \t]*simpleInterface" + ws + "\\{" + ws;
+    regex += "std::vector<std::pair<Visibility, std::string>>" + ws + "complexMethod\\(" + ws;
+    regex += "std::vector<int>" + ws + "param1," + ws;
+    regex += "std::pair<Visibility, std::string>" + ws + "param2" + ws;
+    regex += "\\) = 0;" + ws;
+    regex += "int method\\(\\) = 0;" + ws;
+    regex += "\\};(.|\n)*";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}
+
 } // namespace Cpp

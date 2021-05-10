@@ -71,7 +71,7 @@ bool ClassTranslator::visit(const PlantUml::Method& m)
 
         method.name       = m.name;
         method.returnType = umlToCppType(m.returnType);
-        method.isAbstract = m.isAbstract;
+        method.isAbstract = m.isAbstract || m_lastEncounteredClass->isInterface;
         method.isConst    = m.isConst;
         method.isStatic   = m.isStatic;
 

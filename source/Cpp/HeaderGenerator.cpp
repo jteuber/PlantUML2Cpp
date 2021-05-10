@@ -129,6 +129,9 @@ std::string HeaderGenerator::toString(const Method& m)
                                });
         ret.erase(ret.length() - 2);
     }
+    if (m.isAbstract) {
+        return ret + ") = 0;\n";
+    }
     return ret + ");\n";
 }
 

@@ -457,3 +457,40 @@ TEST(ClassTranslatorTest, Templates)
     EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[1]).type,
               (Cpp::Type{"std::map", {Cpp::Type{"std::string"}, Cpp::Type{"int"}}}));
 }
+
+TEST(ClassTranslatorTest, Interface)
+{
+    // Arrange
+    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+    interface test {
+        method() : var
+        method2(input : bool) : var
+    }
+    @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    ASSERT_EQ(sut.results().size(), 1);
+
+    EXPECT_EQ(sut.results()[0].name, "test");
+
+    ASSERT_EQ(sut.results()[0].body.size(), 2);
+    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).name, "method");
+    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).returnType, Cpp::Type{"var"});
+    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[0]).isAbstract);
+    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[0]).parameters.empty());
+
+    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).name, "method2");
+    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).returnType, Cpp::Type{"var"});
+    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[1]).isAbstract);
+
+    ASSERT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters[0].name, "input");
+    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
+}
