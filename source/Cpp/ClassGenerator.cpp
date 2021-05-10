@@ -8,6 +8,7 @@ namespace Cpp {
 
 ClassGenerator::ClassGenerator(std::shared_ptr<Config> config)
     : m_headerGenerator(config)
+    , m_config(config)
 {}
 
 void ClassGenerator::generate(fs::path basePath, const Class& c)
@@ -20,10 +21,10 @@ void ClassGenerator::generate(fs::path basePath, const Class& c)
     fs::create_directory(basePath / "include");
 
     std::string header = m_headerGenerator.generate(c);
-    writeFullFile(basePath / "include" / nsPath / (c.name + ".h"), header);
+    writeFullFile(basePath / m_config->includeFolderName / nsPath / (c.name + ".h"), header);
 
     std::string source = m_sourceGenerator.generate(c);
-    writeFullFile(basePath / "src" / nsPath / (c.name + ".cpp"), source);
+    writeFullFile(basePath / m_config->sourceFolderName / nsPath / (c.name + ".cpp"), source);
 }
 
 bool ClassGenerator::writeFullFile(const fs::path& filepath, std::string_view contents)

@@ -8,6 +8,9 @@
 
 struct Config
 {
+    std::string includeFolderName = "include";
+    std::string sourceFolderName  = "source";
+
     std::string memberPrefix      = "m_";
     std::string indent            = "    ";
     bool noMemberPrefixForStructs = true;

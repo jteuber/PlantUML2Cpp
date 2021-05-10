@@ -20,6 +20,8 @@ private:
 
     HeaderGenerator m_headerGenerator;
     SourceGenerator m_sourceGenerator;
+
+    std::shared_ptr<Config> m_config;
 };
 
 } // namespace Cpp
