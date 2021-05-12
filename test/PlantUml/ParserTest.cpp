@@ -5,6 +5,7 @@
 
 #include "mocks/VisitorMock.h"
 
+using testing::InSequence;
 using testing::Return;
 
 namespace PlantUml {
@@ -494,11 +495,13 @@ namespace "net.foo" {
     End ed{EndType::Document};
 
     // Assert Calls
+    InSequence seq;
     EXPECT_CALL(visitor, visit(c));
     EXPECT_CALL(visitor, visit(ns1));
+    EXPECT_CALL(visitor, visit(ens));
     EXPECT_CALL(visitor, visit(ns2));
-    EXPECT_CALL(visitor, visit(ens)).Times(2);
-    EXPECT_CALL(visitor, visit(ed)).Times(1);
+    EXPECT_CALL(visitor, visit(ens));
+    EXPECT_CALL(visitor, visit(ed));
 
     // Act
     act(parser, visitor, puml);
@@ -526,6 +529,41 @@ class X1::X2::foo {
 
     // Assert Calls
     EXPECT_CALL(visitor, visit(e));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
+TEST(ParserTest, NestedNamespaces)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+namespace net #DDDDDD {
+        namespace foo {
+        }
+}
+
+@enduml)";
+
+    Container c{{}, "", ContainerType::Document};
+    Container ns1{{"net"}, "", ContainerType::Namespace};
+    Container ns2{{"foo"}, "", ContainerType::Namespace};
+    End ens{EndType::Namespace};
+    End ed{EndType::Document};
+
+    // Assert Calls
+    InSequence seq;
+    EXPECT_CALL(visitor, visit(c));
+    EXPECT_CALL(visitor, visit(ns1));
+    EXPECT_CALL(visitor, visit(ns2));
+    EXPECT_CALL(visitor, visit(ens)).Times(2);
+    EXPECT_CALL(visitor, visit(ed)).Times(1);
 
     // Act
     act(parser, visitor, puml);

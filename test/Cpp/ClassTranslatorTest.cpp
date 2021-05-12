@@ -406,6 +406,38 @@ TEST(ClassTranslatorTest, NamespaceSeperator)
     EXPECT_EQ(foo.namespaces.back(), "X1");
 }
 
+TEST(ClassTranslatorTest, NestedNamespaces)
+{
+    // Arrange
+    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+        namespace net {
+            namespace dummy {
+                class Person
+            }
+        }
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
+
+    Cpp::Class foo = classes[0];
+    EXPECT_EQ(foo.name, "Person");
+    ASSERT_EQ(foo.namespaces.size(), 2);
+    EXPECT_EQ(foo.namespaces.back(), "dummy");
+    foo.namespaces.pop_back();
+    EXPECT_EQ(foo.namespaces.back(), "net");
+}
+
 TEST(ClassTranslatorTest, Stereotypes)
 {
     // Arrange
