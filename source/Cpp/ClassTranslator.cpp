@@ -18,7 +18,7 @@ ClassTranslator::ClassTranslator(std::shared_ptr<Config> config)
     : m_config(config)
 {}
 
-std::vector<Class>& ClassTranslator::results()
+std::vector<Class> ClassTranslator::results() &&
 {
     return m_classes;
 }

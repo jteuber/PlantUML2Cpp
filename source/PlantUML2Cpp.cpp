@@ -46,9 +46,10 @@ bool PlantUML2Cpp::run(fs::path path)
             if (parser.parse(fileContents)) {
                 parser.visitAST(classTranslator);
 
-                classPostProcessor.process(classTranslator.results());
+                auto classes = std::move(classTranslator).results();
+                classPostProcessor.process(classes);
 
-                for (const auto& c : classTranslator.results()) {
+                for (const auto& c : classes) {
                     classGenerator.generate(path, c);
                 }
             }

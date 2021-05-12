@@ -24,7 +24,8 @@ TEST(ClassTranslatorTest, EmptyDiagram)
     sut.visit(ec);
 
     // Assert
-    EXPECT_TRUE(sut.results().empty());
+    auto classes = std::move(sut).results();
+    EXPECT_TRUE(classes.empty());
 }
 
 TEST(ClassTranslatorTest, SingleAbstract)
@@ -44,12 +45,13 @@ TEST(ClassTranslatorTest, SingleAbstract)
     sut.visit(ec);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "name");
-    EXPECT_EQ(sut.results()[0].isInterface, false);
-    EXPECT_EQ(sut.results()[0].isStruct, false);
-    EXPECT_TRUE(sut.results()[0].namespaces.empty());
+    EXPECT_EQ(classes[0].name, "name");
+    EXPECT_EQ(classes[0].isInterface, false);
+    EXPECT_EQ(classes[0].isStruct, false);
+    EXPECT_TRUE(classes[0].namespaces.empty());
 }
 
 TEST(ClassTranslatorTest, AllSimpleContainers)
@@ -74,20 +76,21 @@ TEST(ClassTranslatorTest, AllSimpleContainers)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 4);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 4);
 
-    EXPECT_EQ(sut.results()[0].name, "abstract");
-    EXPECT_EQ(sut.results()[0].isInterface, false);
-    EXPECT_EQ(sut.results()[0].isStruct, false);
-    EXPECT_EQ(sut.results()[1].name, "class");
-    EXPECT_EQ(sut.results()[1].isInterface, false);
-    EXPECT_EQ(sut.results()[1].isStruct, false);
-    EXPECT_EQ(sut.results()[2].name, "entity");
-    EXPECT_EQ(sut.results()[2].isInterface, false);
-    EXPECT_EQ(sut.results()[2].isStruct, true);
-    EXPECT_EQ(sut.results()[3].name, "interface");
-    EXPECT_EQ(sut.results()[3].isInterface, true);
-    EXPECT_EQ(sut.results()[3].isStruct, false);
+    EXPECT_EQ(classes[0].name, "abstract");
+    EXPECT_EQ(classes[0].isInterface, false);
+    EXPECT_EQ(classes[0].isStruct, false);
+    EXPECT_EQ(classes[1].name, "class");
+    EXPECT_EQ(classes[1].isInterface, false);
+    EXPECT_EQ(classes[1].isStruct, false);
+    EXPECT_EQ(classes[2].name, "entity");
+    EXPECT_EQ(classes[2].isInterface, false);
+    EXPECT_EQ(classes[2].isStruct, true);
+    EXPECT_EQ(classes[3].name, "interface");
+    EXPECT_EQ(classes[3].isInterface, true);
+    EXPECT_EQ(classes[3].isStruct, false);
 }
 
 TEST(ClassTranslatorTest, EntityWithEmptyBody)
@@ -105,12 +108,13 @@ TEST(ClassTranslatorTest, EntityWithEmptyBody)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "test");
-    EXPECT_EQ(sut.results()[0].isInterface, false);
-    EXPECT_EQ(sut.results()[0].isStruct, true);
-    EXPECT_TRUE(sut.results()[0].body.empty());
+    EXPECT_EQ(classes[0].name, "test");
+    EXPECT_EQ(classes[0].isInterface, false);
+    EXPECT_EQ(classes[0].isStruct, true);
+    EXPECT_TRUE(classes[0].body.empty());
 }
 
 TEST(ClassTranslatorTest, EntityWithSingleVariable)
@@ -130,15 +134,16 @@ TEST(ClassTranslatorTest, EntityWithSingleVariable)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "test");
-    EXPECT_EQ(sut.results()[0].isInterface, false);
-    EXPECT_EQ(sut.results()[0].isStruct, true);
+    EXPECT_EQ(classes[0].name, "test");
+    EXPECT_EQ(classes[0].isInterface, false);
+    EXPECT_EQ(classes[0].isStruct, true);
 
-    ASSERT_EQ(sut.results()[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).name, "variable");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).type, Cpp::Type{"var"});
+    ASSERT_EQ(classes[0].body.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "variable");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"var"});
 }
 
 TEST(ClassTranslatorTest, ClassWithTwoMethods)
@@ -159,21 +164,22 @@ TEST(ClassTranslatorTest, ClassWithTwoMethods)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "test");
+    EXPECT_EQ(classes[0].name, "test");
 
-    ASSERT_EQ(sut.results()[0].body.size(), 2);
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).name, "method");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).returnType, Cpp::Type{"var"});
-    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[0]).parameters.empty());
+    ASSERT_EQ(classes[0].body.size(), 2);
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).name, "method");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).returnType, Cpp::Type{"var"});
+    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).parameters.empty());
 
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).name, "method2");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).returnType, Cpp::Type{"var"});
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).name, "method2");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).returnType, Cpp::Type{"var"});
 
-    ASSERT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters[0].name, "input");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
+    ASSERT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].name, "input");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
 }
 
 TEST(ClassTranslatorTest, Inheritance)
@@ -192,11 +198,12 @@ TEST(ClassTranslatorTest, Inheritance)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "Class02");
-    ASSERT_EQ(sut.results()[0].inherits.size(), 1);
-    EXPECT_EQ(sut.results()[0].inherits[0], "Class01");
+    EXPECT_EQ(classes[0].name, "Class02");
+    ASSERT_EQ(classes[0].inherits.size(), 1);
+    EXPECT_EQ(classes[0].inherits[0], "Class01");
 }
 
 TEST(ClassTranslatorTest, Composition)
@@ -215,12 +222,13 @@ TEST(ClassTranslatorTest, Composition)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "Class03");
-    ASSERT_EQ(sut.results()[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).name, "");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).type, Cpp::Type{"Class04"});
+    EXPECT_EQ(classes[0].name, "Class03");
+    ASSERT_EQ(classes[0].body.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"Class04"});
 }
 
 TEST(ClassTranslatorTest, Aggregation)
@@ -239,12 +247,13 @@ TEST(ClassTranslatorTest, Aggregation)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "Class05");
-    ASSERT_EQ(sut.results()[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).name, "");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).type, Cpp::Type{"std::shared_ptr<Class06>"});
+    EXPECT_EQ(classes[0].name, "Class05");
+    ASSERT_EQ(classes[0].body.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"std::shared_ptr<Class06>"});
 }
 
 TEST(ClassTranslatorTest, LabelsOnRelations)
@@ -268,21 +277,22 @@ TEST(ClassTranslatorTest, LabelsOnRelations)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 4);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 4);
 
-    EXPECT_EQ(sut.results()[0].name, "Class01");
-    EXPECT_EQ(sut.results()[0].isInterface, false);
-    EXPECT_EQ(sut.results()[0].isStruct, false);
-    ASSERT_EQ(sut.results()[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).name, "contains");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).type, Cpp::Type{"std::vector<Class02>"});
+    EXPECT_EQ(classes[0].name, "Class01");
+    EXPECT_EQ(classes[0].isInterface, false);
+    EXPECT_EQ(classes[0].isStruct, false);
+    ASSERT_EQ(classes[0].body.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "contains");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"std::vector<Class02>"});
 
-    EXPECT_EQ(sut.results()[2].name, "Class03");
-    EXPECT_EQ(sut.results()[2].isInterface, false);
-    EXPECT_EQ(sut.results()[2].isStruct, false);
-    ASSERT_EQ(sut.results()[2].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[2].body[0]).name, "aggregation");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[2].body[0]).type, Cpp::Type{"std::shared_ptr<Class04>"});
+    EXPECT_EQ(classes[2].name, "Class03");
+    EXPECT_EQ(classes[2].isInterface, false);
+    EXPECT_EQ(classes[2].isStruct, false);
+    ASSERT_EQ(classes[2].body.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).name, "aggregation");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).type, Cpp::Type{"std::shared_ptr<Class04>"});
 }
 
 TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
@@ -305,22 +315,23 @@ TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 2);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 2);
 
-    EXPECT_EQ(sut.results()[0].name, "Object");
-    ASSERT_EQ(sut.results()[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).name, "equals");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).returnType, Cpp::Type{"void"});
-    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[0]).parameters.empty());
+    EXPECT_EQ(classes[0].name, "Object");
+    ASSERT_EQ(classes[0].body.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).name, "equals");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).returnType, Cpp::Type{"void"});
+    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).parameters.empty());
 
-    EXPECT_EQ(sut.results()[1].name, "ArrayList");
-    ASSERT_EQ(sut.results()[1].body.size(), 2);
+    EXPECT_EQ(classes[1].name, "ArrayList");
+    ASSERT_EQ(classes[1].body.size(), 2);
 
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[1].body[0]).name, "elementData");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[1].body[0]).type, Cpp::Type{"Object[]"});
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[1].body[1]).name, "size");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[1].body[1]).returnType, Cpp::Type{"int"});
-    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[1].body[1]).parameters.empty());
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[1].body[0]).name, "elementData");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[1].body[0]).type, Cpp::Type{"Object[]"});
+    EXPECT_EQ(std::get<Cpp::Method>(classes[1].body[1]).name, "size");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[1].body[1]).returnType, Cpp::Type{"int"});
+    EXPECT_TRUE(std::get<Cpp::Method>(classes[1].body[1]).parameters.empty());
 }
 
 TEST(ClassTranslatorTest, Namespaces)
@@ -345,12 +356,13 @@ TEST(ClassTranslatorTest, Namespaces)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 3);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 3);
 
-    EXPECT_EQ(sut.results()[0].name, "BaseClass");
-    EXPECT_TRUE(sut.results()[0].namespaces.empty());
+    EXPECT_EQ(classes[0].name, "BaseClass");
+    EXPECT_TRUE(classes[0].namespaces.empty());
 
-    Cpp::Class person = sut.results()[1];
+    Cpp::Class person = classes[1];
     EXPECT_EQ(person.name, "Person");
     ASSERT_EQ(person.namespaces.size(), 2);
     EXPECT_EQ(person.namespaces.back(), "dummy");
@@ -359,8 +371,8 @@ TEST(ClassTranslatorTest, Namespaces)
     ASSERT_EQ(person.inherits.size(), 1);
     EXPECT_EQ(person.inherits[0], "BaseClass");
 
-    EXPECT_EQ(sut.results()[2].name, "BaseClass2");
-    EXPECT_TRUE(sut.results()[2].namespaces.empty());
+    EXPECT_EQ(classes[2].name, "BaseClass2");
+    EXPECT_TRUE(classes[2].namespaces.empty());
 }
 
 TEST(ClassTranslatorTest, NamespaceSeperator)
@@ -383,9 +395,10 @@ TEST(ClassTranslatorTest, NamespaceSeperator)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    Cpp::Class foo = sut.results()[0];
+    Cpp::Class foo = classes[0];
     EXPECT_EQ(foo.name, "foo");
     ASSERT_EQ(foo.namespaces.size(), 2);
     EXPECT_EQ(foo.namespaces.back(), "X2");
@@ -410,9 +423,10 @@ TEST(ClassTranslatorTest, Stereotypes)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    Cpp::Class system = sut.results()[0];
+    Cpp::Class system = classes[0];
     EXPECT_EQ(system.name, "SystemData");
     EXPECT_TRUE(system.isStruct);
 }
@@ -442,19 +456,19 @@ TEST(ClassTranslatorTest, Templates)
     sut.visit(ec);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "test");
-    EXPECT_EQ(sut.results()[0].isInterface, false);
-    EXPECT_EQ(sut.results()[0].isStruct, false);
+    EXPECT_EQ(classes[0].name, "test");
+    EXPECT_EQ(classes[0].isInterface, false);
+    EXPECT_EQ(classes[0].isStruct, false);
 
-    ASSERT_EQ(sut.results()[0].body.size(), 2);
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).name, "variable");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[0]).type,
-              (Cpp::Type{"std::vector", {Cpp::Type{"std::string"}}}));
+    ASSERT_EQ(classes[0].body.size(), 2);
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "variable");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, (Cpp::Type{"std::vector", {Cpp::Type{"std::string"}}}));
 
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[1]).name, "map");
-    EXPECT_EQ(std::get<Cpp::Variable>(sut.results()[0].body[1]).type,
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[1]).name, "map");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[1]).type,
               (Cpp::Type{"std::map", {Cpp::Type{"std::string"}, Cpp::Type{"int"}}}));
 }
 
@@ -476,21 +490,22 @@ TEST(ClassTranslatorTest, Interface)
     act(parser, sut, puml);
 
     // Assert
-    ASSERT_EQ(sut.results().size(), 1);
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
 
-    EXPECT_EQ(sut.results()[0].name, "test");
+    EXPECT_EQ(classes[0].name, "test");
 
-    ASSERT_EQ(sut.results()[0].body.size(), 2);
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).name, "method");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[0]).returnType, Cpp::Type{"var"});
-    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[0]).isAbstract);
-    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[0]).parameters.empty());
+    ASSERT_EQ(classes[0].body.size(), 2);
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).name, "method");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).returnType, Cpp::Type{"var"});
+    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).isAbstract);
+    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).parameters.empty());
 
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).name, "method2");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).returnType, Cpp::Type{"var"});
-    EXPECT_TRUE(std::get<Cpp::Method>(sut.results()[0].body[1]).isAbstract);
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).name, "method2");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).returnType, Cpp::Type{"var"});
+    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[1]).isAbstract);
 
-    ASSERT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters[0].name, "input");
-    EXPECT_EQ(std::get<Cpp::Method>(sut.results()[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
+    ASSERT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters.size(), 1);
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].name, "input");
+    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
 }
