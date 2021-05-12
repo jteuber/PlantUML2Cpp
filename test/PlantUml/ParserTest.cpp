@@ -310,6 +310,37 @@ Class07 --> Class08
     // Assert Results
 }
 
+TEST(ParserTest, RelationshipsWithDirections)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+Class01 -up-|> Class02
+Class03 -down-* Class04
+Class05 -left-o Class06
+Class07 -right-> Class08
+@enduml)";
+
+    Relationship r1{{"Class01"}, {"Class02"}, "", "", "", false, RelationshipType::Extension};
+    Relationship r2{{"Class04"}, {"Class03"}, "", "", "", false, RelationshipType::Composition};
+    Relationship r3{{"Class06"}, {"Class05"}, "", "", "", false, RelationshipType::Aggregation};
+    Relationship r4{{"Class07"}, {"Class08"}, "", "", "", false, RelationshipType::Usage};
+
+    // Assert Calls
+    EXPECT_CALL(visitor, visit(r1));
+    EXPECT_CALL(visitor, visit(r2));
+    EXPECT_CALL(visitor, visit(r3));
+    EXPECT_CALL(visitor, visit(r4));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
 TEST(ParserTest, RelationshipsWithLabels)
 {
     // Arrange
