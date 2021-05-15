@@ -227,7 +227,7 @@ TEST(ClassTranslatorTest, Composition)
 
     EXPECT_EQ(classes[0].name, "Class03");
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "class04");
     EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"Class04"});
 }
 
@@ -252,8 +252,8 @@ TEST(ClassTranslatorTest, Aggregation)
 
     EXPECT_EQ(classes[0].name, "Class05");
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"std::shared_ptr<Class06>"});
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "class06");
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, (Cpp::Type{"std::shared_ptr<Class06>"}));
 }
 
 TEST(ClassTranslatorTest, LabelsOnRelations)
@@ -285,14 +285,14 @@ TEST(ClassTranslatorTest, LabelsOnRelations)
     EXPECT_EQ(classes[0].isStruct, false);
     ASSERT_EQ(classes[0].body.size(), 1);
     EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "contains");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"std::vector<Class02>"});
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, (Cpp::Type{"std::vector<Class02>"}));
 
     EXPECT_EQ(classes[2].name, "Class03");
     EXPECT_EQ(classes[2].isInterface, false);
     EXPECT_EQ(classes[2].isStruct, false);
     ASSERT_EQ(classes[2].body.size(), 1);
     EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).name, "aggregation");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).type, Cpp::Type{"std::shared_ptr<Class04>"});
+    EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).type, (Cpp::Type{"std::shared_ptr<Class04>"}));
 }
 
 TEST(ClassTranslatorTest, ExternalMethodsAndVariables)

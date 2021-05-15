@@ -119,6 +119,10 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
             }
 
             var.name = r.label;
+            if (var.name.empty()) {
+                var.name    = r.object.back();
+                var.name[0] = std::tolower(var.name[0]);
+            }
             m_lastEncounteredClass->body.emplace_back(var);
             break;
         }
@@ -132,6 +136,10 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
             }
 
             var.name = r.label;
+            if (var.name.empty()) {
+                var.name    = r.object.back();
+                var.name[0] = std::tolower(var.name[0]);
+            }
             m_lastEncounteredClass->body.emplace_back(var);
             break;
         }

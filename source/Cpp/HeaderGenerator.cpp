@@ -107,13 +107,7 @@ std::string HeaderGenerator::toString(const std::string& s)
 
 std::string HeaderGenerator::toString(const Variable& var)
 {
-    std::string varName = var.name;
-    if (varName.empty()) {
-        varName    = var.type.base;
-        varName[0] = std::tolower(varName[0]);
-    }
-
-    varName = m_variablePrefix + varName;
+    std::string varName = m_variablePrefix + var.name;
     return m_config->indent + typeToString(var.type) + " " + varName + ";\n";
 }
 

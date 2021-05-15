@@ -64,8 +64,8 @@ TEST(IncludeGathererTest, MultipleFromVariable)
     IncludeGatherer sut{std::make_shared<Config>()};
 
     Class test{"Test"};
-    test.body.emplace_back(Variable{"var", "std::string"});
-    test.body.emplace_back(Variable{"vec", "std::vector"});
+    test.body.emplace_back(Variable{"var", Type{"std::string"}});
+    test.body.emplace_back(Variable{"vec", Type{"std::vector", {{"int"}}}});
     test.body.emplace_back(Variable{"vec", "Test"});
 
     // Act
