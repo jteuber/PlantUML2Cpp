@@ -17,9 +17,9 @@ class Config {
 }
 
 PlantUML2Cpp *-- "1" PlantUml.Parser
-PlantUML2Cpp *-- "1" Cpp.ClassTranslator
-PlantUML2Cpp *-- "1" Cpp.ClassPostProcessor
-PlantUML2Cpp *-- "1" Cpp.ClassGenerator
+PlantUML2Cpp *-- "1" Cpp.Translator
+PlantUML2Cpp *-- "1" Cpp.PostProcessor
+PlantUML2Cpp *-- "1" Cpp.CodeGenerator
 PlantUML2Cpp *-left- "1" Config
 
 namespace PlantUml {
@@ -174,27 +174,119 @@ namespace PlantUml {
 
 namespace Cpp {
 
+
+    ' *************** DATA ***************
+
+    class Class {
+        +name : string
+        +comment : string
+        +isStruct : bool
+        +namespaces : list<string>
+        +inherits : set<string>
+        +externalIncludes : vector<string>
+        +localIncludes : vector<string>
+    }
+    class ClassElement << (V,#FF55AA) >>
+    class VisibilityKeyword {
+        +name : string
+    }
+    class Separator {
+        +text : string
+    }
+    class Variable {
+        +name : string
+        +comment : string
+        +isStatic : bool
+    }
+    class Method {
+        +name : string
+        +comment : string
+        +isAbstract : bool
+        +isConst : bool
+        +isStatic : bool
+    }
+    class Parameter {
+        +name : string
+    }
+    class Type
+    {
+        +list<string> base;
+        +vector<Type> templateParams;
+    }
+
+    Method *-- "1" Type : returnType
+    Parameter *-- "1" Type : type
+    Variable *-- "1" Type : type
+
+
+    Class *-- "0..*" ClassElement : body
+    ClassElement *-- Method
+    ClassElement *-- Variable
+    ClassElement *-- VisibilityKeyword
+    ClassElement *-- Separator
+    Method *-- "0..*" Parameter : parameters
+
+
+    class Enum {
+        +name  : string
+        +namespaces : list<string>
+        +comment : string
+    }
+    class Keyword {
+        +name : string
+    }
+
+    Enum *-- Keyword
+
+
+    class Variant {
+        +name  : string
+        +namespaces : list<string>
+        +comment : string
+    }
+
+    Variant *-- "1..*" Type : containedTypes
+
+
+    class Types << (V,#FF55AA) >>
+    Types *-- Class
+    Types *-- Enum
+    Types *-- Variant
+
+
+    class Module {
+        +name : string
+    }
+    Module *-- "0..*" Module
+    Module *-- "0..*" Types
+
+
+    ' *************** ALGORITHMS ***************
     class ClassTranslator {
         +visit(Variable v)     : bool
         +visit(Method m)       : bool
         +visit(Relationship r) : bool
-        +visit(Container c)    : bool
         +visit(Element e)      : bool
         +visit(Note n)         : bool
         +visit(Separator s)    : bool
-        +visit(Keyword k)      : bool
         +visit(Parameter p)    : bool
-        +visit(End e)          : bool
+
+        +result() : Class
     }
-    ClassTranslator --|> PlantUml.AbstractVisitor
 
     class ClassPostProcessor {
         +process(vector<Class>& classes)
     }
 
-    class IncludeGatherer
-    class IncludeOptimizer
-    class MemberSorter
+    class IncludeGatherer {
+        +gather(Class& c)
+    }
+    class IncludeOptimizer {
+        +process(vector<Class>& classes)
+    }
+    class MemberSorter {
+        +sort(Class& c)
+    }
 
     ClassPostProcessor *-- IncludeGatherer
     ClassPostProcessor *-- IncludeOptimizer
@@ -207,13 +299,6 @@ namespace Cpp {
 
     class HeaderGenerator {
         +string generate(Class in)
-        -string generateMethods(vector<Method> methods, Visibility vis)
-        -string generateMembers(vector<Variable> members, Visibility vis, Class::Type classType)
-        -string generateIncludes(Class in)
-        -string methodToString(Method m)
-        -string variableToString(Variable var, Class::Type classType)
-        -string variableTypeToString(Variable var)
-        -string visibilityToString(Visibility vis)
     }
 
     class SourceGenerator {
@@ -223,64 +308,38 @@ namespace Cpp {
     ClassGenerator *-- HeaderGenerator
     ClassGenerator *-- SourceGenerator
 
-    class Class {
-        +name : string
-        +comment : string
-        +isStruct : bool
-        +namespaces : list<string>
-        +inherits : set<string>
-        +externalIncludes : vector<string>
-        +localIncludes : vector<string>
-    }
-    class BodyElement << (V,#FF55AA) >>
-    class VisibilityKeyword {
-        +name : string
-    }
-    class Separator {
-        +text : string
-    }
-    class Variable {
-        +name : string
-        +type : string
-        +comment : string
-        +isStatic : bool
-    }
-    class Method {
-        +name : string
-        +returnType : string
-        +comment : string
-        +isAbstract : bool
-        +isConst : bool
-        +isStatic : bool
-    }
-    class Parameter {
-        +name : string
-        +type : string
-    }
 
-    ' class Enum {
-    '     +name  : string
-    '     +namespaces : list<string>
-    '     +comment : string
-    ' }
-    ' class Keyword {
-    '     +name : string
-    ' }
 
-    
-    ClassPostProcessor <- ClassTranslator
-    ClassGenerator <- ClassPostProcessor
+    class Translator {
+        +visit(Variable v)     : bool
+        +visit(Method m)       : bool
+        +visit(Relationship r) : bool
+        +visit(Container c)    : bool
+        +visit(Element e)      : bool
+        +visit(Note n)         : bool
+        +visit(Separator s)    : bool
+        +visit(Keyword k)      : bool
+        +visit(Parameter p)    : bool
+        +visit(End e)          : bool
 
-    Class *-- "0..*" BodyElement : body
-    BodyElement *-- Method
-    BodyElement *-- Variable
-    BodyElement *-- VisibilityKeyword
-    BodyElement *-- Separator
-    Method *-- "0..*" Parameter : parameters
+        +results() : Module
+    }
+    Translator --|> PlantUml.AbstractVisitor
+    Translator *-- ClassTranslator
 
-    ' Enum *-- Keyword
+    class PostProcessor {
+        process(Module m) : Module
+    }
+    PostProcessor *-- ClassPostProcessor
 
-    ClassTranslator *-- "0..*" Class : generated
+    class CodeGenerator {
+        +generate(Module m)
+    }
+    CodeGenerator *-- ClassGenerator
+
+
+    PostProcessor <- Translator
+    CodeGenerator <- PostProcessor
 }
 
 @enduml
