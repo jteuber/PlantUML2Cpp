@@ -113,7 +113,7 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityComposition.end()) {
-                var.type = Type{fmt::format(containerIt->second, r.object.back())};
+                var.type = stringToCppType(fmt::format(containerIt->second, r.object.back()));
             } else {
                 var.type = Type{r.object.back()};
             }
@@ -130,7 +130,7 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityAggregation.find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityAggregation.end()) {
-                var.type = Type{fmt::format(containerIt->second, r.object.back())};
+                var.type = stringToCppType(fmt::format(containerIt->second, r.object.back()));
             } else {
                 var.type = Type{r.object.back()};
             }
@@ -249,8 +249,9 @@ Type ClassTranslator::umlToCppType(PlantUml::Type umlType)
     Type out;
 
     out.base = umlType.base.back();
-    for (auto ns : umlType.base | std::views::reverse | std::views::drop(1))
+    for (auto ns : umlType.base | std::views::reverse | std::views::drop(1)) {
         out.base = ns + "::" + out.base;
+    }
 
     auto it = m_config->umlToCppTypeMap.find(out.base);
     if (it != m_config->umlToCppTypeMap.end()) {
@@ -265,6 +266,28 @@ Type ClassTranslator::umlToCppType(PlantUml::Type umlType)
     }
 
     return out;
+}
+
+Type ClassTranslator::stringToCppType(std::string_view typeString)
+{
+    auto pos = typeString.find_first_of(",<>");
+    Type ret{std::string(typeString.substr(0, pos))};
+
+    if (pos != std::string_view::npos) {
+        if (typeString[pos] == '<') {
+            typeString.remove_prefix(pos + 1);
+            ret.templateParams.push_back(stringToCppType(typeString));
+
+            auto nextPos = typeString.find_first_of(",<>");
+            while (typeString[nextPos] == ',') {
+                typeString.remove_prefix(nextPos + 1);
+                ret.templateParams.push_back(stringToCppType(typeString));
+                nextPos = typeString.find_first_of(",<>");
+            }
+        }
+    }
+
+    return ret;
 }
 
 std::string ClassTranslator::visibilityToString(PlantUml::Visibility vis)

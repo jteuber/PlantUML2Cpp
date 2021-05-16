@@ -33,6 +33,7 @@ private:
     // helper methods
     std::string variableTypeToString(const PlantUml::Variable& var, PlantUml::RelationshipType relationship);
     Type umlToCppType(PlantUml::Type umlType);
+    Type stringToCppType(std::string_view typeString);
     Type decomposeType(std::string_view type);
 
     static std::string visibilityToString(PlantUml::Visibility vis);
