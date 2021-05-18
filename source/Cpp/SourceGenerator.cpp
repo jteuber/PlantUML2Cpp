@@ -13,8 +13,8 @@ std::string SourceGenerator::generate(const Class& in)
         return "";
     } else if (std::count_if(in.body.begin(),
                              in.body.end(),
-                             [](const BodyElement& elem) { return std::holds_alternative<Method>(elem); }) == 0 &&
-               std::count_if(in.body.begin(), in.body.end(), [](const BodyElement& elem) {
+                             [](const ClassElement& elem) { return std::holds_alternative<Method>(elem); }) == 0 &&
+               std::count_if(in.body.begin(), in.body.end(), [](const ClassElement& elem) {
                    return std::holds_alternative<Variable>(elem) && std::get<Variable>(elem).isStatic;
                }) == 0) { // no methods and no static members
         return "";

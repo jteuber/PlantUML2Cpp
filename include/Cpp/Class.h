@@ -52,7 +52,7 @@ struct Separator
     std::string text;
 };
 
-using BodyElement = std::variant<std::string, Variable, Method, VisibilityKeyword, Separator>;
+using ClassElement = std::variant<std::string, Variable, Method, VisibilityKeyword, Separator>;
 
 struct Class
 {
@@ -64,7 +64,7 @@ struct Class
     std::vector<std::string> inherits;
     std::set<std::string> localIncludes;
     std::set<std::string> externalIncludes;
-    std::vector<BodyElement> body;
+    std::vector<ClassElement> body;
 };
 
 } // namespace Cpp
