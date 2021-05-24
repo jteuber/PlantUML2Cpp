@@ -91,16 +91,8 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
             if (r.object.front().empty()) {
                 m_lastEncounteredClass->inherits.push_back(r.object.back());
             } else {
-                std::string parentNS;
-                if (!m_namespaceStack.empty()) {
-                    parentNS =
-                        std::accumulate(++m_namespaceStack.begin(),
-                                        m_namespaceStack.end(),
-                                        m_namespaceStack.front(),
-                                        [](const auto& a, const auto& b) -> std::string { return a + "::" + b; });
-                }
                 std::string dep = std::accumulate(
-                    r.object.begin(), r.object.end(), parentNS, [](const auto& a, const auto& b) -> std::string {
+                    r.object.begin(), r.object.end(), std::string(), [](const auto& a, const auto& b) -> std::string {
                         return a + (a.empty() ? "" : "::") + b;
                     });
 

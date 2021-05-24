@@ -438,6 +438,45 @@ TEST(ClassTranslatorTest, NestedNamespaces)
     EXPECT_EQ(foo.namespaces.back(), "net");
 }
 
+TEST(ClassTranslatorTest, InheritFromOtherNamespace)
+{
+    // Arrange
+    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+        namespace net {
+            class foo
+        }
+        namespace dummy {
+            class bar
+            bar --|> net.foo
+        }
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 2);
+
+    Cpp::Class foo = classes[0];
+    EXPECT_EQ(foo.name, "foo");
+    ASSERT_EQ(foo.namespaces.size(), 1);
+    EXPECT_EQ(foo.namespaces.back(), "net");
+
+    Cpp::Class bar = classes[1];
+    EXPECT_EQ(bar.name, "bar");
+    ASSERT_EQ(bar.inherits.size(), 1);
+    EXPECT_EQ(bar.inherits[0], "net::foo");
+    ASSERT_EQ(bar.namespaces.size(), 1);
+    EXPECT_EQ(bar.namespaces.back(), "dummy");
+}
+
 TEST(ClassTranslatorTest, Stereotypes)
 {
     // Arrange
