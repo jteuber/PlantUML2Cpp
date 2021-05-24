@@ -169,10 +169,4 @@ using ModelElement = std::variant<std::string,
                                   RelationshipType,
                                   Visibility>;
 
-struct SyntaxNode
-{
-    ModelElement element;
-    std::vector<SyntaxNode> children;
-};
-
 } // namespace PlantUml

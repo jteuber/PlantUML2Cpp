@@ -5,7 +5,7 @@
 #include <peg_parser/generator.h>
 
 #include "AbstractVisitor.h"
-#include "PlantUml/ModelElement.h"
+#include "PlantUml/SyntaxNode.h"
 
 namespace PlantUml {
 

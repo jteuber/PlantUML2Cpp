@@ -1,6 +1,7 @@
 #include "PlantUml/Parser.h"
 
 #include "PlantUml/ModelElement.h"
+#include "PlantUml/SyntaxNode.h"
 
 #include <algorithm>
 #include <bits/ranges_algobase.h>
@@ -344,20 +345,7 @@ bool Parser::parse(std::string_view input)
 
 void Parser::visitAST(AbstractVisitor& visitor)
 {
-    // depth-first search through the tree
-    std::stack<const SyntaxNode*> nodeStack;
-    nodeStack.push(&root);
-    while (!nodeStack.empty()) {
-        const SyntaxNode* top = nodeStack.top();
-        nodeStack.pop();
-
-        bool visitChildren = std::visit([&visitor](auto&& arg) -> bool { return visitor.visit(arg); }, top->element);
-        if (visitChildren) {
-            for (const auto& child : top->children | std::views::reverse) {
-                nodeStack.push(&child);
-            }
-        }
-    }
+    root.visit(visitor);
 }
 
 std::string Parser::toName(Expression e)
