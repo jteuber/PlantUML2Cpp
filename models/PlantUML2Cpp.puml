@@ -17,10 +17,18 @@ class Config {
 }
 
 PlantUML2Cpp *-- "1" PlantUml.Parser
-PlantUML2Cpp *-- "1" Cpp.Translator
-PlantUML2Cpp *-- "1" Cpp.PostProcessor
-PlantUML2Cpp *-- "1" Cpp.CodeGenerator
+PlantUML2Cpp *-- Generator
 PlantUML2Cpp *-left- "1" Config
+
+class File {
+    +path : path
+    +content : string
+}
+
+interface Generator {
+    generate(PlantUml.SyntaxNode root) : vector<File>
+}
+Generator -> File : uses
 
 namespace PlantUml {
 
@@ -136,7 +144,9 @@ namespace PlantUml {
         Method
     }
 
-    class SyntaxNode
+    class SyntaxNode {
+        +visit(AbstractVisitor visitor)
+    }
 
     Parser *-- SyntaxNode : root
 
@@ -164,7 +174,7 @@ namespace PlantUml {
     End *-- "1" EndType : type
     Relationship *-- "1" RelationshipType : type
 
-    AbstractVisitor -left-> ModelElement : visits
+    AbstractVisitor -right-> ModelElement : visits
 
     Parser *-up- "1" peg_parser.SyntaxTree
     Parser *-up- "1" peg_parser.ParserGenerator
@@ -174,172 +184,130 @@ namespace PlantUml {
 
 namespace Cpp {
 
+    namespace Class {
+        ' *************** ALGORITHMS ***************
+        class PostProcessor {
+            +process(vector<Class>& classes)
+        }
 
-    ' *************** DATA ***************
+        class IncludeGatherer {
+            +gather(Class& c)
+        }
+        class IncludeOptimizer {
+            +process(vector<Class>& classes)
+        }
+        class MemberSorter {
+            +sort(Class& c)
+        }
 
-    class Class {
-        +name : string
-        +comment : string
-        +isStruct : bool
-        +namespaces : list<string>
-        +inherits : set<string>
-        +externalIncludes : vector<string>
-        +localIncludes : vector<string>
-    }
-    class ClassElement << (V,#FF55AA) >>
-    class VisibilityKeyword {
-        +name : string
-    }
-    class Separator {
-        +text : string
-    }
-    class Variable {
-        +name : string
-        +comment : string
-        +isStatic : bool
-    }
-    class Method {
-        +name : string
-        +comment : string
-        +isAbstract : bool
-        +isConst : bool
-        +isStatic : bool
-    }
-    class Parameter {
-        +name : string
-    }
-    class Type
-    {
-        +list<string> base;
-        +vector<Type> templateParams;
-    }
-
-    Method *-- "1" Type : returnType
-    Parameter *-- "1" Type : type
-    Variable *-- "1" Type : type
+        PostProcessor *-- IncludeGatherer
+        PostProcessor *-- IncludeOptimizer
+        PostProcessor *--- MemberSorter
+        IncludeOptimizer <- IncludeGatherer
 
 
-    Class *-- "0..*" ClassElement : body
-    ClassElement *-- Method
-    ClassElement *-- Variable
-    ClassElement *-- VisibilityKeyword
-    ClassElement *-- Separator
-    Method *-- "0..*" Parameter : parameters
+        class HeaderGenerator {
+            +string generate(Class in)
+        }
+
+        class SourceGenerator {
+            +string generate(Class in)
+        }
+
+        Translator -left-> PostProcessor
+
+        class Generator implements .Generator {
+        }
+        Generator *-- Translator
+        Generator *-- PostProcessor
+        Generator *-- HeaderGenerator
+        Generator *--- SourceGenerator
+        
+        class Translator {
+            +visit(Variable v)     : bool
+            +visit(Method m)       : bool
+            +visit(Relationship r) : bool
+            +visit(Element e)      : bool
+            +visit(Note n)         : bool
+            +visit(Separator s)    : bool
+            +visit(Parameter p)    : bool
+
+            +finalize() : Class
+        }
+        Translator .|> PlantUml.AbstractVisitor
+
+        ' *************** DATA ***************
+        class Class {
+            +name : string
+            +comment : string
+            +isStruct : bool
+            +namespaces : list<string>
+            +inherits : set<string>
+            +externalIncludes : vector<string>
+            +localIncludes : vector<string>
+        }
+        class ClassElement << (V,#FF55AA) >>
+        class VisibilityKeyword {
+            +name : string
+        }
+        class Separator {
+            +text : string
+        }
+        class Variable {
+            +name : string
+            +comment : string
+            +isStatic : bool
+        }
+        class Method {
+            +name : string
+            +comment : string
+            +isAbstract : bool
+            +isConst : bool
+            +isStatic : bool
+        }
+        class Parameter {
+            +name : string
+        }
+        class Type
+        {
+            +list<string> base;
+            +vector<Type> templateParams;
+        }
+
+        Method *-- "1" Type : returnType
+        Parameter *-- "1" Type : type
+        Variable *-- "1" Type : type
 
 
-    class Enum {
-        +name  : string
-        +namespaces : list<string>
-        +comment : string
-    }
-    class Keyword {
-        +name : string
-    }
-
-    Enum *-- Keyword
+        Class *-- "0..*" ClassElement : body
+        ClassElement *-- Method
+        ClassElement *-- Variable
+        ClassElement *-- VisibilityKeyword
+        ClassElement *-- Separator
+        Method *-- "0..*" Parameter : parameters
 
 
-    class Variant {
-        +name  : string
-        +namespaces : list<string>
-        +comment : string
-    }
+        ' class Enum {
+        '     +name  : string
+        '     +namespaces : list<string>
+        '     +comment : string
+        ' }
+        ' class Keyword {
+        '     +name : string
+        ' }
 
-    Variant *-- "1..*" Type : containedTypes
-
-
-    class Types << (V,#FF55AA) >>
-    Types *-- Class
-    Types *-- Enum
-    Types *-- Variant
+        ' Enum *-- Keyword
 
 
-    class Module {
-        +name : string
-    }
-    Module *-- "0..*" Module
-    Module *-- "0..*" Types
+        ' class Variant {
+        '     +name  : string
+        '     +namespaces : list<string>
+        '     +comment : string
+        ' }
 
-
-    ' *************** ALGORITHMS ***************
-    class ClassTranslator {
-        +visit(Variable v)     : bool
-        +visit(Method m)       : bool
-        +visit(Relationship r) : bool
-        +visit(Element e)      : bool
-        +visit(Note n)         : bool
-        +visit(Separator s)    : bool
-        +visit(Parameter p)    : bool
-
-        +finalize() : Class
-    }
-
-    class ClassPostProcessor {
-        +process(vector<Class>& classes)
-    }
-
-    class IncludeGatherer {
-        +gather(Class& c)
-    }
-    class IncludeOptimizer {
-        +process(vector<Class>& classes)
-    }
-    class MemberSorter {
-        +sort(Class& c)
-    }
-
-    ClassPostProcessor *-- IncludeGatherer
-    ClassPostProcessor *-- IncludeOptimizer
-    ClassPostProcessor *--- MemberSorter
-    IncludeOptimizer <- IncludeGatherer
-
-    class ClassGenerator {
-        +generate(Class c)
-    }
-
-    class HeaderGenerator {
-        +string generate(Class in)
+        ' Variant *-- "1..*" Type : containedTypes
     }
 
-    class SourceGenerator {
-        +string generate(Class in)
-    }
-
-    ClassGenerator *-- HeaderGenerator
-    ClassGenerator *-- SourceGenerator
-
-
-
-    class Translator {
-        +visit(PlantUml.Variable v)     : bool
-        +visit(PlantUml.Method m)       : bool
-        +visit(PlantUml.Relationship r) : bool
-        +visit(PlantUml.Container c)    : bool
-        +visit(PlantUml.Element e)      : bool
-        +visit(PlantUml.Note n)         : bool
-        +visit(PlantUml.Separator s)    : bool
-        +visit(PlantUml.Enumerator k)      : bool
-        +visit(PlantUml.Parameter p)    : bool
-        +visit(PlantUml.End e)          : bool
-
-        +result() : Module
-    }
-    Translator --|> PlantUml.AbstractVisitor
-    Translator *-- ClassTranslator
-
-    class PostProcessor {
-        process(Module m) : Module
-    }
-    PostProcessor *-- ClassPostProcessor
-
-    class CodeGenerator {
-        +generate(Module m)
-    }
-    CodeGenerator *-- ClassGenerator
-
-
-    PostProcessor <- Translator
-    CodeGenerator <- PostProcessor
 }
 
 @enduml
