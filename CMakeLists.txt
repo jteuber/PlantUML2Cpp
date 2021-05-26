@@ -9,11 +9,13 @@ file(GLOB SRC_FILES
     "source/*.cpp"
     "source/PlantUml/*.cpp"
     "source/Cpp/*.cpp"
+    "source/Cpp/*/*.cpp"
 )
 file(GLOB HEADER_FILES
     "include/*.h"
     "include/PlantUml/*.h"
     "include/Cpp/*.h"
+    "include/Cpp/*/*.h"
 )
 
 add_executable(PlantUML2Cpp ${SRC_FILES} ${HEADER_FILES})

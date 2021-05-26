@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace Cpp {
+namespace Class {
 
 struct Type
 {
@@ -67,4 +68,5 @@ struct Class
     std::vector<ClassElement> body;
 };
 
+} // namespace Class
 } // namespace Cpp

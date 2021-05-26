@@ -1,6 +1,7 @@
-#include "Cpp/MemberSorter.h"
+#include "Cpp/Class/MemberSorter.h"
 
 namespace Cpp {
+namespace Class {
 
 void MemberSorter::sort(Class& c)
 {
@@ -28,4 +29,5 @@ void MemberSorter::sort(Class& c)
     }
 }
 
+} // namespace Class
 } // namespace Cpp

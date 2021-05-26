@@ -1,20 +1,23 @@
 #include "gtest/gtest.h"
 
-#include "Cpp/ClassTranslator.h"
+#include "Cpp/Class/Translator.h"
 #include "PlantUml/Parser.h"
 
 namespace puml = PlantUml;
 
-void act(PlantUml::Parser& parser, Cpp::ClassTranslator& sut, std::string_view puml)
+namespace Cpp {
+namespace Class {
+
+void act(PlantUml::Parser& parser, Translator& sut, std::string_view puml)
 {
     ASSERT_TRUE(parser.parse(puml));
     parser.visitAST(sut);
 }
 
-TEST(ClassTranslatorTest, EmptyDiagram)
+TEST(TranslatorTest, EmptyDiagram)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
 
     puml::Container c{{}, "", puml::ContainerType::Document};
     puml::End ec{puml::EndType::Document};
@@ -28,10 +31,10 @@ TEST(ClassTranslatorTest, EmptyDiagram)
     EXPECT_TRUE(classes.empty());
 }
 
-TEST(ClassTranslatorTest, SingleAbstract)
+TEST(TranslatorTest, SingleAbstract)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
 
     puml::Container c{{}, "", puml::ContainerType::Document};
     puml::Element e{{"name"}, "", ' ', {}, {}, puml::ElementType::Abstract};
@@ -54,10 +57,10 @@ TEST(ClassTranslatorTest, SingleAbstract)
     EXPECT_TRUE(classes[0].namespaces.empty());
 }
 
-TEST(ClassTranslatorTest, AllSimpleContainers)
+TEST(TranslatorTest, AllSimpleContainers)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -93,10 +96,10 @@ TEST(ClassTranslatorTest, AllSimpleContainers)
     EXPECT_EQ(classes[3].isStruct, false);
 }
 
-TEST(ClassTranslatorTest, EntityWithEmptyBody)
+TEST(TranslatorTest, EntityWithEmptyBody)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -117,10 +120,10 @@ TEST(ClassTranslatorTest, EntityWithEmptyBody)
     EXPECT_TRUE(classes[0].body.empty());
 }
 
-TEST(ClassTranslatorTest, EntityWithSingleVariable)
+TEST(TranslatorTest, EntityWithSingleVariable)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -142,14 +145,14 @@ TEST(ClassTranslatorTest, EntityWithSingleVariable)
     EXPECT_EQ(classes[0].isStruct, true);
 
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "variable");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"var"});
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "variable");
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Type{"var"});
 }
 
-TEST(ClassTranslatorTest, ClassWithTwoMethods)
+TEST(TranslatorTest, ClassWithTwoMethods)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -170,22 +173,22 @@ TEST(ClassTranslatorTest, ClassWithTwoMethods)
     EXPECT_EQ(classes[0].name, "test");
 
     ASSERT_EQ(classes[0].body.size(), 2);
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).name, "method");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).returnType, Cpp::Type{"var"});
-    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).parameters.empty());
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).name, "method");
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Type{"var"});
+    EXPECT_TRUE(std::get<Method>(classes[0].body[0]).parameters.empty());
 
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).name, "method2");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).returnType, Cpp::Type{"var"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).name, "method2");
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).returnType, Type{"var"});
 
-    ASSERT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].name, "input");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
+    ASSERT_EQ(std::get<Method>(classes[0].body[1]).parameters.size(), 1);
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].name, "input");
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
 }
 
-TEST(ClassTranslatorTest, Inheritance)
+TEST(TranslatorTest, Inheritance)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -206,10 +209,10 @@ TEST(ClassTranslatorTest, Inheritance)
     EXPECT_EQ(classes[0].inherits[0], "Class01");
 }
 
-TEST(ClassTranslatorTest, Composition)
+TEST(TranslatorTest, Composition)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -227,14 +230,14 @@ TEST(ClassTranslatorTest, Composition)
 
     EXPECT_EQ(classes[0].name, "Class03");
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "class04");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, Cpp::Type{"Class04"});
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "class04");
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Type{"Class04"});
 }
 
-TEST(ClassTranslatorTest, Aggregation)
+TEST(TranslatorTest, Aggregation)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -252,14 +255,14 @@ TEST(ClassTranslatorTest, Aggregation)
 
     EXPECT_EQ(classes[0].name, "Class05");
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "class06");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, (Cpp::Type{"std::shared_ptr", {{"Class06"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "class06");
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::shared_ptr", {{"Class06"}}}));
 }
 
-TEST(ClassTranslatorTest, LabelsOnRelations)
+TEST(TranslatorTest, LabelsOnRelations)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -284,21 +287,21 @@ TEST(ClassTranslatorTest, LabelsOnRelations)
     EXPECT_EQ(classes[0].isInterface, false);
     EXPECT_EQ(classes[0].isStruct, false);
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "contains");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, (Cpp::Type{"std::vector", {{"Class02"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "contains");
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::vector", {{"Class02"}}}));
 
     EXPECT_EQ(classes[2].name, "Class03");
     EXPECT_EQ(classes[2].isInterface, false);
     EXPECT_EQ(classes[2].isStruct, false);
     ASSERT_EQ(classes[2].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).name, "aggregation");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[2].body[0]).type, (Cpp::Type{"std::shared_ptr", {{"Class04"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[2].body[0]).name, "aggregation");
+    EXPECT_EQ(std::get<Variable>(classes[2].body[0]).type, (Type{"std::shared_ptr", {{"Class04"}}}));
 }
 
-TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
+TEST(TranslatorTest, ExternalMethodsAndVariables)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -320,24 +323,24 @@ TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
 
     EXPECT_EQ(classes[0].name, "Object");
     ASSERT_EQ(classes[0].body.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).name, "equals");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).returnType, Cpp::Type{"void"});
-    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).parameters.empty());
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).name, "equals");
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Type{"void"});
+    EXPECT_TRUE(std::get<Method>(classes[0].body[0]).parameters.empty());
 
     EXPECT_EQ(classes[1].name, "ArrayList");
     ASSERT_EQ(classes[1].body.size(), 2);
 
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[1].body[0]).name, "elementData");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[1].body[0]).type, Cpp::Type{"Object[]"});
-    EXPECT_EQ(std::get<Cpp::Method>(classes[1].body[1]).name, "size");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[1].body[1]).returnType, Cpp::Type{"int"});
-    EXPECT_TRUE(std::get<Cpp::Method>(classes[1].body[1]).parameters.empty());
+    EXPECT_EQ(std::get<Variable>(classes[1].body[0]).name, "elementData");
+    EXPECT_EQ(std::get<Variable>(classes[1].body[0]).type, Type{"Object[]"});
+    EXPECT_EQ(std::get<Method>(classes[1].body[1]).name, "size");
+    EXPECT_EQ(std::get<Method>(classes[1].body[1]).returnType, Type{"int"});
+    EXPECT_TRUE(std::get<Method>(classes[1].body[1]).parameters.empty());
 }
 
-TEST(ClassTranslatorTest, Namespaces)
+TEST(TranslatorTest, Namespaces)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -362,7 +365,7 @@ TEST(ClassTranslatorTest, Namespaces)
     EXPECT_EQ(classes[0].name, "BaseClass");
     EXPECT_TRUE(classes[0].namespaces.empty());
 
-    Cpp::Class person = classes[1];
+    Class person = classes[1];
     EXPECT_EQ(person.name, "Person");
     ASSERT_EQ(person.namespaces.size(), 2);
     EXPECT_EQ(person.namespaces.back(), "dummy");
@@ -375,10 +378,10 @@ TEST(ClassTranslatorTest, Namespaces)
     EXPECT_TRUE(classes[2].namespaces.empty());
 }
 
-TEST(ClassTranslatorTest, NamespaceSeperator)
+TEST(TranslatorTest, NamespaceSeperator)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -398,7 +401,7 @@ TEST(ClassTranslatorTest, NamespaceSeperator)
     auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
-    Cpp::Class foo = classes[0];
+    Class foo = classes[0];
     EXPECT_EQ(foo.name, "foo");
     ASSERT_EQ(foo.namespaces.size(), 2);
     EXPECT_EQ(foo.namespaces.back(), "X2");
@@ -406,10 +409,10 @@ TEST(ClassTranslatorTest, NamespaceSeperator)
     EXPECT_EQ(foo.namespaces.back(), "X1");
 }
 
-TEST(ClassTranslatorTest, NestedNamespaces)
+TEST(TranslatorTest, NestedNamespaces)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -430,7 +433,7 @@ TEST(ClassTranslatorTest, NestedNamespaces)
     auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
-    Cpp::Class foo = classes[0];
+    Class foo = classes[0];
     EXPECT_EQ(foo.name, "Person");
     ASSERT_EQ(foo.namespaces.size(), 2);
     EXPECT_EQ(foo.namespaces.back(), "dummy");
@@ -438,10 +441,10 @@ TEST(ClassTranslatorTest, NestedNamespaces)
     EXPECT_EQ(foo.namespaces.back(), "net");
 }
 
-TEST(ClassTranslatorTest, InheritFromOtherNamespace)
+TEST(TranslatorTest, InheritFromOtherNamespace)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -464,12 +467,12 @@ TEST(ClassTranslatorTest, InheritFromOtherNamespace)
     auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 2);
 
-    Cpp::Class foo = classes[0];
+    Class foo = classes[0];
     EXPECT_EQ(foo.name, "foo");
     ASSERT_EQ(foo.namespaces.size(), 1);
     EXPECT_EQ(foo.namespaces.back(), "net");
 
-    Cpp::Class bar = classes[1];
+    Class bar = classes[1];
     EXPECT_EQ(bar.name, "bar");
     ASSERT_EQ(bar.inherits.size(), 1);
     EXPECT_EQ(bar.inherits[0], "net::foo");
@@ -477,10 +480,10 @@ TEST(ClassTranslatorTest, InheritFromOtherNamespace)
     EXPECT_EQ(bar.namespaces.back(), "dummy");
 }
 
-TEST(ClassTranslatorTest, Stereotypes)
+TEST(TranslatorTest, Stereotypes)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -497,15 +500,15 @@ TEST(ClassTranslatorTest, Stereotypes)
     auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
-    Cpp::Class system = classes[0];
+    Class system = classes[0];
     EXPECT_EQ(system.name, "SystemData");
     EXPECT_TRUE(system.isStruct);
 }
 
-TEST(ClassTranslatorTest, Templates)
+TEST(TranslatorTest, Templates)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
 
     puml::Element e{{"test"}, "", ' ', {}, {}, puml::ElementType::Class};
     puml::Variable v{
@@ -535,18 +538,17 @@ TEST(ClassTranslatorTest, Templates)
     EXPECT_EQ(classes[0].isStruct, false);
 
     ASSERT_EQ(classes[0].body.size(), 2);
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).name, "variable");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[0]).type, (Cpp::Type{"std::vector", {Cpp::Type{"std::string"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "variable");
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::vector", {Type{"std::string"}}}));
 
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[1]).name, "map");
-    EXPECT_EQ(std::get<Cpp::Variable>(classes[0].body[1]).type,
-              (Cpp::Type{"std::map", {Cpp::Type{"std::string"}, Cpp::Type{"int"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[1]).name, "map");
+    EXPECT_EQ(std::get<Variable>(classes[0].body[1]).type, (Type{"std::map", {Type{"std::string"}, Type{"int"}}}));
 }
 
-TEST(ClassTranslatorTest, Interface)
+TEST(TranslatorTest, Interface)
 {
     // Arrange
-    Cpp::ClassTranslator sut{std::make_shared<Config>()};
+    Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
 
     static constexpr auto puml =
@@ -567,16 +569,19 @@ TEST(ClassTranslatorTest, Interface)
     EXPECT_EQ(classes[0].name, "test");
 
     ASSERT_EQ(classes[0].body.size(), 2);
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).name, "method");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[0]).returnType, Cpp::Type{"var"});
-    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).isAbstract);
-    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[0]).parameters.empty());
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).name, "method");
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Type{"var"});
+    EXPECT_TRUE(std::get<Method>(classes[0].body[0]).isAbstract);
+    EXPECT_TRUE(std::get<Method>(classes[0].body[0]).parameters.empty());
 
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).name, "method2");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).returnType, Cpp::Type{"var"});
-    EXPECT_TRUE(std::get<Cpp::Method>(classes[0].body[1]).isAbstract);
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).name, "method2");
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).returnType, Type{"var"});
+    EXPECT_TRUE(std::get<Method>(classes[0].body[1]).isAbstract);
 
-    ASSERT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters.size(), 1);
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].name, "input");
-    EXPECT_EQ(std::get<Cpp::Method>(classes[0].body[1]).parameters[0].type, Cpp::Type{"bool"});
+    ASSERT_EQ(std::get<Method>(classes[0].body[1]).parameters.size(), 1);
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].name, "input");
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
 }
+
+} // namespace Class
+} // namespace Cpp

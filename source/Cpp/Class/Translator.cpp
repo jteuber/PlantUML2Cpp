@@ -1,4 +1,4 @@
-#include "Cpp/ClassTranslator.h"
+#include "Cpp/Class/Translator.h"
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
@@ -13,17 +13,18 @@
 #include <fmt/core.h>
 
 namespace Cpp {
+namespace Class {
 
-ClassTranslator::ClassTranslator(std::shared_ptr<Config> config)
+Translator::Translator(std::shared_ptr<Config> config)
     : m_config(config)
 {}
 
-std::vector<Class> ClassTranslator::results() &&
+std::vector<Class> Translator::results() &&
 {
     return m_classes;
 }
 
-bool ClassTranslator::visit(const PlantUml::Variable& v)
+bool Translator::visit(const PlantUml::Variable& v)
 {
     if (!v.element.empty()) {
         m_lastEncounteredClass = std::ranges::find(m_classes, v.element.back(), &Class::name);
@@ -53,7 +54,7 @@ bool ClassTranslator::visit(const PlantUml::Variable& v)
     return true;
 }
 
-bool ClassTranslator::visit(const PlantUml::Method& m)
+bool Translator::visit(const PlantUml::Method& m)
 {
     if (!m.element.empty()) {
         m_lastEncounteredClass     = std::ranges::find(m_classes, m.element.back(), &Class::name);
@@ -81,7 +82,7 @@ bool ClassTranslator::visit(const PlantUml::Method& m)
     return true;
 }
 
-bool ClassTranslator::visit(const PlantUml::Relationship& r)
+bool Translator::visit(const PlantUml::Relationship& r)
 {
     m_lastEncounteredClass = std::ranges::find(m_classes, r.subject.back(), &Class::name);
 
@@ -143,7 +144,7 @@ bool ClassTranslator::visit(const PlantUml::Relationship& r)
     return true;
 }
 
-bool ClassTranslator::visit(const PlantUml::Container& c)
+bool Translator::visit(const PlantUml::Container& c)
 {
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
@@ -153,7 +154,7 @@ bool ClassTranslator::visit(const PlantUml::Container& c)
     return true;
 }
 
-bool ClassTranslator::visit(const PlantUml::Element& e)
+bool Translator::visit(const PlantUml::Element& e)
 {
     if (e.type != PlantUml::ElementType::Class && e.type != PlantUml::ElementType::Entity &&
         e.type != PlantUml::ElementType::Interface && e.type != PlantUml::ElementType::Abstract) {
@@ -184,27 +185,27 @@ bool ClassTranslator::visit(const PlantUml::Element& e)
     return true;
 }
 
-bool ClassTranslator::visit(const PlantUml::Note& /*n*/)
+bool Translator::visit(const PlantUml::Note& /*n*/)
 {
     return false;
 }
 
-bool ClassTranslator::visit(const PlantUml::Separator& /*s*/)
+bool Translator::visit(const PlantUml::Separator& /*s*/)
 {
     return false;
 }
 
-bool ClassTranslator::visit(const PlantUml::Enumerator& /*e*/)
+bool Translator::visit(const PlantUml::Enumerator& /*e*/)
 {
     return false;
 }
 
-bool ClassTranslator::visit(const PlantUml::Type& /*t*/)
+bool Translator::visit(const PlantUml::Type& /*t*/)
 {
     return false;
 }
 
-bool ClassTranslator::visit(const PlantUml::Parameter& p)
+bool Translator::visit(const PlantUml::Parameter& p)
 {
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
@@ -216,7 +217,7 @@ bool ClassTranslator::visit(const PlantUml::Parameter& p)
     return true;
 }
 
-bool ClassTranslator::visit(const PlantUml::End& e)
+bool Translator::visit(const PlantUml::End& e)
 {
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
@@ -236,7 +237,7 @@ bool ClassTranslator::visit(const PlantUml::End& e)
     return true;
 }
 
-Type ClassTranslator::umlToCppType(PlantUml::Type umlType)
+Type Translator::umlToCppType(PlantUml::Type umlType)
 {
     Type out;
 
@@ -260,7 +261,7 @@ Type ClassTranslator::umlToCppType(PlantUml::Type umlType)
     return out;
 }
 
-Type ClassTranslator::stringToCppType(std::string_view typeString)
+Type Translator::stringToCppType(std::string_view typeString)
 {
     auto pos = typeString.find_first_of(",<>");
     Type ret{std::string(typeString.substr(0, pos))};
@@ -282,7 +283,7 @@ Type ClassTranslator::stringToCppType(std::string_view typeString)
     return ret;
 }
 
-std::string ClassTranslator::visibilityToString(PlantUml::Visibility vis)
+std::string Translator::visibilityToString(PlantUml::Visibility vis)
 {
     switch (vis) {
     case PlantUml::Visibility::Protected:
@@ -296,4 +297,5 @@ std::string ClassTranslator::visibilityToString(PlantUml::Visibility vis)
     }
 }
 
+} // namespace Class
 } // namespace Cpp

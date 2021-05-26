@@ -3,17 +3,18 @@
 #include <memory>
 #include <set>
 
-#include "Cpp/Class.h"
-#include "Cpp/IncludeGatherer.h"
-#include "Cpp/IncludeOptimizer.h"
-#include "Cpp/MemberSorter.h"
+#include "Cpp/Class/Class.h"
+#include "Cpp/Class/IncludeGatherer.h"
+#include "Cpp/Class/IncludeOptimizer.h"
+#include "Cpp/Class/MemberSorter.h"
 
 namespace Cpp {
+namespace Class {
 
-class ClassPostProcessor
+class PostProcessor
 {
 public:
-    ClassPostProcessor(std::shared_ptr<Config> config);
+    PostProcessor(std::shared_ptr<Config> config);
     void process(std::vector<Class>& classes);
 
 private:
@@ -24,4 +25,5 @@ private:
     MemberSorter m_sorter;
 };
 
+} // namespace Class
 } // namespace Cpp

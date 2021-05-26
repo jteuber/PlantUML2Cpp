@@ -1,8 +1,9 @@
-#include "Cpp/SourceGenerator.h"
+#include "Cpp/Class/SourceGenerator.h"
 
 #include <ranges>
 
 namespace Cpp {
+namespace Class {
 
 std::string SourceGenerator::generate(const Class& in)
 {
@@ -78,4 +79,5 @@ std::string SourceGenerator::typeToString(const Type& t)
     return t.base + templ;
 }
 
+} // namespace Class
 } // namespace Cpp

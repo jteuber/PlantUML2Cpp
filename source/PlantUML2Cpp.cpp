@@ -1,5 +1,5 @@
 #include "PlantUML2Cpp.h"
-#include "Cpp/HeaderGenerator.h"
+#include "Cpp/Class/HeaderGenerator.h"
 #include "peg_parser/interpreter.h"
 
 #include <array>
@@ -44,13 +44,13 @@ bool PlantUML2Cpp::run(fs::path path)
             std::string fileContents = readFullFile(file.path());
 
             if (parser.parse(fileContents)) {
-                parser.visitAST(classTranslator);
+                parser.visitAST(Translator);
 
-                auto classes = std::move(classTranslator).results();
-                classPostProcessor.process(classes);
+                auto classes = std::move(Translator).results();
+                PostProcessor.process(classes);
 
                 for (const auto& c : classes) {
-                    classGenerator.generate(path, c);
+                    Generator.generate(path, c);
                 }
             }
         }

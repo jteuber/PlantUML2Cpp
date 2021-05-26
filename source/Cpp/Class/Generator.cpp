@@ -1,17 +1,18 @@
-#include "Cpp/ClassGenerator.h"
+#include "Cpp/Class/Generator.h"
 
 #include <fstream>
 #include <iostream>
 #include <numeric>
 
 namespace Cpp {
+namespace Class {
 
-ClassGenerator::ClassGenerator(std::shared_ptr<Config> config)
+Generator::Generator(std::shared_ptr<Config> config)
     : m_headerGenerator(config)
     , m_config(config)
 {}
 
-void ClassGenerator::generate(fs::path basePath, const Class& c)
+void Generator::generate(fs::path basePath, const Class& c)
 {
     auto nsPath =
         std::accumulate(c.namespaces.begin(), c.namespaces.end(), fs::path(), [](const auto& a, const auto& b) {
@@ -30,7 +31,7 @@ void ClassGenerator::generate(fs::path basePath, const Class& c)
     }
 }
 
-bool ClassGenerator::writeFullFile(const fs::path& filepath, std::string_view contents)
+bool Generator::writeFullFile(const fs::path& filepath, std::string_view contents)
 {
     if (!fs::exists(filepath)) {
         std::cout << "writing to file " << filepath << std::endl;
@@ -48,4 +49,5 @@ bool ClassGenerator::writeFullFile(const fs::path& filepath, std::string_view co
     return false;
 }
 
+} // namespace Class
 } // namespace Cpp

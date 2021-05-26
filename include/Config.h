@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cpp/Class.h"
+#include "Cpp/Class/Class.h"
 
 #include <array>
 #include <string>

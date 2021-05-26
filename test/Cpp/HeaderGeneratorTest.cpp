@@ -3,10 +3,11 @@
 #include <regex>
 
 #include "Config.h"
-#include "Cpp/Class.h"
-#include "Cpp/HeaderGenerator.h"
+#include "Cpp/Class/Class.h"
+#include "Cpp/Class/HeaderGenerator.h"
 
 namespace Cpp {
+namespace Class {
 
 static const std::string ws     = "( |\t|\n)*";
 static const std::string header = "#pragma once" + ws;
@@ -319,4 +320,5 @@ TEST(HeaderGenerator, Interface)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
+} // namespace Class
 } // namespace Cpp

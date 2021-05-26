@@ -8,11 +8,12 @@ namespace fs = std::filesystem;
 #include "SourceGenerator.h"
 
 namespace Cpp {
+namespace Class {
 
-class ClassGenerator
+class Generator
 {
 public:
-    ClassGenerator(std::shared_ptr<Config> config);
+    Generator(std::shared_ptr<Config> config);
     void generate(fs::path basePath, const Class& c);
 
 private:
@@ -24,4 +25,5 @@ private:
     std::shared_ptr<Config> m_config;
 };
 
+} // namespace Class
 } // namespace Cpp

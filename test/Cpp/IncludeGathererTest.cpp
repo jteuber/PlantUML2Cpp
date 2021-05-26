@@ -1,8 +1,9 @@
 #include "gtest/gtest.h"
 
-#include "Cpp/IncludeGatherer.h"
+#include "Cpp/Class/IncludeGatherer.h"
 
 namespace Cpp {
+namespace Class {
 
 TEST(IncludeGathererTest, NoPrimitives)
 {
@@ -80,4 +81,5 @@ TEST(IncludeGathererTest, MultipleFromVariable)
     EXPECT_NE(test.externalIncludes.find("vector"), test.externalIncludes.end());
 }
 
+} // namespace Class
 } // namespace Cpp

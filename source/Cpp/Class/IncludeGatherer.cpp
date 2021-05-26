@@ -1,10 +1,11 @@
-#include "Cpp/IncludeGatherer.h"
+#include "Cpp/Class/IncludeGatherer.h"
 
 #include <algorithm>
 #include <numeric>
 #include <variant>
 
 namespace Cpp {
+namespace Class {
 
 IncludeGatherer::IncludeGatherer(std::shared_ptr<Config> config)
     : m_config(config)
@@ -64,4 +65,5 @@ std::set<std::string> IncludeGatherer::decomposeType(const Type& type)
     return out;
 }
 
+} // namespace Class
 } // namespace Cpp

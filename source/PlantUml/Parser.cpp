@@ -119,7 +119,8 @@ Parser::Parser(/* args */)
     g["OpenTriRight"] << "'>'";
 
     g["LineModifiers"] << "'[hidden]' | 'left' | 'right' | 'up' | 'down'";
-    g["Line"] << "'-'* LineModifiers? '-'*";
+    g["LineCharacter"] << "'-' | '.'";
+    g["Line"] << "LineCharacter* LineModifiers? LineCharacter*";
 
     g["Label"] << "(!('>' | Endl) .)*";
 

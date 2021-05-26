@@ -4,9 +4,10 @@
 #include <set>
 
 #include "Config.h"
-#include "Cpp/Class.h"
+#include "Cpp/Class/Class.h"
 
 namespace Cpp {
+namespace Class {
 
 class HeaderGenerator
 {
@@ -30,4 +31,5 @@ private:
     std::string m_variablePrefix;
 };
 
+} // namespace Class
 } // namespace Cpp

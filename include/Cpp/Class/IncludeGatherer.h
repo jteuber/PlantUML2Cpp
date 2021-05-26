@@ -5,9 +5,10 @@
 
 #include "Config.h"
 
-#include "Cpp/Class.h"
+#include "Cpp/Class/Class.h"
 
 namespace Cpp {
+namespace Class {
 
 class IncludeGatherer
 {
@@ -22,4 +23,5 @@ private:
     std::shared_ptr<Config> m_config;
 };
 
+} // namespace Class
 } // namespace Cpp

@@ -1,8 +1,9 @@
 #include "gtest/gtest.h"
 
-#include "Cpp/MemberSorter.h"
+#include "Cpp/Class/MemberSorter.h"
 
 namespace Cpp {
+namespace Class {
 
 TEST(MemberSorterTest, NoPrimitives)
 {
@@ -26,4 +27,5 @@ TEST(MemberSorterTest, NoPrimitives)
     EXPECT_EQ(std::get<VisibilityKeyword>(test.body[6]).name, "public:");
 }
 
+} // namespace Class
 } // namespace Cpp

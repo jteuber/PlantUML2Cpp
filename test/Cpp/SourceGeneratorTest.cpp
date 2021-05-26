@@ -3,10 +3,11 @@
 #include <regex>
 
 #include "Config.h"
-#include "Cpp/Class.h"
-#include "Cpp/SourceGenerator.h"
+#include "Cpp/Class/Class.h"
+#include "Cpp/Class/SourceGenerator.h"
 
 namespace Cpp {
+namespace Class {
 
 static const std::string ws     = "( |\t|\n)*";
 static const std::string header = "#include \"test.h\"" + ws;
@@ -156,4 +157,5 @@ TEST(SourceGenerator, MultiMethodClass)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
+} // namespace Class
 } // namespace Cpp

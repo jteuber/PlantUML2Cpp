@@ -4,17 +4,18 @@
 #include <set>
 
 #include "Config.h"
-#include "Cpp/Class.h"
+#include "Cpp/Class/Class.h"
 
 #include "PlantUml/AbstractVisitor.h"
 #include "PlantUml/ModelElement.h"
 
 namespace Cpp {
+namespace Class {
 
-class ClassTranslator : public PlantUml::AbstractVisitor
+class Translator : public PlantUml::AbstractVisitor
 {
 public:
-    ClassTranslator(std::shared_ptr<Config> config);
+    Translator(std::shared_ptr<Config> config);
     std::vector<Class> results() &&;
 
     bool visit(const PlantUml::Variable& v) override;
@@ -48,4 +49,5 @@ private:
     std::shared_ptr<Config> m_config;
 };
 
+} // namespace Class
 } // namespace Cpp
