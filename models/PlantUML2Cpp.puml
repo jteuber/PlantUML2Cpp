@@ -98,10 +98,9 @@ namespace PlantUml {
     class Enumerator {
         +name : string
     }
-    class Type
-    {
-        +list<string> base;
-        +vector<Type> templateParams;
+    class Type {
+        +base : list<string>
+        +templateParams : vector<Type>
     }
     class Relationship {
         +subject : list<string> 
@@ -187,14 +186,14 @@ namespace Cpp {
     namespace Class {
         ' *************** ALGORITHMS ***************
         class PostProcessor {
-            +process(vector<Class>& classes)
+            +process(vector<Class> classes)
         }
 
         class IncludeGatherer {
             +gather(Class& c)
         }
         class IncludeOptimizer {
-            +process(vector<Class>& classes)
+            +process(vector<Class> classes)
         }
         class MemberSorter {
             +sort(Class& c)
@@ -270,8 +269,8 @@ namespace Cpp {
         }
         class Type
         {
-            +list<string> base;
-            +vector<Type> templateParams;
+            +base : list<string>
+            +templateParams : vector<Type>
         }
 
         Method *-- "1" Type : returnType
