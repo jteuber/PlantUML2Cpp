@@ -1,14 +1,10 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 
-#include "path.h"
-
-
-class File
+struct File
 {
-    path m_path;
-
-    std::string m_content;
-
+    std::filesystem::path path;
+    std::string content;
 };

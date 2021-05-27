@@ -344,9 +344,9 @@ bool Parser::parse(std::string_view input)
     return false;
 }
 
-void Parser::visitAST(AbstractVisitor& visitor)
+const SyntaxNode& Parser::getAST()
 {
-    root.visit(visitor);
+    return root;
 }
 
 std::string Parser::toName(Expression e)

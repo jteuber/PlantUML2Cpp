@@ -13,7 +13,7 @@ namespace PlantUml {
 void act(Parser& parser, VisitorMock& visitor, std::string_view puml)
 {
     EXPECT_TRUE(parser.parse(puml));
-    parser.visitAST(visitor);
+    parser.getAST().visit(visitor);
 }
 
 TEST(ParserTest, EmptyDiagram)

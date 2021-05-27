@@ -11,7 +11,7 @@ namespace Class {
 void act(PlantUml::Parser& parser, Translator& sut, std::string_view puml)
 {
     ASSERT_TRUE(parser.parse(puml));
-    parser.visitAST(sut);
+    parser.getAST().visit(sut);
 }
 
 TEST(TranslatorTest, EmptyDiagram)

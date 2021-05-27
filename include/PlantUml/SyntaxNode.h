@@ -11,7 +11,7 @@ namespace PlantUml {
 class SyntaxNode
 {
 public:
-    void visit(AbstractVisitor& visitor);
+    void visit(AbstractVisitor& visitor) const;
 
     ModelElement element;
     std::vector<SyntaxNode> children;

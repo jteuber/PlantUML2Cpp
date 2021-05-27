@@ -4,21 +4,26 @@
 namespace fs = std::filesystem;
 
 #include "Class.h"
+#include "File.h"
+#include "Generator.h"
 #include "HeaderGenerator.h"
+#include "PlantUml/SyntaxNode.h"
+#include "PostProcessor.h"
 #include "SourceGenerator.h"
+#include "Translator.h"
 
 namespace Cpp {
 namespace Class {
 
-class Generator
+class ClassGenerator : public Generator
 {
 public:
-    Generator(std::shared_ptr<Config> config);
-    void generate(fs::path basePath, const Class& c);
+    ClassGenerator(std::shared_ptr<Config> config);
+    std::vector<File> generate(PlantUml::SyntaxNode root) override;
 
 private:
-    bool writeFullFile(const fs::path& filepath, std::string_view contents);
-
+    Translator m_translator;
+    PostProcessor m_postProcessor;
     HeaderGenerator m_headerGenerator;
     SourceGenerator m_sourceGenerator;
 

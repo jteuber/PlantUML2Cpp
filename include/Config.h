@@ -31,5 +31,6 @@ struct Config
                                                                     {"vector", "std::vector"},
                                                                     {"pair", "std::pair"},
                                                                     {"list", "std::list"},
-                                                                    {"umap", "std::unordered_map"}};
+                                                                    {"umap", "std::unordered_map"},
+                                                                    {"path", "std::filesystem::path"}};
 };

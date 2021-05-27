@@ -18,7 +18,7 @@ public:
     Parser(/* args */);
 
     bool parse(std::string_view input);
-    void visitAST(AbstractVisitor& visitor);
+    const SyntaxNode& getAST();
 
 private:
     // helpers

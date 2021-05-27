@@ -1,5 +1,5 @@
 #include "PlantUML2Cpp.h"
-#include "Cpp/Class/HeaderGenerator.h"
+#include "Cpp/Class/ClassGenerator.h"
 #include "peg_parser/interpreter.h"
 
 #include <array>
@@ -23,6 +23,28 @@ std::string readFullFile(const fs::path& filepath)
     return input;
 }
 
+bool writeFile(const File& file)
+{
+    if (!fs::exists(file.path)) {
+        std::cout << "writing to file " << file.path << std::endl;
+
+        fs::create_directory(file.path.parent_path());
+
+        std::ofstream f(file.path, std::ios_base::out | std::ios_base::app);
+        if (f.is_open()) {
+            f << file.content;
+            return true;
+        }
+
+        std::cout << "unable to write to file " << file.path << std::endl;
+    }
+    return false;
+}
+
+PlantUML2Cpp::PlantUML2Cpp()
+    : generator(std::make_shared<Cpp::Class::ClassGenerator>(config))
+{}
+
 bool PlantUML2Cpp::run(fs::path path)
 {
     auto modelPath = path / "models";
@@ -38,19 +60,19 @@ bool PlantUML2Cpp::run(fs::path path)
         std::cout << "found config file" << std::endl;
     }
 
+    fs::create_directory(path / config->includeFolderName);
+    fs::create_directory(path / config->sourceFolderName);
+
     for (const auto& file : fs::directory_iterator(modelPath)) {
         if (file.is_regular_file() && file.path().extension() == ".puml") {
             std::cout << "parsing file " << file << std::endl;
             std::string fileContents = readFullFile(file.path());
 
             if (parser.parse(fileContents)) {
-                parser.visitAST(Translator);
+                auto files = generator->generate(parser.getAST());
 
-                auto classes = std::move(Translator).results();
-                PostProcessor.process(classes);
-
-                for (const auto& c : classes) {
-                    Generator.generate(path, c);
+                for (const auto& file : files) {
+                    writeFile(file);
                 }
             }
         }

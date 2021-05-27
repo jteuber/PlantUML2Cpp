@@ -2,11 +2,11 @@
 
 namespace PlantUml {
 
-void SyntaxNode::visit(AbstractVisitor& visitor)
+void SyntaxNode::visit(AbstractVisitor& visitor) const
 {
     bool visitChildren = std::visit([&visitor](auto&& arg) -> bool { return visitor.visit(arg); }, element);
     if (visitChildren) {
-        for (auto& child : children) {
+        for (const auto& child : children) {
             child.visit(visitor);
         }
     }
