@@ -114,7 +114,11 @@ std::string HeaderGenerator::toString(const Variable& var)
 
 std::string HeaderGenerator::toString(const Method& m)
 {
-    std::string ret = m_config->indent + typeToString(m.returnType) + " " + m.name + "(";
+    std::string ret = m_config->indent;
+    if (m.isAbstract) {
+        ret += "virtual ";
+    }
+    ret += typeToString(m.returnType) + " " + m.name + "(";
     if (!m.parameters.empty()) {
         ret += std::accumulate(m.parameters.begin(),
                                m.parameters.end(),

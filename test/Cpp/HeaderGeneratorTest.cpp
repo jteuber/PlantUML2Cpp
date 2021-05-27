@@ -310,11 +310,11 @@ TEST(HeaderGenerator, Interface)
 
     // Assert
     std::string regex = header + "class[ \t]*simpleInterface" + ws + "\\{" + ws;
-    regex += "std::vector<std::pair<Visibility, std::string>>" + ws + "complexMethod\\(" + ws;
+    regex += "virtual std::vector<std::pair<Visibility, std::string>>" + ws + "complexMethod\\(" + ws;
     regex += "std::vector<int>" + ws + "param1," + ws;
     regex += "std::pair<Visibility, std::string>" + ws + "param2" + ws;
     regex += "\\) = 0;" + ws;
-    regex += "int method\\(\\) = 0;" + ws;
+    regex += "virtual int method\\(\\) = 0;" + ws;
     regex += "\\};(.|\n)*";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
