@@ -71,8 +71,8 @@ bool PlantUML2Cpp::run(fs::path path)
             if (parser.parse(fileContents)) {
                 auto files = generator->generate(parser.getAST());
 
-                for (const auto& file : files) {
-                    writeFile(file);
+                for (const auto& f : files) {
+                    writeFile(f);
                 }
             }
         }

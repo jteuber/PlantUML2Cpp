@@ -40,6 +40,8 @@ std::vector<File> ClassGenerator::generate(PlantUml::SyntaxNode root)
             source.path = m_config->sourceFolderName / nsPath / (c.name + ".cpp");
         }
     }
+
+    return files;
 }
 
 } // namespace Class
