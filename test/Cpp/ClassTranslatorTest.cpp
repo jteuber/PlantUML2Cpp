@@ -583,5 +583,36 @@ TEST(TranslatorTest, Interface)
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
 }
 
+TEST(TranslatorTest, Visibility)
+{
+    // Arrange
+    Translator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+    class test {
+        +method() : var
+        -method2(input : bool) : var
+    }
+    @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
+
+    EXPECT_EQ(classes[0].name, "test");
+
+    ASSERT_EQ(classes[0].body.size(), 4);
+    EXPECT_EQ(std::get<VisibilityKeyword>(classes[0].body[0]).name, "public:");
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).name, "method");
+
+    EXPECT_EQ(std::get<VisibilityKeyword>(classes[0].body[2]).name, "private:");
+    EXPECT_EQ(std::get<Method>(classes[0].body[3]).name, "method2");
+}
+
 } // namespace Class
 } // namespace Cpp
