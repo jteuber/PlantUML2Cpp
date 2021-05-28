@@ -52,7 +52,8 @@ namespace PlantUml {
 
     class ModelElement << (V,#FF55AA) >>
 
-    class Container {
+    class Container << (S,#FFAA55) >>
+    {
         +name : list<string>
         +style : string
     }
@@ -62,7 +63,8 @@ namespace PlantUml {
         Namespace
     }
 
-    class Element {
+    class Element << (S,#FFAA55) >>
+    {
         +name : list<string>
         +stereotype : string
         +spotLetter : char
@@ -78,31 +80,38 @@ namespace PlantUml {
         Interface
     }
 
-    class Variable {
+    class Variable << (S,#FFAA55) >>
+    {
         +name : string
         +type : Type
         +element : list<string>
     }
-    class Method {
+    class Method << (S,#FFAA55) >>
+    {
         +name : string
         +returnType : Type
         +element : list<string>
     }
-    class Parameter {
+    class Parameter << (S,#FFAA55) >>
+    {
         +name : string
         +type : Type
     }
-    class Separator {
+    class Separator << (S,#FFAA55) >>
+    {
         +text : string
     }
-    class Enumerator {
+    class Enumerator << (S,#FFAA55) >>
+    {
         +name : string
     }
-    class Type {
+    class Type << (S,#FFAA55) >>
+    {
         +base : list<string>
         +templateParams : vector<Type>
     }
-    class Relationship {
+    class Relationship << (S,#FFAA55) >>
+    {
         +subject : list<string> 
         +object : list<string> 
         +subjectCardinality : string 
@@ -116,7 +125,8 @@ namespace PlantUml {
         Aggregation
         Usage
     }
-    class Note {
+    class Note << (S,#FFAA55) >>
+    {
         +name : string
         +relatesTo : list<string>
         +text : string
@@ -133,7 +143,7 @@ namespace PlantUml {
         Abstract 
         Static
     }
-    class End
+    class End<< (S,#FFAA55) >>
     enum EndType
     {
         Document
@@ -143,7 +153,8 @@ namespace PlantUml {
         Method
     }
 
-    class SyntaxNode {
+    class SyntaxNode << (S,#FFAA55) >>
+    {
         +visit(AbstractVisitor visitor)
     }
 
@@ -215,12 +226,12 @@ namespace Cpp {
 
         Translator -left-> PostProcessor
 
-        class Generator implements .Generator {
+        class ClassGenerator implements .Generator {
         }
-        Generator *-- Translator
-        Generator *-- PostProcessor
-        Generator *-- HeaderGenerator
-        Generator *--- SourceGenerator
+        ClassGenerator *-- Translator
+        ClassGenerator *-- PostProcessor
+        ClassGenerator *-- HeaderGenerator
+        ClassGenerator *--- SourceGenerator
         
         class Translator {
             +visit(Variable v)     : bool
@@ -236,7 +247,8 @@ namespace Cpp {
         Translator .|> PlantUml.AbstractVisitor
 
         ' *************** DATA ***************
-        class Class {
+        class Class << (S,#FFAA55) >> 
+        {
             +name : string
             +comment : string
             +isStruct : bool
@@ -246,28 +258,33 @@ namespace Cpp {
             +localIncludes : vector<string>
         }
         class ClassElement << (V,#FF55AA) >>
-        class VisibilityKeyword {
+        class VisibilityKeyword << (S,#FFAA55) >> 
+        {
             +name : string
         }
-        class Separator {
+        class Separator << (S,#FFAA55) >> 
+        {
             +text : string
         }
-        class Variable {
+        class Variable << (S,#FFAA55) >> 
+        {
             +name : string
             +comment : string
             +isStatic : bool
         }
-        class Method {
+        class Method << (S,#FFAA55) >> 
+        {
             +name : string
             +comment : string
             +isAbstract : bool
             +isConst : bool
             +isStatic : bool
         }
-        class Parameter {
+        class Parameter << (S,#FFAA55) >> 
+        {
             +name : string
         }
-        class Type
+        class Type << (S,#FFAA55) >> 
         {
             +base : list<string>
             +templateParams : vector<Type>
