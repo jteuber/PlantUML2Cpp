@@ -109,7 +109,7 @@ std::string HeaderGenerator::toString(const std::string& s)
 std::string HeaderGenerator::toString(const Variable& var)
 {
     std::string varName = m_variablePrefix + var.name;
-    return m_config->indent + typeToString(var.type) + " " + varName + ";\n";
+    return m_config->indent + typeToString(var.type) + " " + varName + ";";
 }
 
 std::string HeaderGenerator::toString(const Method& m)
@@ -129,9 +129,9 @@ std::string HeaderGenerator::toString(const Method& m)
         ret.erase(ret.length() - 2);
     }
     if (m.isAbstract) {
-        return ret + ") = 0;\n";
+        return ret + ") = 0;";
     }
-    return ret + ");\n";
+    return ret + ");";
 }
 
 std::string HeaderGenerator::toString(const VisibilityKeyword& s)
