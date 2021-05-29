@@ -372,7 +372,7 @@ TEST(TranslatorTest, Namespaces)
     person.namespaces.pop_back();
     EXPECT_EQ(person.namespaces.back(), "net");
     ASSERT_EQ(person.inherits.size(), 1);
-    EXPECT_EQ(person.inherits[0], "BaseClass");
+    EXPECT_EQ(person.inherits[0], "::BaseClass");
 
     EXPECT_EQ(classes[2].name, "BaseClass2");
     EXPECT_TRUE(classes[2].namespaces.empty());
@@ -612,6 +612,43 @@ TEST(TranslatorTest, Visibility)
 
     EXPECT_EQ(std::get<VisibilityKeyword>(classes[0].body[2]).name, "private:");
     EXPECT_EQ(std::get<Method>(classes[0].body[3]).name, "method2");
+}
+
+TEST(TranslatorTest, SameClassNameDifferentNamespace)
+{
+    // Arrange
+    Translator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class BaseClass
+        namespace Adam {
+            class Person
+        }
+        namespace Steve {
+            class Person
+            Person --|> .BaseClass
+        }
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 3);
+
+    EXPECT_EQ(classes[0].name, "BaseClass");
+    EXPECT_TRUE(classes[0].namespaces.empty());
+
+    Class person = classes[2];
+    EXPECT_EQ(person.name, "Person");
+    EXPECT_EQ(person.namespaces.size(), 1);
+    EXPECT_EQ(person.namespaces.back(), "Steve");
+    ASSERT_EQ(person.inherits.size(), 1);
+    EXPECT_EQ(person.inherits[0], "::BaseClass");
 }
 
 } // namespace Class
