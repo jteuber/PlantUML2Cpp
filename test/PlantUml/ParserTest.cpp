@@ -703,4 +703,36 @@ class test {
     // Assert Results
 }
 
+TEST(ParserTest, NamespaceResolution)
+{
+    // Arrange
+    VisitorMock visitor;
+    Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+          class Test
+          namespace net #DDDDDD {
+            namespace foo {
+              class Fighters
+            }
+            foo.Fighters --> .Test
+            class Test2
+            Test2 --> foo.Fighters
+          }
+@enduml)";
+
+    Relationship r1{{"foo", "Fighters"}, {"", "Test"}, "", "", "", false, RelationshipType::Usage};
+    Relationship r2{{"Test2"}, {"foo", "Fighters"}, "", "", "", false, RelationshipType::Usage};
+
+    // Assert Calls
+    EXPECT_CALL(visitor, visit(r1));
+    EXPECT_CALL(visitor, visit(r2));
+
+    // Act
+    act(parser, visitor, puml);
+
+    // Assert Results
+}
+
 } // namespace PlantUml
