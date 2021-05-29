@@ -84,21 +84,12 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    m_lastEncounteredClass = std::ranges::find(m_classes, r.subject.back(), &Class::name);
+    m_lastEncounteredClass = findClass(r.subject);
 
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (r.type) {
         case PlantUml::RelationshipType::Extension: {
-            if (r.object.front().empty()) {
-                m_lastEncounteredClass->inherits.push_back(r.object.back());
-            } else {
-                std::string dep = std::accumulate(
-                    r.object.begin(), r.object.end(), std::string(), [](const auto& a, const auto& b) -> std::string {
-                        return a + (a.empty() ? "" : "::") + b;
-                    });
-
-                m_lastEncounteredClass->inherits.push_back(dep);
-            }
+            m_lastEncounteredClass->inherits.push_back(toNamespacedString(r.object));
             break;
         }
 
@@ -106,9 +97,9 @@ bool Translator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityComposition.end()) {
-                var.type = stringToCppType(fmt::format(containerIt->second, r.object.back()));
+                var.type = stringToCppType(fmt::format(containerIt->second, toNamespacedString(r.object)));
             } else {
-                var.type = Type{r.object.back()};
+                var.type = Type{toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -123,9 +114,9 @@ bool Translator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityAggregation.find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityAggregation.end()) {
-                var.type = stringToCppType(fmt::format(containerIt->second, r.object.back()));
+                var.type = stringToCppType(fmt::format(containerIt->second, toNamespacedString(r.object)));
             } else {
-                var.type = Type{r.object.back()};
+                var.type = Type{toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -173,10 +164,10 @@ bool Translator::visit(const PlantUml::Element& e)
     c.namespaces.insert(c.namespaces.end(), e.name.begin(), e.name.end());
     c.namespaces.pop_back();
     if (!e.implements.empty()) {
-        c.inherits.push_back(e.implements.back());
+        c.inherits.push_back(toNamespacedString(e.implements));
     }
     if (!e.extends.empty()) {
-        c.inherits.push_back(e.extends.back());
+        c.inherits.push_back(toNamespacedString(e.extends));
     }
 
     m_classes.push_back(c);
@@ -278,6 +269,54 @@ Type Translator::stringToCppType(std::string_view typeString)
                 nextPos = typeString.find_first_of(",<>");
             }
         }
+    }
+
+    return ret;
+}
+
+std::list<std::string> Translator::getEffectiveNamespace(std::list<std::string> umlTypename)
+{
+    // not interested in the name
+    umlTypename.pop_back();
+
+    // uml typename starts with a dot => global namespace
+    if (umlTypename.front().empty()) {
+        umlTypename.pop_front();
+    } else {
+        for (const auto& ns : m_namespaceStack | std::views::reverse) {
+            umlTypename.push_front(ns);
+        }
+    }
+
+    return umlTypename;
+}
+
+std::vector<Class>::iterator Translator::findClass(std::list<std::string> umlTypename)
+{
+    return std::ranges::find_if(m_classes, [this, subject = umlTypename](const Class& c) {
+        if (c.name == subject.back()) {
+            auto subjectNamespace = getEffectiveNamespace(subject);
+            auto it               = subjectNamespace.begin();
+            for (auto& nc : c.namespaces) {
+                if (it == subjectNamespace.end() || nc != *it) {
+                    return false;
+                }
+                ++it;
+            }
+            return true;
+        }
+        return false;
+    });
+}
+
+std::string Translator::toNamespacedString(std::list<std::string> namespacedType)
+{
+    auto ret = std::accumulate(
+        namespacedType.begin(), namespacedType.end(), std::string(), [](const auto& a, const auto& b) -> std::string {
+            return a + (a.empty() ? "" : "::") + b;
+        });
+    if (namespacedType.front().empty()) {
+        ret = "::" + ret;
     }
 
     return ret;

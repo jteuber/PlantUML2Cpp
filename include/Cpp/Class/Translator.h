@@ -36,6 +36,9 @@ private:
     Type umlToCppType(PlantUml::Type umlType);
     Type stringToCppType(std::string_view typeString);
     Type decomposeType(std::string_view type);
+    std::list<std::string> getEffectiveNamespace(std::list<std::string> umlTypename);
+    std::vector<Class>::iterator findClass(std::list<std::string> umlTypename);
+    std::string toNamespacedString(std::list<std::string> namespacedType);
 
     static std::string visibilityToString(PlantUml::Visibility vis);
 
