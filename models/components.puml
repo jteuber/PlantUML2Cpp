@@ -1,0 +1,22 @@
+@startuml
+
+component Cpp {
+    [Class]
+    [Enum]
+    [Variant]
+    [Module]
+}
+
+[Main] --( Generator
+Generator -- [Class]
+Generator -- [Enum]
+Generator -- [Variant]
+Generator -- [Module]
+
+AbstractVisitor )-- [PlantUml]
+[Class] -- AbstractVisitor
+[Enum] -- AbstractVisitor
+[Variant] -- AbstractVisitor
+[Module] -- AbstractVisitor
+
+@enduml
