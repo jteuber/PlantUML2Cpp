@@ -7,7 +7,8 @@ class PlantUML2Cpp {
     bool run(filesystem::path path)
 }
 
-class Config {
+class Config << (S,#FFAA55) >>
+{
     +string memberPrefix
     +string indent
     +bool noMemberPrefixForStructs
@@ -20,7 +21,8 @@ PlantUML2Cpp *-- "1" PlantUml.Parser
 PlantUML2Cpp *-- Generator
 PlantUML2Cpp *-left- "1" Config
 
-class File {
+class File << (S,#FFAA55) >>
+{
     +path : path
     +content : string
 }
@@ -45,7 +47,8 @@ namespace PlantUml {
         +visit(End e)          : bool
     }
 
-    class Parser {
+    class Parser 
+    {
         +parse(string_view input) : bool
         +showAST(AbstractVisitor visitor) : bool
     }
@@ -233,16 +236,20 @@ namespace Cpp {
         ClassGenerator *-- HeaderGenerator
         ClassGenerator *--- SourceGenerator
         
-        class Translator {
+        class Translator 
+        {
             +visit(Variable v)     : bool
             +visit(Method m)       : bool
             +visit(Relationship r) : bool
+            +visit(Container c)    : bool
             +visit(Element e)      : bool
             +visit(Note n)         : bool
             +visit(Separator s)    : bool
+            +visit(Keyword k)      : bool
             +visit(Parameter p)    : bool
+            +visit(End e)          : bool
 
-            +finalize() : Class
+            +results() : vector<Class>
         }
         Translator .|> PlantUml.AbstractVisitor
 
