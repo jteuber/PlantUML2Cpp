@@ -1,0 +1,46 @@
+@startuml Enum
+
+namespace Cpp {
+    namespace Enum {
+        ' *************** ALGORITHMS ***************
+        class HeaderGenerator {
+            +generate(Enum in) : string
+        }
+
+        class Translator
+        {
+            +visit(Variable v)     : bool
+            +visit(Method m)       : bool
+            +visit(Relationship r) : bool
+            +visit(Container c)    : bool
+            +visit(Element e)      : bool
+            +visit(Note n)         : bool
+            +visit(Separator s)    : bool
+            +visit(Keyword k)      : bool
+            +visit(Parameter p)    : bool
+            +visit(End e)          : bool
+
+            +results() : vector<Class>
+        }
+        Translator .|> PlantUml.AbstractVisitor
+        Translator -left-> HeaderGenerator
+
+
+        class EnumGenerator implements Main.Generator {
+        }
+        EnumGenerator *-- Translator
+        EnumGenerator *-- HeaderGenerator
+
+        class Enum {
+            +name  : string
+            +namespaces : list<string>
+            +comment : string
+        }
+        class Keyword {
+            +name : string
+        }
+
+        Enum *-- Keyword
+    }
+}
+@enduml

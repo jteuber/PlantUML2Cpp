@@ -1,0 +1,167 @@
+@startuml PlantUml
+
+namespace PlantUml {
+
+    interface AbstractVisitor {
+        +visit(Variable v)     : bool
+        +visit(Method m)       : bool
+        +visit(Relationship r) : bool
+        +visit(Container c)    : bool
+        +visit(Element e)      : bool
+        +visit(Note n)         : bool
+        +visit(Separator s)    : bool
+        +visit(Keyword k)      : bool
+        +visit(Parameter p)    : bool
+        +visit(End e)          : bool
+    }
+
+    class Parser
+    {
+        +parse(string_view input) : bool
+        +showAST(AbstractVisitor visitor) : bool
+    }
+
+    class ModelElement << (V,#FF55AA) >>
+
+    class Container << (S,#FFAA55) >>
+    {
+        +name : list<string>
+        +style : string
+    }
+    enum ContainerType {
+        Document
+        Package
+        Namespace
+    }
+
+    class Element << (S,#FFAA55) >>
+    {
+        +name : list<string>
+        +stereotype : string
+        +spotLetter : char
+        +implements : list<string>
+        +extends : list<string>
+    }
+    enum ElementType {
+        Abstract
+        Annotation
+        Class
+        Entity
+        Enum
+        Interface
+    }
+
+    class Variable << (S,#FFAA55) >>
+    {
+        +name : string
+        +type : Type
+        +element : list<string>
+    }
+    class Method << (S,#FFAA55) >>
+    {
+        +name : string
+        +returnType : Type
+        +element : list<string>
+    }
+    class Parameter << (S,#FFAA55) >>
+    {
+        +name : string
+        +type : Type
+    }
+    class Separator << (S,#FFAA55) >>
+    {
+        +text : string
+    }
+    class Enumerator << (S,#FFAA55) >>
+    {
+        +name : string
+    }
+    class Type << (S,#FFAA55) >>
+    {
+        +base : list<string>
+        +templateParams : vector<Type>
+    }
+    class Relationship << (S,#FFAA55) >>
+    {
+        +subject : list<string>
+        +object : list<string>
+        +subjectCardinality : string
+        +objectCardinality : string
+        +label : string
+        +hidden : bool
+    }
+    enum RelationshipType {
+        Extension
+        Composition
+        Aggregation
+        Usage
+    }
+    class Note << (S,#FFAA55) >>
+    {
+        +name : string
+        +relatesTo : list<string>
+        +text : string
+    }
+    enum Visibility {
+        Private
+        Protected
+        PackagePrivate
+        Public
+        Unspecified
+    }
+    enum Modifier {
+        None
+        Abstract
+        Static
+    }
+    class End<< (S,#FFAA55) >>
+    enum EndType
+    {
+        Document
+        Package
+        Namespace
+        Element
+        Method
+    }
+
+    class SyntaxNode << (S,#FFAA55) >>
+    {
+        +visit(AbstractVisitor visitor)
+    }
+
+    Parser *-- SyntaxNode : root
+
+    SyntaxNode *-- "0..*" SyntaxNode : children
+    SyntaxNode *-- "1" ModelElement : element
+
+    ModelElement *-up- Note
+    ModelElement *-up- Separator
+    ModelElement *-up- Enumerator
+    ModelElement *-up- Parameter
+    ModelElement *-up- Type
+    ModelElement *-- Container
+    ModelElement *-- Element
+    ModelElement *-- Relationship
+    ModelElement *-- Variable
+    ModelElement *-- Method
+    ModelElement *-- End
+
+    Element *-- "1" ElementType : type
+    Container *-- "1" ContainerType  : type
+    Variable *-- "1" Visibility
+    Variable *-- "1" Modifier
+    Method *-- "1" Visibility
+    Method *-- "1" Modifier
+    End *-- "1" EndType : type
+    Relationship *-- "1" RelationshipType : type
+
+    AbstractVisitor -right-> ModelElement : visits
+
+    Parser *-up- "1" peg_parser.SyntaxTree
+    Parser *-up- "1" peg_parser.ParserGenerator
+}
+
+() visitor
+PlantUml.AbstractVisitor -left-( visitor
+
+@enduml

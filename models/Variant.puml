@@ -1,0 +1,50 @@
+@startuml Variant
+
+namespace Cpp {
+    namespace Variant {
+        ' *************** ALGORITHMS ***************
+        class HeaderGenerator {
+            +generate(Variant in) : string
+        }
+
+        class Translator
+        {
+            +visit(Variable v)     : bool
+            +visit(Method m)       : bool
+            +visit(Relationship r) : bool
+            +visit(Container c)    : bool
+            +visit(Element e)      : bool
+            +visit(Note n)         : bool
+            +visit(Separator s)    : bool
+            +visit(Keyword k)      : bool
+            +visit(Parameter p)    : bool
+            +visit(End e)          : bool
+
+            +results() : vector<Class>
+        }
+        Translator .|> PlantUml.AbstractVisitor
+        Translator -left-> HeaderGenerator
+
+
+        class VariantGenerator implements Main.Generator {
+        }
+        VariantGenerator *-- Translator
+        VariantGenerator *-- HeaderGenerator
+
+        class Type << (S,#FFAA55) >>
+        {
+            +base : list<string>
+            +templateParams : vector<Type>
+        }
+
+        class Variant << (S,#FFAA55) >>
+        {
+            +name  : string
+            +namespaces : list<string>
+            +comment : string
+        }
+
+        Variant *-- "1..*" Type : containedTypes
+    }
+}
+@enduml

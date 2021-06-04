@@ -1,0 +1,42 @@
+@startuml Package
+
+namespace Cpp {
+    namespace Package {
+        ' *************** ALGORITHMS ***************
+        class CMakeGenerator {
+            +string generate(Class in)
+        }
+
+        class Translator
+        {
+            +visit(Variable v)     : bool
+            +visit(Method m)       : bool
+            +visit(Relationship r) : bool
+            +visit(Container c)    : bool
+            +visit(Element e)      : bool
+            +visit(Note n)         : bool
+            +visit(Separator s)    : bool
+            +visit(Keyword k)      : bool
+            +visit(Parameter p)    : bool
+            +visit(End e)          : bool
+
+            +results() : vector<Class>
+        }
+        Translator .|> PlantUml.AbstractVisitor
+        Translator -left-> CMakeGenerator
+
+
+        class PackageGenerator implements Main.Generator {
+        }
+        PackageGenerator *-- Translator
+        PackageGenerator *-- CMakeGenerator
+
+        class Package
+        {
+            +name  : string
+            +files : vector<path>
+        }
+        Package *-- Package
+    }
+}
+@enduml

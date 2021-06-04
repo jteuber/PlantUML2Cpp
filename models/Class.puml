@@ -1,0 +1,120 @@
+@startuml Class
+
+namespace Cpp {
+
+    namespace Class {
+        ' *************** ALGORITHMS ***************
+        class Translator
+        {
+            +visit(Variable v)     : bool
+            +visit(Method m)       : bool
+            +visit(Relationship r) : bool
+            +visit(Container c)    : bool
+            +visit(Element e)      : bool
+            +visit(Note n)         : bool
+            +visit(Separator s)    : bool
+            +visit(Keyword k)      : bool
+            +visit(Parameter p)    : bool
+            +visit(End e)          : bool
+
+            +results() : vector<Class>
+        }
+        Translator .|> PlantUml.AbstractVisitor
+
+        class PostProcessor {
+            +process(vector<Class> classes)
+        }
+
+        class IncludeGatherer {
+            +gather(Class& c)
+        }
+        class IncludeOptimizer {
+            +process(vector<Class> classes)
+        }
+        class MemberSorter {
+            +sort(Class& c)
+        }
+
+        PostProcessor *-- IncludeGatherer
+        PostProcessor *-- IncludeOptimizer
+        PostProcessor *--- MemberSorter
+        IncludeOptimizer <- IncludeGatherer
+
+
+        class HeaderGenerator {
+            +generate(Class in) : string
+        }
+
+        class SourceGenerator {
+            +generate(Class in) : string
+        }
+
+        Translator -left-> PostProcessor
+
+        class ClassGenerator implements Main.Generator {
+        }
+        ClassGenerator *-- Translator
+        ClassGenerator *-- PostProcessor
+        ClassGenerator *-- HeaderGenerator
+        ClassGenerator *--- SourceGenerator
+
+        ' *************** DATA ***************
+        class Class << (S,#FFAA55) >>
+        {
+            +name : string
+            +comment : string
+            +isStruct : bool
+            +namespaces : list<string>
+            +inherits : set<string>
+            +externalIncludes : vector<string>
+            +localIncludes : vector<string>
+        }
+        class ClassElement << (V,#FF55AA) >>
+        class VisibilityKeyword << (S,#FFAA55) >>
+        {
+            +name : string
+        }
+        class Separator << (S,#FFAA55) >>
+        {
+            +text : string
+        }
+        class Variable << (S,#FFAA55) >>
+        {
+            +name : string
+            +comment : string
+            +isStatic : bool
+        }
+        class Method << (S,#FFAA55) >>
+        {
+            +name : string
+            +comment : string
+            +isAbstract : bool
+            +isConst : bool
+            +isStatic : bool
+        }
+        class Parameter << (S,#FFAA55) >>
+        {
+            +name : string
+        }
+
+
+        class Type << (S,#FFAA55) >>
+        {
+            +base : list<string>
+            +templateParams : vector<Type>
+        }
+        Method *--- "1" Type : returnType
+        Parameter *-- "1" Type : type
+        Variable *--- "1" Type : type
+
+
+        Class *-- "0..*" ClassElement : body
+        ClassElement *-- Method
+        ClassElement *-- Variable
+        ClassElement *-- VisibilityKeyword
+        ClassElement *-- Separator
+        Method *-- "0..*" Parameter : parameters
+    }
+}
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml Main
+
+package Main {
+    class PlantUML2Cpp {
+        +run(filesystem::path path) : bool
+    }
+
+    class Config << (S,#FFAA55) >>
+    {
+        +memberPrefix : string
+        +indent : string
+        +noMemberPrefixForStructs : bool
+        +containerByCardinalityComposition : umap<string, string>
+        +containerByCardinalityAggregation : umap<string, string>
+        +typeToIncludeMap : umap<string, string>
+    }
+
+    PlantUML2Cpp *-- "1" PlantUml.Parser
+    PlantUML2Cpp *-- Generator
+    PlantUML2Cpp *-left- "1" Config
+
+    class File << (S,#FFAA55) >>
+    {
+        +path : path
+        +content : string
+    }
+
+    interface Generator {
+        +generate(PlantUml.SyntaxNode root) : vector<File>
+    }
+    Generator -> File : uses
+}
+
+() interface
+Generator --( interface
+
+@enduml
