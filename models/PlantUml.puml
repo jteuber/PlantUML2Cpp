@@ -13,6 +13,7 @@ namespace PlantUml {
         +visit(Keyword k)      : bool
         +visit(Parameter p)    : bool
         +visit(End e)          : bool
+        +visit(Type t)         : bool
     }
 
     class Parser

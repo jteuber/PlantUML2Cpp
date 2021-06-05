@@ -9,18 +9,19 @@ namespace Cpp {
 
         class Translator
         {
-            +visit(Variable v)     : bool
-            +visit(Method m)       : bool
-            +visit(Relationship r) : bool
-            +visit(Container c)    : bool
-            +visit(Element e)      : bool
-            +visit(Note n)         : bool
-            +visit(Separator s)    : bool
-            +visit(Keyword k)      : bool
-            +visit(Parameter p)    : bool
-            +visit(End e)          : bool
+            +visit(PlantUml.Variable v)     : bool
+            +visit(PlantUml.Method m)       : bool
+            +visit(PlantUml.Relationship r) : bool
+            +visit(PlantUml.Container c)    : bool
+            +visit(PlantUml.Element e)      : bool
+            +visit(PlantUml.Note n)         : bool
+            +visit(PlantUml.Separator s)    : bool
+            +visit(PlantUml.Enumerator e)   : bool
+            +visit(PlantUml.Parameter p)    : bool
+            +visit(PlantUml.End e)          : bool
+            +visit(PlantUml.Type t)         : bool
 
-            +results() : vector<Class>
+            +results() : vector<Package>
         }
         Translator .|> PlantUml.AbstractVisitor
         Translator -left-> CMakeGenerator
