@@ -1,19 +1,10 @@
 #pragma once
 
-#include <AbstractVisitor.h>
 #include <vector>
 
-#include "Class.h"
-#include "Container.h"
-#include "Element.h"
-#include "End.h"
-#include "Keyword.h"
-#include "Method.h"
-#include "Note.h"
-#include "Parameter.h"
-#include "Relationship.h"
-#include "Separator.h"
-#include "Variable.h"
+#include "PlantUml/AbstractVisitor.h"
+
+#include "Variant.h"
 
 namespace Cpp {
 namespace Variant {
@@ -21,17 +12,19 @@ namespace Variant {
 class Translator : public PlantUml::AbstractVisitor
 {
 public:
-    bool visit(Variable v);
-    bool visit(Method m);
-    bool visit(Relationship r);
-    bool visit(Container c);
-    bool visit(Element e);
-    bool visit(Note n);
-    bool visit(Separator s);
-    bool visit(Keyword k);
-    bool visit(Parameter p);
-    bool visit(End e);
-    std::vector<Class> results();
+    bool visit(const PlantUml::Variable& v) override;
+    bool visit(const PlantUml::Method& m) override;
+    bool visit(const PlantUml::Relationship& r) override;
+    bool visit(const PlantUml::Container& c) override;
+    bool visit(const PlantUml::Element& e) override;
+    bool visit(const PlantUml::Note& n) override;
+    bool visit(const PlantUml::Separator& s) override;
+    bool visit(const PlantUml::Enumerator& e) override;
+    bool visit(const PlantUml::Type& t) override;
+    bool visit(const PlantUml::Parameter& p) override;
+    bool visit(const PlantUml::End& e) override;
+
+    std::vector<Variant> results();
 };
 } // namespace Variant
 } // namespace Cpp
