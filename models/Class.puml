@@ -52,6 +52,7 @@ namespace Cpp {
         Translator -left-> PostProcessor
 
         class ClassGenerator implements Main.Generator {
+            +generate(PlantUml.SyntaxNode root) : vector<File>
         }
         ClassGenerator *-- Translator
         ClassGenerator *-- PostProcessor

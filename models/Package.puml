@@ -27,6 +27,7 @@ namespace Cpp {
 
 
         class PackageGenerator implements Main.Generator {
+            +generate(PlantUml.SyntaxNode root) : vector<File>
         }
         PackageGenerator *-- Translator
         PackageGenerator *-- CMakeGenerator

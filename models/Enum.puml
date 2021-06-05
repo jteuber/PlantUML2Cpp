@@ -27,6 +27,7 @@ namespace Cpp {
 
 
         class EnumGenerator implements Main.Generator {
+            +generate(PlantUml.SyntaxNode root) : vector<File>
         }
         EnumGenerator *-- Translator
         EnumGenerator *-- HeaderGenerator

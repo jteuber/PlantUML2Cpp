@@ -27,6 +27,7 @@ namespace Cpp {
 
 
         class VariantGenerator implements Main.Generator {
+            +generate(PlantUml.SyntaxNode root) : vector<File>
         }
         VariantGenerator *-- Translator
         VariantGenerator *-- HeaderGenerator
