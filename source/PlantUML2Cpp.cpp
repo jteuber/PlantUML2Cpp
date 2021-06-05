@@ -25,7 +25,7 @@ std::string readFullFile(const fs::path& filepath)
 
 bool writeFile(const File& file)
 {
-    if (!fs::exists(file.path)) {
+    if (!file.path.empty() && !fs::exists(file.path)) {
         std::cout << "writing to file " << file.path << std::endl;
 
         fs::create_directory(file.path.parent_path());
@@ -68,6 +68,7 @@ bool PlantUML2Cpp::run(fs::path path)
             std::cout << "parsing file " << file << std::endl;
             std::string fileContents = readFullFile(file.path());
 
+            PlantUml::Parser parser;
             if (parser.parse(fileContents)) {
                 auto files = generator->generate(parser.getAST());
 

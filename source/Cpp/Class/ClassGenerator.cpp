@@ -39,6 +39,7 @@ std::vector<File> ClassGenerator::generate(PlantUml::SyntaxNode root)
         if (!source.content.empty()) {
             source.path = m_config->sourceFolderName / nsPath / (c.name + ".cpp");
         }
+        files.emplace_back(std::move(source));
     }
 
     return files;

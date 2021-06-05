@@ -15,6 +15,5 @@ public:
 
 private:
     std::shared_ptr<Config> config = std::make_shared<Config>();
-    PlantUml::Parser parser;
     std::shared_ptr<Generator> generator;
 };
