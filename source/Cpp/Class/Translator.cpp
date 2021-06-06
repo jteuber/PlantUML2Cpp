@@ -152,10 +152,16 @@ bool Translator::visit(const PlantUml::Element& e)
         return false;
     }
 
+    // don't process variants
+    if (e.spotLetter == 'V' && (e.stereotype == "Variant" || e.stereotype.empty())) {
+        return false;
+    }
+
     Class c;
     if (e.type == PlantUml::ElementType::Interface) {
         c.isInterface = true;
-    } else if (e.spotLetter == 'S' || e.type == PlantUml::ElementType::Entity) {
+    } else if ((e.spotLetter == 'S' && (e.stereotype == "Struct" || e.stereotype.empty())) ||
+               e.type == PlantUml::ElementType::Entity) {
         c.isStruct = true;
     }
 
