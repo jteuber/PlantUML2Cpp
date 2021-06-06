@@ -13,7 +13,7 @@ void MemberSorter::sort(Class& c)
     } lastVis = Visibility::Private;
 
     if (c.isStruct) {
-        lastVis = Visibility::Public;
+        return;
     }
 
     for (auto it = c.body.begin(); it != c.body.end(); ++it) {
