@@ -52,6 +52,11 @@ namespace PlantUml {
         Interface
     }
 
+    class Typename {
+        +fullyClassyfiedName : list<string>
+        +getEffectiveNamespace()
+    }
+
     class Variable << (S,#FFAA55) >>
     {
         +name : string

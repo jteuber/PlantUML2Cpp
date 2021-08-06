@@ -24,7 +24,16 @@ public:
     bool visit(const PlantUml::Parameter& p) override;
     bool visit(const PlantUml::End& e) override;
 
-    std::vector<Variant> results();
+    std::vector<Variant> results() &&;
+
+private:
+    std::vector<Variant>::iterator findNamespaced(std::list<std::string> umlTypename);
+
+    std::list<std::string> m_namespaceStack;
+    std::list<size_t> m_namespaceSizes;
+
+    std::vector<Variant> m_results;
+    std::vector<Variant>::iterator m_lastEncountered = m_results.end();
 };
 } // namespace Variant
 } // namespace Cpp

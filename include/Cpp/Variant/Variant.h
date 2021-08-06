@@ -10,7 +10,6 @@ namespace Variant {
 
 struct Variant
 {
-private:
     std::string name;
     std::list<std::string> namespaces;
     std::string comment;

@@ -100,14 +100,9 @@ namespace Cpp {
         }
 
 
-        class Type << (S,#FFAA55) >>
-        {
-            +base : list<string>
-            +templateParams : vector<Type>
-        }
-        Method *--- "1" Type : returnType
-        Parameter *-- "1" Type : type
-        Variable *--- "1" Type : type
+        Method *--- "1" Cpp.Type : returnType
+        Parameter *-- "1" Cpp.Type : type
+        Variable *--- "1" Cpp.Type : type
 
 
         Class *-- "0..*" ClassElement : body

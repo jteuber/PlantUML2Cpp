@@ -1,0 +1,22 @@
+@startuml Cpp
+
+namespace Cpp {
+    class TranslatorUtils {
+        +Type umlToCppType(PlantUml.Type umlType)
+        +Type stringToCppType(string_view typeString)
+        +Type decomposeType(string_view type)
+        
+        +string toNamespacedString(list<string> namespacedType)
+        +string visibilityToString(PlantUml.Visibility vis)
+
+        +list<string> getEffectiveNamespace(list<string> umlTypename)
+        +vector<Class>.iterator findClass(list<string> umlTypename)
+    }
+
+    class Type << (S,#FFAA55) >>
+    {
+        +base : list<string>
+        +templateParams : vector<Type>
+    }
+}
+@enduml
