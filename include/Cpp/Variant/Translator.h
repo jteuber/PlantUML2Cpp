@@ -1,9 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "PlantUml/AbstractVisitor.h"
 
+#include "Config.h"
+#include "Cpp/TranslatorUtils.h"
 #include "Variant.h"
 
 namespace Cpp {
@@ -27,13 +30,14 @@ public:
     std::vector<Variant> results() &&;
 
 private:
-    std::vector<Variant>::iterator findNamespaced(std::list<std::string> umlTypename);
-
     std::list<std::string> m_namespaceStack;
     std::list<size_t> m_namespaceSizes;
 
     std::vector<Variant> m_results;
     std::vector<Variant>::iterator m_lastEncountered = m_results.end();
+
+    std::shared_ptr<Config> m_config;
+    TranslatorUtils m_utils;
 };
 } // namespace Variant
 } // namespace Cpp
