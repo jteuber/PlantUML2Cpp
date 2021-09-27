@@ -6,16 +6,10 @@
 #include <variant>
 #include <vector>
 
+#include "Cpp/Type.h"
+
 namespace Cpp {
 namespace Class {
-
-struct Type
-{
-    std::string base;
-    std::vector<Type> templateParams;
-
-    auto operator<=>(const Type&) const = default;
-};
 
 struct Variable
 {

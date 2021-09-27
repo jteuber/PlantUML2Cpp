@@ -7,13 +7,12 @@
 #include "Type.h"
 
 namespace Cpp {
-namespace Variant {
 
 struct Type
 {
-private:
-    std::list<std::string> base;
+    std::string base;
     std::vector<Type> templateParams;
+
+    auto operator<=>(const Type&) const = default;
 };
-} // namespace Variant
 } // namespace Cpp

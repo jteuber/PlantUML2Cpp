@@ -17,6 +17,7 @@ namespace Class {
 
 Translator::Translator(std::shared_ptr<Config> config)
     : m_config(config)
+    , m_utils(config)
 {}
 
 std::vector<Class> Translator::results() &&
@@ -35,12 +36,12 @@ bool Translator::visit(const PlantUml::Variable& v)
         auto& c = *m_lastEncounteredClass;
 
         if (v.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{visibilityToString(v.visibility)});
+            c.body.emplace_back(VisibilityKeyword{m_utils.visibilityToString(v.visibility)});
             m_lastVisibility = v.visibility;
         }
 
         var.name     = v.name;
-        var.type     = umlToCppType(v.type);
+        var.type     = m_utils.umlToCppType(v.type);
         var.isConst  = v.isConst;
         var.isStatic = v.isStatic;
 
@@ -66,12 +67,12 @@ bool Translator::visit(const PlantUml::Method& m)
         auto& c = *m_lastEncounteredClass;
 
         if (m.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{visibilityToString(m.visibility)});
+            c.body.emplace_back(VisibilityKeyword{m_utils.visibilityToString(m.visibility)});
             m_lastVisibility = m.visibility;
         }
 
         method.name       = m.name;
-        method.returnType = umlToCppType(m.returnType);
+        method.returnType = m_utils.umlToCppType(m.returnType);
         method.isAbstract = m.isAbstract || m_lastEncounteredClass->isInterface;
         method.isConst    = m.isConst;
         method.isStatic   = m.isStatic;
@@ -84,12 +85,12 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    m_lastEncounteredClass = findClass(r.subject);
+    m_lastEncounteredClass = findClass<Class>(r.subject, m_classes, m_namespaceStack);
 
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (r.type) {
         case PlantUml::RelationshipType::Extension: {
-            m_lastEncounteredClass->inherits.push_back(toNamespacedString(r.object));
+            m_lastEncounteredClass->inherits.push_back(m_utils.toNamespacedString(r.object));
             break;
         }
 
@@ -97,9 +98,10 @@ bool Translator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityComposition.end()) {
-                var.type = stringToCppType(fmt::format(containerIt->second, toNamespacedString(r.object)));
+                var.type =
+                    m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {
-                var.type = Type{toNamespacedString(r.object)};
+                var.type = Type{m_utils.toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -114,9 +116,10 @@ bool Translator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityAggregation.find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityAggregation.end()) {
-                var.type = stringToCppType(fmt::format(containerIt->second, toNamespacedString(r.object)));
+                var.type =
+                    m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {
-                var.type = Type{toNamespacedString(r.object)};
+                var.type = Type{m_utils.toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -170,10 +173,10 @@ bool Translator::visit(const PlantUml::Element& e)
     c.namespaces.insert(c.namespaces.end(), e.name.begin(), e.name.end());
     c.namespaces.pop_back();
     if (!e.implements.empty()) {
-        c.inherits.push_back(toNamespacedString(e.implements));
+        c.inherits.push_back(m_utils.toNamespacedString(e.implements));
     }
     if (!e.extends.empty()) {
-        c.inherits.push_back(toNamespacedString(e.extends));
+        c.inherits.push_back(m_utils.toNamespacedString(e.extends));
     }
 
     m_classes.push_back(c);
@@ -207,7 +210,7 @@ bool Translator::visit(const PlantUml::Parameter& p)
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
         param.name = p.name;
-        param.type = umlToCppType(p.type);
+        param.type = m_utils.umlToCppType(p.type);
         std::get<Method>(m_lastEncounteredClass->body.back()).parameters.push_back(param);
     }
 
@@ -232,114 +235,6 @@ bool Translator::visit(const PlantUml::End& e)
     }
 
     return true;
-}
-
-Type Translator::umlToCppType(PlantUml::Type umlType)
-{
-    Type out;
-
-    out.base = umlType.base.back();
-    for (auto ns : umlType.base | std::views::reverse | std::views::drop(1)) {
-        out.base = ns + "::" + out.base;
-    }
-
-    auto it = m_config->umlToCppTypeMap.find(out.base);
-    if (it != m_config->umlToCppTypeMap.end()) {
-        out.base = it->second;
-    }
-
-    if (out.base.empty())
-        out.base = "void";
-
-    for (auto& param : umlType.templateParams) {
-        out.templateParams.push_back(umlToCppType(param));
-    }
-
-    return out;
-}
-
-Type Translator::stringToCppType(std::string_view typeString)
-{
-    auto pos = typeString.find_first_of(",<>");
-    Type ret{std::string(typeString.substr(0, pos))};
-
-    if (pos != std::string_view::npos) {
-        if (typeString[pos] == '<') {
-            typeString.remove_prefix(pos + 1);
-            ret.templateParams.push_back(stringToCppType(typeString));
-
-            auto nextPos = typeString.find_first_of(",<>");
-            while (typeString[nextPos] == ',') {
-                typeString.remove_prefix(nextPos + 1);
-                ret.templateParams.push_back(stringToCppType(typeString));
-                nextPos = typeString.find_first_of(",<>");
-            }
-        }
-    }
-
-    return ret;
-}
-
-std::list<std::string> Translator::getEffectiveNamespace(std::list<std::string> umlTypename)
-{
-    // not interested in the name
-    umlTypename.pop_back();
-
-    // uml typename starts with a dot => global namespace
-    if (umlTypename.front().empty()) {
-        umlTypename.pop_front();
-    } else {
-        for (const auto& ns : m_namespaceStack | std::views::reverse) {
-            umlTypename.push_front(ns);
-        }
-    }
-
-    return umlTypename;
-}
-
-std::vector<Class>::iterator Translator::findClass(std::list<std::string> umlTypename)
-{
-    return std::ranges::find_if(m_classes, [this, subject = umlTypename](const Class& c) {
-        if (c.name == subject.back()) {
-            auto subjectNamespace = getEffectiveNamespace(subject);
-            auto it               = subjectNamespace.begin();
-            for (auto& nc : c.namespaces) {
-                if (it == subjectNamespace.end() || nc != *it) {
-                    return false;
-                }
-                ++it;
-            }
-            return true;
-        }
-        return false;
-    });
-}
-
-std::string Translator::toNamespacedString(std::list<std::string> namespacedType)
-{
-    auto ret = std::accumulate(
-        namespacedType.begin(), namespacedType.end(), std::string(), [](const auto& a, const auto& b) -> std::string {
-            return a + (a.empty() ? "" : "::") + b;
-        });
-    if (namespacedType.front().empty()) {
-        ret = "::" + ret;
-    }
-
-    return ret;
-}
-
-std::string Translator::visibilityToString(PlantUml::Visibility vis)
-{
-    switch (vis) {
-    case PlantUml::Visibility::Protected:
-        return "protected:";
-    case PlantUml::Visibility::Private:
-        return "private:";
-    case PlantUml::Visibility::Public:
-        return "public:";
-    default:
-        return "";
-    }
 }
 
 } // namespace Class

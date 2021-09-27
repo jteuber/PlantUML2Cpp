@@ -24,10 +24,12 @@ enum class ElementType
 };
 enum class RelationshipType
 {
-    Extension,
-    Composition,
-    Aggregation,
-    Usage
+    Extension,      // --|>
+    Composition,    // --*
+    Aggregation,    // --o
+    Usage,          // -->
+    Implementation, // -- towards ()
+    Requirement     // --(
 };
 enum class Visibility
 {

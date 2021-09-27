@@ -15,9 +15,9 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    m_lastEncountered = findClass(r.subject);
+    auto lastEncountered = findClass<Variant>(r.subject, m_results, m_namespaceStack);
 
-    if (m_lastEncountered != m_classes.end()) {
+    /*if (m_lastEncountered != m_results.end()) {
         switch (r.type) {
         case PlantUml::RelationshipType::Composition: {
             Variable var;
@@ -39,7 +39,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
         default:
             break;
         }
-    }
+    }*/
 
     return true;
 }
@@ -113,24 +113,6 @@ bool Translator::visit(const PlantUml::Type& /*t*/)
 std::vector<Variant> Translator::results() &&
 {
     return m_results;
-}
-
-std::vector<Variant>::iterator Translator::findNamespaced(std::list<std::string> umlTypename)
-{
-    return std::ranges::find_if(m_results, [this, subject = umlTypename](const Variant& c) {
-        if (c.name == subject.back()) {
-            auto subjectNamespace = getEffectiveNamespace(subject);
-            auto it               = subjectNamespace.begin();
-            for (auto& nc : c.namespaces) {
-                if (it == subjectNamespace.end() || nc != *it) {
-                    return false;
-                }
-                ++it;
-            }
-            return true;
-        }
-        return false;
-    });
 }
 
 } // namespace Variant
