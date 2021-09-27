@@ -117,6 +117,8 @@ Parser::Parser(/* args */)
     g["Aggregation"] << "'o'";
     g["OpenTriLeft"] << "'<'";
     g["OpenTriRight"] << "'>'";
+    g["SocketLeft"] << "')'";
+    g["SocketRight"] << "'('";
 
     g["LineModifiers"] << "'[hidden]' | 'left' | 'right' | 'up' | 'down'";
     g["LineCharacter"] << "'-' | '.'";
@@ -148,6 +150,13 @@ Parser::Parser(/* args */)
         r.type = RelationshipType::Usage;
         return SyntaxNode{r};
     };
+    g["RequirementSubjectLeft"] << "Line SocketRight" >> [](auto e) {
+        Relationship r;
+        r.type = RelationshipType::Requirement;
+        return SyntaxNode{r};
+    };
+    g["ConnectorLeft"] << "ExtensionSubjectLeft | CompositionSubjectLeft | AggregationSubjectLeft | UsageSubjectLeft | "
+                          "RequirementSubjectLeft";
 
     g["ExtensionSubjectRight"] << "TriangleLeft Line" >> [](auto e) {
         Relationship r;
@@ -169,9 +178,13 @@ Parser::Parser(/* args */)
         r.type = RelationshipType::Usage;
         return SyntaxNode{r};
     };
-    g["ConnectorRight"]
-        << "ExtensionSubjectRight | CompositionSubjectRight | AggregationSubjectRight | UsageSubjectRight";
-    g["ConnectorLeft"] << "ExtensionSubjectLeft | CompositionSubjectLeft | AggregationSubjectLeft | UsageSubjectLeft";
+    g["RequirementSubjectRight"] << "SocketLeft Line" >> [](auto e) {
+        Relationship r;
+        r.type = RelationshipType::Requirement;
+        return SyntaxNode{r};
+    };
+    g["ConnectorRight"] << "ExtensionSubjectRight | CompositionSubjectRight | AggregationSubjectRight | "
+                           "UsageSubjectRight | RequirementSubjectRight";
 
     g["Relationship"] << "Object Cardinality? ConnectorRight QuotedName? Subject (':' '<'? Label '>'?)? | "
                          "Subject QuotedName? ConnectorLeft Cardinality? Object (':' '<'? Label '>'?)?" >>
