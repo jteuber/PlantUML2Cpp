@@ -157,11 +157,11 @@ TEST(TranslatorTest, ClassWithTwoMethods)
 
     static constexpr auto puml =
         R"(@startuml
-    class test {
-        method() : var
-        method2(input : bool) : var
-    }
-    @enduml)";
+        class test {
+            method() : var
+            method2(input : bool) : var
+        }
+        @enduml)";
 
     // Act
     act(parser, sut, puml);
@@ -649,6 +649,85 @@ TEST(TranslatorTest, SameClassNameDifferentNamespace)
     EXPECT_EQ(person.namespaces.back(), "Steve");
     ASSERT_EQ(person.inherits.size(), 1);
     EXPECT_EQ(person.inherits[0], "::BaseClass");
+}
+
+TEST(TranslatorTest, ClassWithSpotSIsStruct)
+{
+    // Arrange
+    Translator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+
+        class Type << (S,#FFAA55) >>
+        {
+            +base : list<string>
+            +templateParams : vector<Type>
+        }
+
+        class Singleton << (S,#FFAA55) Singleton >>
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 2);
+
+    Class type = classes[0];
+    EXPECT_EQ(type.name, "Type");
+    ASSERT_TRUE(type.isStruct);
+}
+
+TEST(TranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
+{
+    // Arrange
+    Translator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Singleton << (S,#FFAA55) Singleton >>
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
+
+    Class type = classes[0];
+    EXPECT_EQ(type.name, "Singleton");
+    ASSERT_FALSE(type.isStruct);
+}
+
+TEST(TranslatorTest, ClassWithSpotSAndStereotypeStructIsStruct)
+{
+    // Arrange
+    Translator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+
+    static constexpr auto puml =
+        R"(@startuml
+        class Struct << (S,#FFAA55) Struct >>
+
+        @enduml)";
+
+    // Act
+    act(parser, sut, puml);
+
+    // Assert
+    auto classes = std::move(sut).results();
+    ASSERT_EQ(classes.size(), 1);
+
+    Class type = classes[0];
+    EXPECT_EQ(type.name, "Struct");
+    ASSERT_TRUE(type.isStruct);
 }
 
 } // namespace Class
