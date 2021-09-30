@@ -15,6 +15,8 @@ namespace Variant {
 class Translator : public PlantUml::AbstractVisitor
 {
 public:
+    explicit Translator(std::shared_ptr<Config> config);
+
     bool visit(const PlantUml::Variable& v) override;
     bool visit(const PlantUml::Method& m) override;
     bool visit(const PlantUml::Relationship& r) override;
@@ -39,5 +41,6 @@ private:
     std::shared_ptr<Config> m_config;
     TranslatorUtils m_utils;
 };
+
 } // namespace Variant
 } // namespace Cpp

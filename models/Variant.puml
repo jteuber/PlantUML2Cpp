@@ -46,7 +46,7 @@ namespace Cpp {
             +comment : string
         }
 
-        Variant *-- "1..*" Type : containedTypes
+        Variant *-- "0..*" Type : containedTypes
     }
 }
 @enduml

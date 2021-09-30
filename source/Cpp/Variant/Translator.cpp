@@ -1,7 +1,11 @@
 #include "Cpp/Variant/Translator.h"
 
-namespace Cpp {
-namespace Variant {
+namespace Cpp::Variant {
+
+Translator::Translator(std::shared_ptr<Config> config)
+    : m_config(config)
+    , m_utils(config)
+{}
 
 bool Translator::visit(const PlantUml::Variable& v)
 {
@@ -17,29 +21,9 @@ bool Translator::visit(const PlantUml::Relationship& r)
 {
     auto lastEncountered = findClass<Variant>(r.subject, m_results, m_namespaceStack);
 
-    /*if (m_lastEncountered != m_results.end()) {
-        switch (r.type) {
-        case PlantUml::RelationshipType::Composition: {
-            Variable var;
-            if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
-                containerIt != m_config->containerByCardinalityComposition.end()) {
-                var.type = stringToCppType(fmt::format(containerIt->second, toNamespacedString(r.object)));
-            } else {
-                var.type = Type{toNamespacedString(r.object)};
-            }
-
-            var.name = r.label;
-            if (var.name.empty()) {
-                var.name    = r.object.back();
-                var.name[0] = std::tolower(var.name[0]);
-            }
-            m_lastEncountered->body.emplace_back(var);
-            break;
-        }
-        default:
-            break;
-        }
-    }*/
+    if (lastEncountered != m_results.end()) {
+        lastEncountered->containedTypes.emplace_back(r.object.back());
+    }
 
     return true;
 }
@@ -82,8 +66,11 @@ bool Translator::visit(const PlantUml::Separator& s)
     return false;
 }
 
-bool Translator::visit(const PlantUml::Enumerator& k)
+bool Translator::visit(const PlantUml::Enumerator& e)
 {
+    if (m_lastEncountered != m_results.end()) {
+        m_lastEncountered->containedTypes.emplace_back(e.name);
+    }
     return false;
 }
 
@@ -115,5 +102,4 @@ std::vector<Variant> Translator::results() &&
     return m_results;
 }
 
-} // namespace Variant
-} // namespace Cpp
+} // namespace Cpp::Variant

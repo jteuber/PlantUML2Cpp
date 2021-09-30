@@ -13,9 +13,9 @@ TEST(MemberSorterTest, NoPrimitives)
     Class test{"Test"};
     test.body.emplace_back(Variable{"var1", {"int"}});
     test.body.emplace_back(Variable{"var2", {"float"}});
-    test.body.emplace_back(Method{"var3", {"unsigned int"}});
-    test.body.emplace_back(Variable{"var4", {"double"}});
-    test.body.emplace_back(Method{"var4", {"bool"}});
+    test.body.emplace_back(Method{"method1", {"unsigned int"}});
+    test.body.emplace_back(Variable{"var3", {"double"}});
+    test.body.emplace_back(Method{"method2", {"bool"}});
 
     // Act
     sut.sort(test);
