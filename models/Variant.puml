@@ -33,12 +33,6 @@ namespace Cpp {
         VariantGenerator *-- Translator
         VariantGenerator *-- HeaderGenerator
 
-        class Type << (S,#FFAA55) >>
-        {
-            +base : list<string>
-            +templateParams : vector<Type>
-        }
-
         class Variant << (S,#FFAA55) >>
         {
             +name  : string
@@ -46,7 +40,7 @@ namespace Cpp {
             +comment : string
         }
 
-        Variant *-- "0..*" Type : containedTypes
+        Variant *-- "0..*" Cpp.Type : containedTypes
     }
 }
 @enduml
