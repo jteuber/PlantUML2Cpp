@@ -147,8 +147,9 @@ std::string HeaderGenerator::toString(const Separator& s)
 std::string HeaderGenerator::typeToString(const Type& t)
 {
     std::string templ;
-    for (const auto& param : t.templateParams)
+    for (const auto& param : t.templateParams) {
         templ += typeToString(param) + ", ";
+    }
     if (!t.templateParams.empty()) {
         templ.erase(templ.length() - 2);
         templ = "<" + templ + ">";

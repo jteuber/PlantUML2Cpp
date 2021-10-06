@@ -14,7 +14,7 @@ void act(PlantUml::Parser& parser, Translator& sut, std::string_view puml)
     parser.getAST().visit(sut);
 }
 
-TEST(TranslatorTest, EmptyDiagram)
+TEST(ClassTranslatorTest, EmptyDiagram)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -31,7 +31,7 @@ TEST(TranslatorTest, EmptyDiagram)
     EXPECT_TRUE(classes.empty());
 }
 
-TEST(TranslatorTest, SingleAbstract)
+TEST(ClassTranslatorTest, SingleAbstract)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -57,7 +57,7 @@ TEST(TranslatorTest, SingleAbstract)
     EXPECT_TRUE(classes[0].namespaces.empty());
 }
 
-TEST(TranslatorTest, AllSimpleContainers)
+TEST(ClassTranslatorTest, AllSimpleContainers)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -96,7 +96,7 @@ TEST(TranslatorTest, AllSimpleContainers)
     EXPECT_EQ(classes[3].isStruct, false);
 }
 
-TEST(TranslatorTest, EntityWithEmptyBody)
+TEST(ClassTranslatorTest, EntityWithEmptyBody)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -120,7 +120,7 @@ TEST(TranslatorTest, EntityWithEmptyBody)
     EXPECT_TRUE(classes[0].body.empty());
 }
 
-TEST(TranslatorTest, EntityWithSingleVariable)
+TEST(ClassTranslatorTest, EntityWithSingleVariable)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -149,7 +149,7 @@ TEST(TranslatorTest, EntityWithSingleVariable)
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Type{"var"});
 }
 
-TEST(TranslatorTest, ClassWithTwoMethods)
+TEST(ClassTranslatorTest, ClassWithTwoMethods)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -185,7 +185,7 @@ TEST(TranslatorTest, ClassWithTwoMethods)
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
 }
 
-TEST(TranslatorTest, Inheritance)
+TEST(ClassTranslatorTest, Inheritance)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -209,7 +209,7 @@ TEST(TranslatorTest, Inheritance)
     EXPECT_EQ(classes[0].inherits[0], "Class01");
 }
 
-TEST(TranslatorTest, Composition)
+TEST(ClassTranslatorTest, Composition)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -234,7 +234,7 @@ TEST(TranslatorTest, Composition)
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Type{"Class04"});
 }
 
-TEST(TranslatorTest, Aggregation)
+TEST(ClassTranslatorTest, Aggregation)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -259,7 +259,7 @@ TEST(TranslatorTest, Aggregation)
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::shared_ptr", {{"Class06"}}}));
 }
 
-TEST(TranslatorTest, LabelsOnRelations)
+TEST(ClassTranslatorTest, LabelsOnRelations)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -298,7 +298,7 @@ TEST(TranslatorTest, LabelsOnRelations)
     EXPECT_EQ(std::get<Variable>(classes[2].body[0]).type, (Type{"std::shared_ptr", {{"Class04"}}}));
 }
 
-TEST(TranslatorTest, ExternalMethodsAndVariables)
+TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -337,7 +337,7 @@ TEST(TranslatorTest, ExternalMethodsAndVariables)
     EXPECT_TRUE(std::get<Method>(classes[1].body[1]).parameters.empty());
 }
 
-TEST(TranslatorTest, Namespaces)
+TEST(ClassTranslatorTest, Namespaces)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -378,7 +378,7 @@ TEST(TranslatorTest, Namespaces)
     EXPECT_TRUE(classes[2].namespaces.empty());
 }
 
-TEST(TranslatorTest, NamespaceSeperator)
+TEST(ClassTranslatorTest, NamespaceSeperator)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -409,7 +409,7 @@ TEST(TranslatorTest, NamespaceSeperator)
     EXPECT_EQ(foo.namespaces.back(), "X1");
 }
 
-TEST(TranslatorTest, NestedNamespaces)
+TEST(ClassTranslatorTest, NestedNamespaces)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -441,7 +441,7 @@ TEST(TranslatorTest, NestedNamespaces)
     EXPECT_EQ(foo.namespaces.back(), "net");
 }
 
-TEST(TranslatorTest, InheritFromOtherNamespace)
+TEST(ClassTranslatorTest, InheritFromOtherNamespace)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -480,7 +480,7 @@ TEST(TranslatorTest, InheritFromOtherNamespace)
     EXPECT_EQ(bar.namespaces.back(), "dummy");
 }
 
-TEST(TranslatorTest, Stereotypes)
+TEST(ClassTranslatorTest, Stereotypes)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -505,7 +505,7 @@ TEST(TranslatorTest, Stereotypes)
     EXPECT_TRUE(system.isStruct);
 }
 
-TEST(TranslatorTest, Templates)
+TEST(ClassTranslatorTest, Templates)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -545,7 +545,7 @@ TEST(TranslatorTest, Templates)
     EXPECT_EQ(std::get<Variable>(classes[0].body[1]).type, (Type{"std::map", {Type{"std::string"}, Type{"int"}}}));
 }
 
-TEST(TranslatorTest, Interface)
+TEST(ClassTranslatorTest, Interface)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -583,7 +583,7 @@ TEST(TranslatorTest, Interface)
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
 }
 
-TEST(TranslatorTest, Visibility)
+TEST(ClassTranslatorTest, Visibility)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -614,7 +614,7 @@ TEST(TranslatorTest, Visibility)
     EXPECT_EQ(std::get<Method>(classes[0].body[3]).name, "method2");
 }
 
-TEST(TranslatorTest, SameClassNameDifferentNamespace)
+TEST(ClassTranslatorTest, SameClassNameDifferentNamespace)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -651,7 +651,7 @@ TEST(TranslatorTest, SameClassNameDifferentNamespace)
     EXPECT_EQ(person.inherits[0], "::BaseClass");
 }
 
-TEST(TranslatorTest, ClassWithSpotSIsStruct)
+TEST(ClassTranslatorTest, ClassWithSpotSIsStruct)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -682,7 +682,7 @@ TEST(TranslatorTest, ClassWithSpotSIsStruct)
     ASSERT_TRUE(type.isStruct);
 }
 
-TEST(TranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
+TEST(ClassTranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
@@ -706,7 +706,7 @@ TEST(TranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
     ASSERT_FALSE(type.isStruct);
 }
 
-TEST(TranslatorTest, ClassWithSpotSAndStereotypeStructIsStruct)
+TEST(ClassTranslatorTest, ClassWithSpotSAndStereotypeStructIsStruct)
 {
     // Arrange
     Translator sut{std::make_shared<Config>()};
