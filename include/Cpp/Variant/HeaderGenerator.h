@@ -4,13 +4,11 @@
 
 #include "Variant.h"
 
-namespace Cpp {
-namespace Variant {
+namespace Cpp::Variant {
 
 class HeaderGenerator
 {
 public:
-    std::string generate(Variant in);
+    std::string generate(const Variant& in);
 };
-} // namespace Variant
-} // namespace Cpp
+} // namespace Cpp::Variant
