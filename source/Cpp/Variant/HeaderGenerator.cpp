@@ -13,7 +13,7 @@ std::string HeaderGenerator::generate(const Variant& in)
     ret += "#pragma once\n\n";
 
     auto incs =
-        in.containedTypes | std::views::transform([](const Type& inc) { return "#include \"" + inc.base + "\"\n"; });
+        in.containedTypes | std::views::transform([](const Type& inc) { return "#include \"" + inc.base + ".h\"\n"; });
     ret += std::accumulate(incs.begin(), incs.end(), std::string());
 
     // open namespaces
@@ -23,11 +23,15 @@ std::string HeaderGenerator::generate(const Variant& in)
     ret += "\n";
 
     // variant definition
-    ret += "\nusing " + in.name + " = std::variant<";
+    ret += "using " + in.name + " = std::variant<";
 
-    auto types = in.containedTypes | std::views::transform([](const Type& inc) { return inc.base + ", "; });
-    ret += std::accumulate(types.begin(), types.end(), std::string());
-    ret = ret.substr(0, ret.size() - 2);
+    if (!in.containedTypes.empty()) {
+        auto types = in.containedTypes | std::views::transform([](const Type& inc) { return inc.base; });
+        ret += std::accumulate(++types.begin(),
+                               types.end(),
+                               types.front(),
+                               [](const std::string& l, const std::string& r) { return l + ", " + r; });
+    }
 
     ret += ">;";
 

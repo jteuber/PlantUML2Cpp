@@ -12,7 +12,7 @@ namespace Class {
 static const std::string ws     = "( |\t|\n)*";
 static const std::string header = "#pragma once" + ws;
 
-TEST(HeaderGenerator, EmptyClass)
+TEST(ClassHeaderGenerator, EmptyClass)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -30,7 +30,7 @@ TEST(HeaderGenerator, EmptyClass)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, SinglePublicMethod)
+TEST(ClassHeaderGenerator, SinglePublicMethod)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -55,7 +55,7 @@ TEST(HeaderGenerator, SinglePublicMethod)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, SinglePrivateMethod)
+TEST(ClassHeaderGenerator, SinglePrivateMethod)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -80,7 +80,7 @@ TEST(HeaderGenerator, SinglePrivateMethod)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, SingleProtectedMethod)
+TEST(ClassHeaderGenerator, SingleProtectedMethod)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -105,7 +105,7 @@ TEST(HeaderGenerator, SingleProtectedMethod)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, AllKindsOfMethods)
+TEST(ClassHeaderGenerator, AllKindsOfMethods)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -144,7 +144,7 @@ TEST(HeaderGenerator, AllKindsOfMethods)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, AllKindsOfMembers)
+TEST(ClassHeaderGenerator, AllKindsOfMembers)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -183,7 +183,7 @@ TEST(HeaderGenerator, AllKindsOfMembers)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, MembersInStruct)
+TEST(ClassHeaderGenerator, MembersInStruct)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -223,7 +223,7 @@ TEST(HeaderGenerator, MembersInStruct)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, ComplexTemplates)
+TEST(ClassHeaderGenerator, ComplexTemplates)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -252,7 +252,7 @@ TEST(HeaderGenerator, ComplexTemplates)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, ComplexMethods)
+TEST(ClassHeaderGenerator, ComplexMethods)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -286,7 +286,7 @@ TEST(HeaderGenerator, ComplexMethods)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(HeaderGenerator, Interface)
+TEST(ClassHeaderGenerator, Interface)
 {
     // Arrange
     auto config = std::make_shared<Config>();

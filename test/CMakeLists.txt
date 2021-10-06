@@ -24,7 +24,8 @@ add_executable(tests main.cpp PlantUml/ParserTest.cpp
     Cpp/Class/IncludeGathererTest.cpp 
     Cpp/Class/MemberSorterTest.cpp 
     Cpp/Class/SourceGeneratorTest.cpp
-    Cpp/Variant/TranslatorTest.cpp)
+    Cpp/Variant/TranslatorTest.cpp
+    Cpp/Variant/HeaderGeneratorTest.cpp)
 target_link_libraries(tests gtest gtest_main gmock PlantUML2Cpp-static PEGParser fmt)
 
 enable_testing()
