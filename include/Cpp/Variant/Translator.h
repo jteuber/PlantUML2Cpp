@@ -6,11 +6,10 @@
 #include "PlantUml/AbstractVisitor.h"
 
 #include "Config.h"
-#include "Cpp/TranslatorUtils.h"
+#include "Cpp/Common/TranslatorUtils.h"
 #include "Variant.h"
 
-namespace Cpp {
-namespace Variant {
+namespace Cpp::Variant {
 
 class Translator : public PlantUml::AbstractVisitor
 {
@@ -39,8 +38,7 @@ private:
     std::vector<Variant>::iterator m_lastEncountered = m_results.end();
 
     std::shared_ptr<Config> m_config;
-    TranslatorUtils m_utils;
+    Common::TranslatorUtils m_utils;
 };
 
-} // namespace Variant
-} // namespace Cpp
+} // namespace Cpp::Variant

@@ -5,13 +5,12 @@
 
 #include "Config.h"
 #include "Cpp/Class/Class.h"
-#include "Cpp/TranslatorUtils.h"
+#include "Cpp/Common/TranslatorUtils.h"
 
 #include "PlantUml/AbstractVisitor.h"
 #include "PlantUml/ModelElement.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 class Translator : public PlantUml::AbstractVisitor
 {
@@ -40,8 +39,7 @@ private:
     std::vector<Class>::iterator m_lastEncounteredClass = m_classes.end();
     bool m_lastClassFromExternalDef                     = false;
     std::shared_ptr<Config> m_config;
-    TranslatorUtils m_utils;
+    Common::TranslatorUtils m_utils;
 };
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

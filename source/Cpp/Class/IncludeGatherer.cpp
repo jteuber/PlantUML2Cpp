@@ -2,13 +2,13 @@
 
 #include <algorithm>
 #include <numeric>
+#include <utility>
 #include <variant>
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 IncludeGatherer::IncludeGatherer(std::shared_ptr<Config> config)
-    : m_config(config)
+    : m_config(std::move(config))
 {}
 
 void IncludeGatherer::gather(Class& c)
@@ -54,10 +54,10 @@ void IncludeGatherer::gather(Class& c)
     }
 }
 
-std::set<std::string> IncludeGatherer::decomposeType(const Type& type)
+std::set<std::string> IncludeGatherer::decomposeType(const Common::Type& type)
 {
     std::set<std::string> out{type.base};
-    for (auto& param : type.templateParams) {
+    for (const auto& param : type.templateParams) {
         auto paramSet = decomposeType(param);
         out.insert(paramSet.begin(), paramSet.end());
     }
@@ -65,5 +65,4 @@ std::set<std::string> IncludeGatherer::decomposeType(const Type& type)
     return out;
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

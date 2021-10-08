@@ -2,7 +2,6 @@
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
-#include <assert.h>
 #include <iostream>
 #include <numeric>
 #include <ranges>
@@ -12,12 +11,11 @@
 
 #include <fmt/core.h>
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 Translator::Translator(std::shared_ptr<Config> config)
-    : m_config(config)
-    , m_utils(config)
+    : m_config(std::move(config))
+    , m_utils(m_config)
 {}
 
 std::vector<Class> Translator::results() &&
@@ -85,7 +83,7 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    m_lastEncounteredClass = findClass<Class>(r.subject, m_classes, m_namespaceStack);
+    m_lastEncounteredClass = Common::findClass<Class>(r.subject, m_classes, m_namespaceStack);
 
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (r.type) {
@@ -101,7 +99,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
                 var.type =
                     m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {
-                var.type = Type{m_utils.toNamespacedString(r.object)};
+                var.type = Common::Type{m_utils.toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -119,7 +117,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
                 var.type =
                     m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {
-                var.type = Type{m_utils.toNamespacedString(r.object)};
+                var.type = Common::Type{m_utils.toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -237,5 +235,4 @@ bool Translator::visit(const PlantUml::End& e)
     return true;
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

@@ -38,7 +38,7 @@ TEST(VariantHeaderGenerator, SingleType)
 
     Variant input;
     input.name = "Simple";
-    input.containedTypes.push_back(Type{"Contained"});
+    input.containedTypes.push_back(Common::Type{"Contained"});
 
     // Act
     auto output = sut.generate(input);

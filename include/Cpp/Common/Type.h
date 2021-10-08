@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Type.h"
-
-namespace Cpp {
+namespace Cpp::Common {
 
 struct Type
 {
@@ -15,4 +13,4 @@ struct Type
 
     auto operator<=>(const Type&) const = default;
 };
-} // namespace Cpp
+} // namespace Cpp::Common

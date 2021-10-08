@@ -1,10 +1,12 @@
 #include "Cpp/Variant/Translator.h"
 
+#include <utility>
+
 namespace Cpp::Variant {
 
 Translator::Translator(std::shared_ptr<Config> config)
-    : m_config(config)
-    , m_utils(config)
+    : m_config(std::move(config))
+    , m_utils(m_config)
 {}
 
 bool Translator::visit(const PlantUml::Variable& v)
@@ -19,7 +21,7 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    auto lastEncountered = findClass<Variant>(r.subject, m_results, m_namespaceStack);
+    auto lastEncountered = Common::findClass<Variant>(r.subject, m_results, m_namespaceStack);
 
     if (lastEncountered != m_results.end()) {
         lastEncountered->containedTypes.emplace_back(r.object.back());

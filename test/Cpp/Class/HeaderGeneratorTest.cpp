@@ -6,8 +6,7 @@
 #include "Cpp/Class/Class.h"
 #include "Cpp/Class/HeaderGenerator.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 static const std::string ws     = "( |\t|\n)*";
 static const std::string header = "#pragma once" + ws;
@@ -38,12 +37,12 @@ TEST(ClassHeaderGenerator, SinglePublicMethod)
 
     Method method;
     method.name       = "simpleMethod";
-    method.returnType = Type{"void"};
+    method.returnType = Common::Type{"void"};
 
     Class input;
     input.name = "simpleClass";
-    input.body.push_back(VisibilityKeyword{"public:"});
-    input.body.push_back(method);
+    input.body.emplace_back(VisibilityKeyword{"public:"});
+    input.body.emplace_back(method);
 
     // Act
     auto output = sut.generate(input);
@@ -63,12 +62,12 @@ TEST(ClassHeaderGenerator, SinglePrivateMethod)
 
     Method method;
     method.name       = "simpleMethod";
-    method.returnType = Type{"void"};
+    method.returnType = Common::Type{"void"};
 
     Class input;
     input.name = "simpleClass";
-    input.body.push_back(VisibilityKeyword{"private:"});
-    input.body.push_back(method);
+    input.body.emplace_back(VisibilityKeyword{"private:"});
+    input.body.emplace_back(method);
 
     // Act
     auto output = sut.generate(input);
@@ -88,12 +87,12 @@ TEST(ClassHeaderGenerator, SingleProtectedMethod)
 
     Method method;
     method.name       = "simpleMethod";
-    method.returnType = Type{"void"};
+    method.returnType = Common::Type{"void"};
 
     Class input;
     input.name = "simpleClass";
-    input.body.push_back(VisibilityKeyword{"protected:"});
-    input.body.push_back(method);
+    input.body.emplace_back(VisibilityKeyword{"protected:"});
+    input.body.emplace_back(method);
 
     // Act
     auto output = sut.generate(input);
@@ -113,22 +112,22 @@ TEST(ClassHeaderGenerator, AllKindsOfMethods)
 
     Method method;
     method.name       = "simplePublicMethod";
-    method.returnType = Type{"void"};
+    method.returnType = Common::Type{"void"};
 
     Class input;
     input.name = "simpleClass";
-    input.body.push_back(VisibilityKeyword{"public:"});
-    input.body.push_back(method);
+    input.body.emplace_back(VisibilityKeyword{"public:"});
+    input.body.emplace_back(method);
 
     method.name = "simpleProtectedMethod";
-    input.body.push_back(VisibilityKeyword{"protected:"});
-    input.body.push_back(method);
+    input.body.emplace_back(VisibilityKeyword{"protected:"});
+    input.body.emplace_back(method);
 
     method.name = "simplePrivateMethod";
-    input.body.push_back(VisibilityKeyword{"private:"});
-    input.body.push_back(method);
+    input.body.emplace_back(VisibilityKeyword{"private:"});
+    input.body.emplace_back(method);
     method.name = "simplePrivateMethod2";
-    input.body.push_back(method);
+    input.body.emplace_back(method);
 
     // Act
     auto output = sut.generate(input);
@@ -152,22 +151,22 @@ TEST(ClassHeaderGenerator, AllKindsOfMembers)
 
     Variable member;
     member.name = "simplePublicMember";
-    member.type = Type{"int"};
+    member.type = Common::Type{"int"};
 
     Class input;
     input.name = "simpleClass";
-    input.body.push_back(VisibilityKeyword{"public:"});
-    input.body.push_back(member);
+    input.body.emplace_back(VisibilityKeyword{"public:"});
+    input.body.emplace_back(member);
 
     member.name = "simplePrivateMember";
-    input.body.push_back(VisibilityKeyword{"private:"});
-    input.body.push_back(member);
+    input.body.emplace_back(VisibilityKeyword{"private:"});
+    input.body.emplace_back(member);
     member.name = "simplePrivateMember2";
-    input.body.push_back(member);
+    input.body.emplace_back(member);
 
     member.name = "simpleProtectedMember";
-    input.body.push_back(VisibilityKeyword{"protected:"});
-    input.body.push_back(member);
+    input.body.emplace_back(VisibilityKeyword{"protected:"});
+    input.body.emplace_back(member);
 
     // Act
     auto output = sut.generate(input);
@@ -191,23 +190,23 @@ TEST(ClassHeaderGenerator, MembersInStruct)
 
     Variable member;
     member.name = "simplePublicMember";
-    member.type = Type{"int"};
+    member.type = Common::Type{"int"};
 
     Class input;
     input.name     = "simpleStruct";
     input.isStruct = true;
-    input.body.push_back(VisibilityKeyword{"public:"});
-    input.body.push_back(member);
+    input.body.emplace_back(VisibilityKeyword{"public:"});
+    input.body.emplace_back(member);
 
     member.name = "simplePrivateMember";
-    input.body.push_back(VisibilityKeyword{"private:"});
-    input.body.push_back(member);
+    input.body.emplace_back(VisibilityKeyword{"private:"});
+    input.body.emplace_back(member);
     member.name = "simplePrivateMember2";
-    input.body.push_back(member);
+    input.body.emplace_back(member);
 
     member.name = "simpleProtectedMember";
-    input.body.push_back(VisibilityKeyword{"protected:"});
-    input.body.push_back(member);
+    input.body.emplace_back(VisibilityKeyword{"protected:"});
+    input.body.emplace_back(member);
 
     // Act
     auto output = sut.generate(input);
@@ -236,8 +235,9 @@ TEST(ClassHeaderGenerator, ComplexTemplates)
 
     Variable member;
     member.name = "complexTemplate";
-    member.type = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    input.body.push_back(member);
+    member.type = Common::Type{"std::vector",
+                               {Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    input.body.emplace_back(member);
 
     // Act
     auto output = sut.generate(input);
@@ -265,10 +265,12 @@ TEST(ClassHeaderGenerator, ComplexMethods)
 
     Method method;
     method.name       = "complexMethod";
-    method.returnType = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    method.parameters = {{"param1", Type{"std::vector", {Type{"int"}}}},
-                         {"param2", Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    input.body.push_back(method);
+    method.returnType = Common::Type{
+        "std::vector", {Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    method.parameters = {
+        {"param1", Common::Type{"std::vector", {Common::Type{"int"}}}},
+        {"param2", Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    input.body.emplace_back(method);
 
     // Act
     auto output = sut.generate(input);
@@ -298,12 +300,14 @@ TEST(ClassHeaderGenerator, Interface)
 
     Method method;
     method.name       = "complexMethod";
-    method.returnType = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    method.parameters = {{"param1", Type{"std::vector", {Type{"int"}}}},
-                         {"param2", Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
+    method.returnType = Common::Type{
+        "std::vector", {Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    method.parameters = {
+        {"param1", Common::Type{"std::vector", {Common::Type{"int"}}}},
+        {"param2", Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
     method.isAbstract = true;
-    input.body.push_back(method);
-    input.body.emplace_back(Method{"method", Type{"int"}, "", true});
+    input.body.emplace_back(method);
+    input.body.emplace_back(Method{"method", Common::Type{"int"}, "", true});
 
     // Act
     auto output = sut.generate(input);
@@ -320,5 +324,4 @@ TEST(ClassHeaderGenerator, Interface)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

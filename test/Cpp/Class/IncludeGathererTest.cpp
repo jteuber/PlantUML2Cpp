@@ -2,8 +2,7 @@
 
 #include "Cpp/Class/IncludeGatherer.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 TEST(IncludeGathererTest, NoPrimitives)
 {
@@ -65,8 +64,8 @@ TEST(IncludeGathererTest, MultipleFromVariable)
     IncludeGatherer sut{std::make_shared<Config>()};
 
     Class test{"Test"};
-    test.body.emplace_back(Variable{"var", Type{"std::string"}});
-    test.body.emplace_back(Variable{"vec", Type{"std::vector", {{"int"}}}});
+    test.body.emplace_back(Variable{"var", Common::Type{"std::string"}});
+    test.body.emplace_back(Variable{"vec", Common::Type{"std::vector", {{"int"}}}});
     test.body.emplace_back(Variable{"vec", "Test"});
 
     // Act
@@ -81,5 +80,4 @@ TEST(IncludeGathererTest, MultipleFromVariable)
     EXPECT_NE(test.externalIncludes.find("vector"), test.externalIncludes.end());
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

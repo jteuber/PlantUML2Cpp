@@ -6,15 +6,14 @@
 #include <variant>
 #include <vector>
 
-#include "Cpp/Type.h"
+#include "Cpp/Common/Type.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 struct Variable
 {
     std::string name;
-    Type type;
+    Common::Type type;
     std::string comment;
     bool isConst  = false;
     bool isStatic = false;
@@ -23,13 +22,13 @@ struct Variable
 struct Parameter
 {
     std::string name;
-    Type type;
+    Common::Type type;
 };
 
 struct Method
 {
     std::string name;
-    Type returnType;
+    Common::Type returnType;
     std::string comment;
     bool isAbstract = false;
     bool isConst    = false;
@@ -62,5 +61,4 @@ struct Class
     std::vector<ClassElement> body;
 };
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

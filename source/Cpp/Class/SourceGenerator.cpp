@@ -2,22 +2,23 @@
 
 #include <ranges>
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 std::string SourceGenerator::generate(const Class& in)
 {
     // there are a bunch of cases where we don't want to generate a source file
     if (in.isInterface) { // interfaces
         return "";
-    } else if (in.body.empty()) { // no body at all
+    }
+    if (in.body.empty()) { // no body at all
         return "";
-    } else if (std::count_if(in.body.begin(),
-                             in.body.end(),
-                             [](const ClassElement& elem) { return std::holds_alternative<Method>(elem); }) == 0 &&
-               std::count_if(in.body.begin(), in.body.end(), [](const ClassElement& elem) {
-                   return std::holds_alternative<Variable>(elem) && std::get<Variable>(elem).isStatic;
-               }) == 0) { // no methods and no static members
+    }
+    if (std::count_if(in.body.begin(),
+                      in.body.end(),
+                      [](const ClassElement& elem) { return std::holds_alternative<Method>(elem); }) == 0 &&
+        std::count_if(in.body.begin(), in.body.end(), [](const ClassElement& elem) {
+            return std::holds_alternative<Variable>(elem) && std::get<Variable>(elem).isStatic;
+        }) == 0) { // no methods and no static members
         return "";
     }
 
@@ -25,8 +26,9 @@ std::string SourceGenerator::generate(const Class& in)
 
     // include header
     ret += "#include \"";
-    for (const auto& ns : in.namespaces)
+    for (const auto& ns : in.namespaces) {
         ret += ns + "/";
+    }
     ret += in.name + ".h\"\n\n";
 
     // open namespaces
@@ -66,11 +68,12 @@ std::string SourceGenerator::generate(const Class& in)
     return ret;
 }
 
-std::string SourceGenerator::typeToString(const Type& t)
+std::string SourceGenerator::typeToString(const Common::Type& t)
 {
     std::string templ;
-    for (const auto& param : t.templateParams)
+    for (const auto& param : t.templateParams) {
         templ += typeToString(param) + ", ";
+    }
     if (!t.templateParams.empty()) {
         templ.erase(templ.length() - 2);
         templ = "<" + templ + ">";
@@ -79,5 +82,4 @@ std::string SourceGenerator::typeToString(const Type& t)
     return t.base + templ;
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

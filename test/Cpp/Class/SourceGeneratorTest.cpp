@@ -6,8 +6,7 @@
 #include "Cpp/Class/Class.h"
 #include "Cpp/Class/SourceGenerator.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 static const std::string ws     = "( |\t|\n)*";
 static const std::string header = "#include \"test.h\"" + ws;
@@ -36,7 +35,7 @@ TEST(SourceGenerator, NoMethodStruct)
     Class input;
     input.name     = "test";
     input.isStruct = true;
-    input.body.emplace_back(Variable{"var", Type{"int"}});
+    input.body.emplace_back(Variable{"var", Common::Type{"int"}});
 
     // Act
     auto output = sut.generate(input);
@@ -53,7 +52,7 @@ TEST(SourceGenerator, Interface)
     Class input;
     input.name        = "test";
     input.isInterface = true;
-    input.body.emplace_back(Method{"method", Type{"int"}});
+    input.body.emplace_back(Method{"method", Common::Type{"int"}});
 
     // Act
     auto output = sut.generate(input);
@@ -69,7 +68,7 @@ TEST(SourceGenerator, SingleMethodClass)
 
     Class input;
     input.name = "test";
-    input.body.emplace_back(Method{"method", Type{"int"}});
+    input.body.emplace_back(Method{"method", Common::Type{"int"}});
 
     // Act
     auto output = sut.generate(input);
@@ -88,7 +87,7 @@ TEST(SourceGenerator, SingleMethodStruct)
     Class input;
     input.name     = "test";
     input.isStruct = true;
-    input.body.emplace_back(Method{"method", Type{"int"}});
+    input.body.emplace_back(Method{"method", Common::Type{"int"}});
 
     // Act
     auto output = sut.generate(input);
@@ -109,10 +108,12 @@ TEST(SourceGenerator, ComplexMethodClass)
 
     Method method;
     method.name       = "complexMethod";
-    method.returnType = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    method.parameters = {{"param1", Type{"std::vector", {Type{"int"}}}},
-                         {"param2", Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    input.body.push_back(method);
+    method.returnType = Common::Type{
+        "std::vector", {Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    method.parameters = {
+        {"param1", Common::Type{"std::vector", {Common::Type{"int"}}}},
+        {"param2", Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    input.body.emplace_back(method);
 
     // Act
     auto output = sut.generate(input);
@@ -137,11 +138,13 @@ TEST(SourceGenerator, MultiMethodClass)
 
     Method method;
     method.name       = "complexMethod";
-    method.returnType = Type{"std::vector", {Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    method.parameters = {{"param1", Type{"std::vector", {Type{"int"}}}},
-                         {"param2", Type{"std::pair", {Type{"Visibility"}, Type{"std::string"}}}}};
-    input.body.push_back(method);
-    input.body.emplace_back(Method{"method", Type{"int"}});
+    method.returnType = Common::Type{
+        "std::vector", {Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    method.parameters = {
+        {"param1", Common::Type{"std::vector", {Common::Type{"int"}}}},
+        {"param2", Common::Type{"std::pair", {Common::Type{"Visibility"}, Common::Type{"std::string"}}}}};
+    input.body.emplace_back(method);
+    input.body.emplace_back(Method{"method", Common::Type{"int"}});
 
     // Act
     auto output = sut.generate(input);
@@ -152,10 +155,9 @@ TEST(SourceGenerator, MultiMethodClass)
     regex += "std::vector<int>" + ws + "param1," + ws;
     regex += "std::pair<Visibility, std::string>" + ws + "param2" + ws;
     regex += "\\)" + ws + "\\{\\}" + ws;
-    regex += "int test::method\\(\\) \\{\\}" + ws;
+    regex += R"(int test::method\(\) \{\})" + ws;
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

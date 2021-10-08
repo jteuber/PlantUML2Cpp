@@ -4,17 +4,15 @@
 #include <string>
 #include <vector>
 
-#include "Cpp/Type.h"
+#include "Cpp/Common/Type.h"
 
-namespace Cpp {
-namespace Variant {
+namespace Cpp::Variant {
 
 struct Variant
 {
     std::string name;
     std::list<std::string> namespaces;
     std::string comment;
-    std::vector<Type> containedTypes;
+    std::vector<Common::Type> containedTypes;
 };
-} // namespace Variant
-} // namespace Cpp
+} // namespace Cpp::Variant

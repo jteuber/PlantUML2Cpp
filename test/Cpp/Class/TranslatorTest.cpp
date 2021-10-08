@@ -5,8 +5,7 @@
 
 namespace puml = PlantUml;
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 void act(PlantUml::Parser& parser, Translator& sut, std::string_view puml)
 {
@@ -146,7 +145,7 @@ TEST(ClassTranslatorTest, EntityWithSingleVariable)
 
     ASSERT_EQ(classes[0].body.size(), 1);
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "variable");
-    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Type{"var"});
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Common::Type{"var"});
 }
 
 TEST(ClassTranslatorTest, ClassWithTwoMethods)
@@ -174,15 +173,15 @@ TEST(ClassTranslatorTest, ClassWithTwoMethods)
 
     ASSERT_EQ(classes[0].body.size(), 2);
     EXPECT_EQ(std::get<Method>(classes[0].body[0]).name, "method");
-    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Type{"var"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Common::Type{"var"});
     EXPECT_TRUE(std::get<Method>(classes[0].body[0]).parameters.empty());
 
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).name, "method2");
-    EXPECT_EQ(std::get<Method>(classes[0].body[1]).returnType, Type{"var"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).returnType, Common::Type{"var"});
 
     ASSERT_EQ(std::get<Method>(classes[0].body[1]).parameters.size(), 1);
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].name, "input");
-    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Common::Type{"bool"});
 }
 
 TEST(ClassTranslatorTest, Inheritance)
@@ -231,7 +230,7 @@ TEST(ClassTranslatorTest, Composition)
     EXPECT_EQ(classes[0].name, "Class03");
     ASSERT_EQ(classes[0].body.size(), 1);
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "class04");
-    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Type{"Class04"});
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, Common::Type{"Class04"});
 }
 
 TEST(ClassTranslatorTest, Aggregation)
@@ -256,7 +255,7 @@ TEST(ClassTranslatorTest, Aggregation)
     EXPECT_EQ(classes[0].name, "Class05");
     ASSERT_EQ(classes[0].body.size(), 1);
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "class06");
-    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::shared_ptr", {{"Class06"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Common::Type{"std::shared_ptr", {{"Class06"}}}));
 }
 
 TEST(ClassTranslatorTest, LabelsOnRelations)
@@ -288,14 +287,14 @@ TEST(ClassTranslatorTest, LabelsOnRelations)
     EXPECT_EQ(classes[0].isStruct, false);
     ASSERT_EQ(classes[0].body.size(), 1);
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "contains");
-    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::vector", {{"Class02"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Common::Type{"std::vector", {{"Class02"}}}));
 
     EXPECT_EQ(classes[2].name, "Class03");
     EXPECT_EQ(classes[2].isInterface, false);
     EXPECT_EQ(classes[2].isStruct, false);
     ASSERT_EQ(classes[2].body.size(), 1);
     EXPECT_EQ(std::get<Variable>(classes[2].body[0]).name, "aggregation");
-    EXPECT_EQ(std::get<Variable>(classes[2].body[0]).type, (Type{"std::shared_ptr", {{"Class04"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[2].body[0]).type, (Common::Type{"std::shared_ptr", {{"Class04"}}}));
 }
 
 TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
@@ -324,16 +323,16 @@ TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
     EXPECT_EQ(classes[0].name, "Object");
     ASSERT_EQ(classes[0].body.size(), 1);
     EXPECT_EQ(std::get<Method>(classes[0].body[0]).name, "equals");
-    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Type{"void"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Common::Type{"void"});
     EXPECT_TRUE(std::get<Method>(classes[0].body[0]).parameters.empty());
 
     EXPECT_EQ(classes[1].name, "ArrayList");
     ASSERT_EQ(classes[1].body.size(), 2);
 
     EXPECT_EQ(std::get<Variable>(classes[1].body[0]).name, "elementData");
-    EXPECT_EQ(std::get<Variable>(classes[1].body[0]).type, Type{"Object[]"});
+    EXPECT_EQ(std::get<Variable>(classes[1].body[0]).type, Common::Type{"Object[]"});
     EXPECT_EQ(std::get<Method>(classes[1].body[1]).name, "size");
-    EXPECT_EQ(std::get<Method>(classes[1].body[1]).returnType, Type{"int"});
+    EXPECT_EQ(std::get<Method>(classes[1].body[1]).returnType, Common::Type{"int"});
     EXPECT_TRUE(std::get<Method>(classes[1].body[1]).parameters.empty());
 }
 
@@ -539,10 +538,12 @@ TEST(ClassTranslatorTest, Templates)
 
     ASSERT_EQ(classes[0].body.size(), 2);
     EXPECT_EQ(std::get<Variable>(classes[0].body[0]).name, "variable");
-    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type, (Type{"std::vector", {Type{"std::string"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[0]).type,
+              (Common::Type{"std::vector", {Common::Type{"std::string"}}}));
 
     EXPECT_EQ(std::get<Variable>(classes[0].body[1]).name, "map");
-    EXPECT_EQ(std::get<Variable>(classes[0].body[1]).type, (Type{"std::map", {Type{"std::string"}, Type{"int"}}}));
+    EXPECT_EQ(std::get<Variable>(classes[0].body[1]).type,
+              (Common::Type{"std::map", {Common::Type{"std::string"}, Common::Type{"int"}}}));
 }
 
 TEST(ClassTranslatorTest, Interface)
@@ -570,17 +571,17 @@ TEST(ClassTranslatorTest, Interface)
 
     ASSERT_EQ(classes[0].body.size(), 2);
     EXPECT_EQ(std::get<Method>(classes[0].body[0]).name, "method");
-    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Type{"var"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[0]).returnType, Common::Type{"var"});
     EXPECT_TRUE(std::get<Method>(classes[0].body[0]).isAbstract);
     EXPECT_TRUE(std::get<Method>(classes[0].body[0]).parameters.empty());
 
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).name, "method2");
-    EXPECT_EQ(std::get<Method>(classes[0].body[1]).returnType, Type{"var"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).returnType, Common::Type{"var"});
     EXPECT_TRUE(std::get<Method>(classes[0].body[1]).isAbstract);
 
     ASSERT_EQ(std::get<Method>(classes[0].body[1]).parameters.size(), 1);
     EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].name, "input");
-    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Type{"bool"});
+    EXPECT_EQ(std::get<Method>(classes[0].body[1]).parameters[0].type, Common::Type{"bool"});
 }
 
 TEST(ClassTranslatorTest, Visibility)
@@ -660,10 +661,10 @@ TEST(ClassTranslatorTest, ClassWithSpotSIsStruct)
     static constexpr auto puml =
         R"(@startuml
 
-        class Type << (S,#FFAA55) >>
+        class Common::Type << (S,#FFAA55) >>
         {
             +base : list<string>
-            +templateParams : vector<Type>
+            +templateParams : vector<Common::Type>
         }
 
         class Singleton << (S,#FFAA55) Singleton >>
@@ -678,7 +679,7 @@ TEST(ClassTranslatorTest, ClassWithSpotSIsStruct)
     ASSERT_EQ(classes.size(), 2);
 
     Class type = classes[0];
-    EXPECT_EQ(type.name, "Type");
+    EXPECT_EQ(type.name, "Common::Type");
     ASSERT_TRUE(type.isStruct);
 }
 
@@ -730,5 +731,4 @@ TEST(ClassTranslatorTest, ClassWithSpotSAndStereotypeStructIsStruct)
     ASSERT_TRUE(type.isStruct);
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

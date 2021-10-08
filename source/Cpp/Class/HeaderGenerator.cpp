@@ -1,7 +1,6 @@
 #include "Cpp/Class/HeaderGenerator.h"
 
 #include <algorithm>
-#include <assert.h>
 #include <cctype>
 #include <concepts>
 #include <list>
@@ -10,8 +9,7 @@
 #include <string_view>
 #include <utility>
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 // template <typename T>
 // concept HasVisibility = requires(T a)
@@ -26,7 +24,7 @@ namespace Class {
 //}
 
 HeaderGenerator::HeaderGenerator(std::shared_ptr<Config> config)
-    : m_config(config)
+    : m_config(std::move(config))
 {}
 
 std::string HeaderGenerator::generate(const Class& in)
@@ -144,7 +142,7 @@ std::string HeaderGenerator::toString(const Separator& s)
     return "// " + s.text;
 }
 
-std::string HeaderGenerator::typeToString(const Type& t)
+std::string HeaderGenerator::typeToString(const Common::Type& t)
 {
     std::string templ;
     for (const auto& param : t.templateParams) {
@@ -158,5 +156,4 @@ std::string HeaderGenerator::typeToString(const Type& t)
     return t.base + templ;
 }
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

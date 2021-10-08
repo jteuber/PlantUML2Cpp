@@ -6,8 +6,7 @@
 #include "Config.h"
 #include "Cpp/Class/Class.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 class HeaderGenerator
 {
@@ -25,11 +24,10 @@ private:
     std::string toString(const VisibilityKeyword& s);
     std::string toString(const Separator& s);
 
-    std::string typeToString(const Type& t);
+    std::string typeToString(const Common::Type& t);
 
     std::shared_ptr<Config> m_config;
     std::string m_variablePrefix;
 };
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

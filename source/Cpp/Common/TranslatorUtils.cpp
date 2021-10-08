@@ -1,9 +1,9 @@
-#include "Cpp/TranslatorUtils.h"
+#include "Cpp/Common/TranslatorUtils.h"
 
 #include <numeric>
 #include <utility>
 
-namespace Cpp {
+namespace Cpp::Common {
 
 TranslatorUtils::TranslatorUtils(std::shared_ptr<Config> config)
     : m_config(std::move(config))
@@ -101,4 +101,4 @@ std::list<std::string> getEffectiveNamespace(std::list<std::string> umlTypename,
     return umlTypename;
 }
 
-} // namespace Cpp
+} // namespace Cpp::Common

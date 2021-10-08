@@ -7,21 +7,19 @@
 
 #include "Cpp/Class/Class.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 class IncludeGatherer
 {
 public:
-    IncludeGatherer(std::shared_ptr<Config> config);
+    explicit IncludeGatherer(std::shared_ptr<Config> config);
     void gather(Class& c);
 
 private:
     // helper methods
-    std::set<std::string> decomposeType(const Type& type);
+    std::set<std::string> decomposeType(const Common::Type& type);
 
     std::shared_ptr<Config> m_config;
 };
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class

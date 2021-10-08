@@ -12,7 +12,7 @@
 
 #include "PlantUml/ModelElement.h"
 
-namespace Cpp {
+namespace Cpp::Common {
 
 template <typename T>
 concept NamespacedElement = requires(T a)
@@ -65,4 +65,4 @@ typename std::vector<E>::iterator findClass(const std::list<std::string>& umlTyp
     });
 }
 
-} // namespace Cpp
+} // namespace Cpp::Common

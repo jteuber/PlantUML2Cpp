@@ -4,8 +4,7 @@
 
 #include "Class.h"
 
-namespace Cpp {
-namespace Class {
+namespace Cpp::Class {
 
 class SourceGenerator
 {
@@ -13,8 +12,7 @@ public:
     std::string generate(const Class& in);
 
 private:
-    std::string typeToString(const Type& t);
+    std::string typeToString(const Common::Type& t);
 };
 
-} // namespace Class
-} // namespace Cpp
+} // namespace Cpp::Class
