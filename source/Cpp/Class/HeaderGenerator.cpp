@@ -25,6 +25,7 @@ namespace Cpp::Class {
 
 HeaderGenerator::HeaderGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
+    , m_genUtils(m_config)
 {}
 
 std::string HeaderGenerator::generate(const Class& in)
@@ -43,10 +44,7 @@ std::string HeaderGenerator::generate(const Class& in)
     ret += "\n";
 
     // open namespaces
-    for (const auto& ns : in.namespaces) {
-        ret += "namespace " + ns + " {\n";
-    }
-    ret += "\n";
+    ret += m_genUtils.openNamespaces(in.namespaces);
 
     // Definintion
     std::string classDef = "class";
@@ -75,9 +73,7 @@ std::string HeaderGenerator::generate(const Class& in)
     ret += "};\n";
 
     // close namespaces
-    for (const auto& ns : in.namespaces | std::views::reverse) {
-        ret += "} // namespace " + ns + "\n";
-    }
+    ret += m_genUtils.closeNamespaces(in.namespaces);
 
     return ret;
 }

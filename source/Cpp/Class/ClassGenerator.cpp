@@ -15,6 +15,7 @@ ClassGenerator::ClassGenerator(std::shared_ptr<Config> config)
     , m_translator(m_config)
     , m_postProcessor(m_config)
     , m_headerGenerator(m_config)
+    , m_sourceGenerator(m_config)
 {}
 
 std::vector<File> ClassGenerator::generate(PlantUml::SyntaxNode root)

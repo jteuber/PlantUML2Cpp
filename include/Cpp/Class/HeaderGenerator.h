@@ -3,8 +3,9 @@
 #include <memory>
 #include <set>
 
+#include "Class.h"
 #include "Config.h"
-#include "Cpp/Class/Class.h"
+#include "Cpp/Common/CodeGeneratorUtils.h"
 
 namespace Cpp::Class {
 
@@ -28,6 +29,7 @@ private:
 
     std::shared_ptr<Config> m_config;
     std::string m_variablePrefix;
+    Common::CodeGeneratorUtils m_genUtils;
 };
 
 } // namespace Cpp::Class

@@ -4,6 +4,11 @@
 
 namespace Cpp::Class {
 
+SourceGenerator::SourceGenerator(std::shared_ptr<Config> config)
+    : m_config(std::move(config))
+    , m_genUtils(m_config)
+{}
+
 std::string SourceGenerator::generate(const Class& in)
 {
     // there are a bunch of cases where we don't want to generate a source file
@@ -32,10 +37,7 @@ std::string SourceGenerator::generate(const Class& in)
     ret += in.name + ".h\"\n\n";
 
     // open namespaces
-    for (const auto& ns : in.namespaces) {
-        ret += "namespace " + ns + " {\n";
-    }
-    ret += "\n";
+    ret += m_genUtils.openNamespaces(in.namespaces);
 
     // static members
     for (const auto& elem : in.body) {
@@ -61,9 +63,7 @@ std::string SourceGenerator::generate(const Class& in)
     }
 
     // close namespaces
-    for (const auto& ns : in.namespaces | std::views::reverse) {
-        ret += "} // namespace " + ns + "\n";
-    }
+    ret += m_genUtils.closeNamespaces(in.namespaces);
 
     return ret;
 }

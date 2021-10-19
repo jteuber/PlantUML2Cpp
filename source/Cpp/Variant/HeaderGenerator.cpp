@@ -5,6 +5,11 @@
 
 namespace Cpp::Variant {
 
+HeaderGenerator::HeaderGenerator(std::shared_ptr<Config> config)
+    : m_config(std::move(config))
+    , m_genUtils(m_config)
+{}
+
 std::string HeaderGenerator::generate(const Variant& in)
 {
     std::string ret;
@@ -17,10 +22,7 @@ std::string HeaderGenerator::generate(const Variant& in)
     ret += std::accumulate(incs.begin(), incs.end(), std::string());
 
     // open namespaces
-    for (const auto& ns : in.namespaces) {
-        ret += "namespace " + ns + " {\n";
-    }
-    ret += "\n";
+    ret += m_genUtils.openNamespaces(in.namespaces);
 
     // variant definition
     ret += "using " + in.name + " = std::variant<";
@@ -35,9 +37,7 @@ std::string HeaderGenerator::generate(const Variant& in)
     ret += ">;";
 
     // close namespaces
-    for (const auto& ns : in.namespaces | std::views::reverse) {
-        ret += "} // namespace " + ns + "\n";
-    }
+    ret += m_genUtils.closeNamespaces(in.namespaces);
 
     return ret;
 }
