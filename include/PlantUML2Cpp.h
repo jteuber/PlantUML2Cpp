@@ -14,6 +14,6 @@ public:
     bool run(std::filesystem::path path = std::filesystem::current_path());
 
 private:
-    std::shared_ptr<Config> config = std::make_shared<Config>();
-    std::shared_ptr<Generator> generator;
+    std::shared_ptr<Config> m_config = std::make_shared<Config>();
+    std::vector<std::unique_ptr<Generator>> m_generators;
 };
