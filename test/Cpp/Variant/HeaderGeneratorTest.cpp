@@ -16,7 +16,7 @@ TEST(VariantHeaderGenerator, Empty)
 {
     // Arrange
     auto config = std::make_shared<Config>();
-    HeaderGenerator sut;
+    HeaderGenerator sut(config);
 
     Variant input;
     input.name = "Empty";
@@ -34,7 +34,7 @@ TEST(VariantHeaderGenerator, SingleType)
 {
     // Arrange
     auto config = std::make_shared<Config>();
-    HeaderGenerator sut;
+    HeaderGenerator sut(config);
 
     Variant input;
     input.name = "Simple";

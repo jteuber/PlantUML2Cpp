@@ -15,7 +15,8 @@ static const std::string header = "#include \"test.h\"" + ws;
 TEST(SourceGenerator, EmptyClass)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name = "test";
@@ -30,7 +31,8 @@ TEST(SourceGenerator, EmptyClass)
 TEST(SourceGenerator, NoMethodStruct)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name     = "test";
@@ -47,7 +49,8 @@ TEST(SourceGenerator, NoMethodStruct)
 TEST(SourceGenerator, Interface)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name        = "test";
@@ -64,7 +67,8 @@ TEST(SourceGenerator, Interface)
 TEST(SourceGenerator, SingleMethodClass)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name = "test";
@@ -82,7 +86,8 @@ TEST(SourceGenerator, SingleMethodClass)
 TEST(SourceGenerator, SingleMethodStruct)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name     = "test";
@@ -101,7 +106,8 @@ TEST(SourceGenerator, SingleMethodStruct)
 TEST(SourceGenerator, ComplexMethodClass)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name = "test";
@@ -131,7 +137,8 @@ TEST(SourceGenerator, ComplexMethodClass)
 TEST(SourceGenerator, MultiMethodClass)
 {
     // Arrange
-    SourceGenerator sut;
+    auto config = std::make_shared<Config>();
+    SourceGenerator sut(config);
 
     Class input;
     input.name = "test";
