@@ -1,22 +1,31 @@
 @startuml Cpp
 
 namespace Cpp {
-    class TranslatorUtils {
-        +Type umlToCppType(PlantUml.Type umlType)
-        +Type stringToCppType(string_view typeString)
-        +Type decomposeType(string_view type)
-        
-        +string toNamespacedString(list<string> namespacedType)
-        +string visibilityToString(PlantUml.Visibility vis)
+    namespace Common {
+        class TranslatorUtils {
+            +TranslatorUtils(Config config)
+            +Type umlToCppType(PlantUml.Type umlType)
+            +Type stringToCppType(string_view typeString)
+            +Type decomposeType(string_view type)
 
-        +list<string> getEffectiveNamespace(list<string> umlTypename)
-        +vector<Class>.iterator findClass(list<string> umlTypename)
-    }
+            +string toNamespacedString(list<string> namespacedType)
+            +string visibilityToString(PlantUml.Visibility vis)
 
-    class Type << (S,#FFAA55) >>
-    {
-        +base : string
-        +templateParams : vector<Type>
+            +list<string> getEffectiveNamespace(list<string> umlTypename)
+            +vector<Class>.iterator findClass(list<string> umlTypename)
+        }
+
+        class CodeGeneratorUtils {
+            +CodeGeneratorUtils(Config config)
+            +string openNamespace(list<string> namespaces)
+            +string closeNamespace(list<string> namespaces)
+        }
+
+        class Type << (S,#FFAA55) >>
+        {
+            +base : string
+            +templateParams : vector<Type>
+        }
     }
 }
 @enduml

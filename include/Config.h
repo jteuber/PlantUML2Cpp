@@ -33,4 +33,6 @@ struct Config
                                                                     {"list", "std::list"},
                                                                     {"umap", "std::unordered_map"},
                                                                     {"path", "std::filesystem::path"}};
+
+    bool concatenateNamespaces = true;
 };
