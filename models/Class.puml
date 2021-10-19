@@ -100,9 +100,9 @@ namespace Cpp {
         }
 
 
-        Method *--- "1" Cpp.Type : returnType
-        Parameter *-- "1" Cpp.Type : type
-        Variable *--- "1" Cpp.Type : type
+        Method *--- "1" Cpp.Common.Type : returnType
+        Parameter *-- "1" Cpp.Common.Type : type
+        Variable *--- "1" Cpp.Common.Type : type
 
 
         Class *-- "0..*" ClassElement : body
