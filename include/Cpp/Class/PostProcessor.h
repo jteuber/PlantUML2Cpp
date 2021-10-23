@@ -20,7 +20,6 @@ private:
     std::shared_ptr<Config> m_config;
 
     IncludeGatherer m_gatherer;
-    // IncludeOptimizer m_optimizer;
     MemberSorter m_sorter;
 };
 
