@@ -46,10 +46,14 @@ void IncludeGatherer::gather(Class& c)
     for (const auto& type : usedTypes) {
         if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
             c.externalIncludes.insert(it->second);
-        } else if (auto ns = type.find_last_of("::"); ns != std::string::npos) {
-            c.externalIncludes.insert(type.substr(ns + 1) + ".h");
         } else {
-            c.localIncludes.insert(type + ".h");
+            size_t pos       = 0;
+            std::string path = type;
+            while ((pos = path.find("::", pos)) != std::string::npos) {
+                path.replace(pos, 2, "/");
+                pos += 1; // Handles case where 'to' is a substring of 'from'
+            }
+            c.localIncludes.insert(path + ".h");
         }
     }
 }
