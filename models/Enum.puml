@@ -33,12 +33,12 @@ namespace Cpp {
         EnumGenerator *-- Translator
         EnumGenerator *-- HeaderGenerator
 
-        class Enum {
+        class Enum << (S,#FFAA55) >> {
             +name  : string
             +namespaces : list<string>
             +comment : string
         }
-        class Keyword {
+        class Keyword << (S,#FFAA55) >> {
             +name : string
         }
 
