@@ -5,7 +5,6 @@
 
 #include "Cpp/Class/Class.h"
 #include "Cpp/Class/IncludeGatherer.h"
-#include "Cpp/Class/IncludeOptimizer.h"
 #include "Cpp/Class/MemberSorter.h"
 
 namespace Cpp {
