@@ -8,13 +8,11 @@
 #include "HeaderGenerator.h"
 #include "PlantUml/SyntaxNode.h"
 
-namespace Cpp {
-namespace Variant {
-
+namespace Cpp::Variant {
 class VariantGenerator : public Generator
 {
 public:
-    VariantGenerator(std::shared_ptr<Config> config);
+    explicit VariantGenerator(std::shared_ptr<Config> config);
     std::vector<File> generate(PlantUml::SyntaxNode root);
 
 private:
@@ -23,5 +21,4 @@ private:
     Translator m_translator;
     HeaderGenerator m_headerGenerator;
 };
-} // namespace Variant
-} // namespace Cpp
+} // namespace Cpp::Variant

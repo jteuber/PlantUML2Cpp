@@ -38,11 +38,11 @@ namespace Cpp {
             +namespaces : list<string>
             +comment : string
         }
-        class Keyword << (S,#FFAA55) >> {
+        class Enumerator << (S,#FFAA55) >> {
             +name : string
         }
 
-        Enum *-- Keyword
+        Enum *-- "0..*" Enumerator: enumerators
     }
 }
 @enduml

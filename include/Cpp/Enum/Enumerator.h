@@ -3,7 +3,7 @@
 #include <string>
 
 namespace Cpp::Enum {
-struct Keyword
+struct Enumerator
 {
     std::string name;
 };

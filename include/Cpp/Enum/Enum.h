@@ -2,8 +2,9 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
-#include "Keyword.h"
+#include "Enumerator.h"
 
 namespace Cpp::Enum {
 struct Enum
@@ -11,6 +12,6 @@ struct Enum
     std::string name;
     std::list<std::string> namespaces;
     std::string comment;
-    Keyword keyword;
+    std::vector<Enumerator> enumerators;
 };
 } // namespace Cpp::Enum
