@@ -18,12 +18,14 @@ CPMAddPackage(
 )
 
 
-add_executable(tests main.cpp PlantUml/ParserTest.cpp 
-    Cpp/Class/TranslatorTest.cpp 
-    Cpp/Class/HeaderGeneratorTest.cpp 
-    Cpp/Class/IncludeGathererTest.cpp 
-    Cpp/Class/MemberSorterTest.cpp 
+add_executable(tests main.cpp PlantUml/ParserTest.cpp
+    Cpp/Class/TranslatorTest.cpp
+    Cpp/Class/HeaderGeneratorTest.cpp
+    Cpp/Class/IncludeGathererTest.cpp
+    Cpp/Class/MemberSorterTest.cpp
     Cpp/Class/SourceGeneratorTest.cpp
+    Cpp/Enum/TranslatorTest.cpp
+    Cpp/Enum/HeaderGeneratorTest.cpp
     Cpp/Variant/TranslatorTest.cpp
     Cpp/Variant/HeaderGeneratorTest.cpp)
 target_link_libraries(tests gtest gtest_main gmock PlantUML2Cpp-static PEGParser fmt)
