@@ -1,5 +1,7 @@
 @startuml Enum
 
+hide private members
+
 namespace Cpp {
     namespace Enum {
         ' *************** ALGORITHMS ***************
@@ -45,4 +47,5 @@ namespace Cpp {
         Enum *-- "0..*" Enumerator: enumerators
     }
 }
+
 @enduml

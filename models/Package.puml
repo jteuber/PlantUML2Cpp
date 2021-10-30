@@ -1,5 +1,7 @@
 @startuml Package
 
+hide private members
+
 namespace Cpp {
     namespace Package {
         ' *************** ALGORITHMS ***************

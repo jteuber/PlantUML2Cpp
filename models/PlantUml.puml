@@ -1,5 +1,7 @@
 @startuml PlantUml
 
+hide private members
+
 namespace PlantUml {
 
     interface AbstractVisitor {
@@ -50,11 +52,6 @@ namespace PlantUml {
         Entity
         Enum
         Interface
-    }
-
-    class Typename {
-        +fullyClassyfiedName : list<string>
-        +getEffectiveNamespace()
     }
 
     class Variable << (S,#FFAA55) >>

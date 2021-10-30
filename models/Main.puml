@@ -1,5 +1,7 @@
 @startuml Main
 
+hide private members
+
 package Main {
     class PlantUML2Cpp {
         +run(filesystem::path path) : bool

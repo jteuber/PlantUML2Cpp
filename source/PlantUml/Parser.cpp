@@ -64,8 +64,9 @@ Parser::Parser(/* args */)
     // ========= COMMENTS =========
     g["Comment"] << "'\\'' (!Endl .)*";
     g["Include"] << "'!include' (!Endl .)*"; // ignore !include
+    g["Hide"] << "'hide' (!Endl .)*";        // ignore hide
 
-    g["Ignored"] << "Comment | Include" >> [](auto /*e*/) { return SyntaxNode{std::string()}; };
+    g["Ignored"] << "Comment | Include | Hide" >> [](auto /*e*/) { return SyntaxNode{std::string()}; };
 
     // ========= WARNINGS =========
     g["WARN_Unrecognized_Line"] << "!(End | CloseBrackets) (!Endl .)+" >> [this](auto e) {

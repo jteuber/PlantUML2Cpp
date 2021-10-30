@@ -1,5 +1,7 @@
 @startuml Cpp
 
+hide private members
+
 namespace Cpp {
     namespace Common {
         class TranslatorUtils {

@@ -1,5 +1,7 @@
 @startuml Class
 
+hide private members
+
 namespace Cpp {
 
     namespace Class {

@@ -1,5 +1,7 @@
 @startuml Variant
 
+hide private members
+
 namespace Cpp {
     namespace Variant {
         ' *************** ALGORITHMS ***************

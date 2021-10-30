@@ -372,7 +372,7 @@ Class05 --|> "1" Class06
     // Assert Results
 }
 
-TEST(ParserTest, IncludesAndComments)
+TEST(ParserTest, IncludesCommentsAndHides)
 {
     // Arrange
     VisitorMock visitor;
@@ -383,6 +383,7 @@ TEST(ParserTest, IncludesAndComments)
 !include something.iuml
 ' simple comment
     ' indented comment
+hide private members
 @enduml)";
 
     Container c{{}, "", ContainerType::Document};
