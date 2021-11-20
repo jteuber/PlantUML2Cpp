@@ -10,7 +10,7 @@ namespace Cpp {
 namespace Variant {
 
 static const std::string ws     = "( |\t|\n)*";
-static const std::string header = "#pragma once" + ws;
+static const std::string header = "#pragma once" + ws + "#include <variant>" + ws;
 
 TEST(VariantHeaderGenerator, Empty)
 {
