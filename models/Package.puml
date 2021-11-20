@@ -6,7 +6,7 @@ namespace Cpp {
     namespace Package {
         ' *************** ALGORITHMS ***************
         class CMakeGenerator {
-            +string generate(Class in)
+            +string generate(Class.Class in)
         }
 
         class Translator

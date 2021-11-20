@@ -44,7 +44,7 @@ namespace Cpp {
             +name : string
         }
 
-        Enum *-- "0..*" Enumerator: enumerators
+        Enum *-- "0..*" Enumerator : enumerators
     }
 }
 
