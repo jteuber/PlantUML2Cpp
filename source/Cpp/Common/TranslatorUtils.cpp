@@ -1,13 +1,15 @@
 #include "Cpp/Common/TranslatorUtils.h"
 
 #include <numeric>
+#include <ranges>
 #include <utility>
 
 namespace Cpp::Common {
 
 TranslatorUtils::TranslatorUtils(std::shared_ptr<Config> config)
     : m_config(std::move(config))
-{}
+{
+}
 
 Type TranslatorUtils::umlToCppType(PlantUml::Type umlType)
 {

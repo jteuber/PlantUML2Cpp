@@ -1,5 +1,6 @@
 #include "Cpp/Class/SourceGenerator.h"
 
+#include <algorithm>
 #include <ranges>
 
 namespace Cpp::Class {
@@ -7,7 +8,8 @@ namespace Cpp::Class {
 SourceGenerator::SourceGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_genUtils(m_config)
-{}
+{
+}
 
 std::string SourceGenerator::generate(const Class& in)
 {
