@@ -28,7 +28,7 @@ include(cmake/CPM.cmake)
 CPMAddPackage(
   NAME PEGParser
   VERSION 2.2.0
-  GIT_REPOSITORY https://github.com/TheLartians/PEGParser.git
+  GITHUB_REPOSITORY TheLartians/PEGParser
 )
 include_directories(${PEGParser_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC PEGParser)

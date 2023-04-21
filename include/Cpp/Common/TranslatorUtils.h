@@ -35,7 +35,7 @@ public:
     Type umlToCppType(PlantUml::Type umlType);
     Type stringToCppType(std::string_view typeString);
     std::string toNamespacedString(std::list<std::string> namespacedType);
-    std::string visibilityToString(PlantUml::Visibility vis);
+    static std::string visibilityToString(PlantUml::Visibility vis);
 
 private:
     std::shared_ptr<Config> m_config;

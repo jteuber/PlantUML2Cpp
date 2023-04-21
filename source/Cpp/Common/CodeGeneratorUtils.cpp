@@ -8,7 +8,8 @@ namespace Cpp::Common {
 
 CodeGeneratorUtils::CodeGeneratorUtils(std::shared_ptr<Config> config)
     : m_config(std::move(config))
-{}
+{
+}
 
 std::string CodeGeneratorUtils::openNamespaces(const std::list<std::string>& namespaces)
 {
@@ -44,9 +45,8 @@ std::string CodeGeneratorUtils::closeNamespaces(const std::list<std::string>& na
             ret += "\n";
         }
     } else {
-        auto revNSs = namespaces | std::views::reverse;
-        ret         = std::accumulate(
-            revNSs.begin(), revNSs.end(), std::string(), [](const std::string& l, const std::string& r) {
+        ret = std::accumulate(
+            namespaces.rbegin(), namespaces.rend(), std::string(), [](const std::string& l, const std::string& r) {
                 return l + "} // namespace " + r + "\n";
             });
     }

@@ -11,6 +11,6 @@ struct Type
     std::string base;
     std::vector<Type> templateParams;
 
-    auto operator<=>(const Type&) const = default;
+    bool operator==(const Type&) const = default;
 };
 } // namespace Cpp::Common

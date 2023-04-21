@@ -29,7 +29,7 @@ Type TranslatorUtils::umlToCppType(PlantUml::Type umlType)
         out.base = "void";
     }
 
-    for (auto& param : umlType.templateParams) {
+    for (const auto& param : umlType.templateParams) {
         out.templateParams.push_back(umlToCppType(param));
     }
 

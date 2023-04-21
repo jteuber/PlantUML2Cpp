@@ -54,7 +54,7 @@ struct Container
     std::string style;
     ContainerType type;
 
-    auto operator<=>(const Container&) const = default;
+    bool operator==(const Container&) const = default;
 };
 
 struct Element
@@ -66,14 +66,14 @@ struct Element
     std::list<std::string> extends;
     ElementType type;
 
-    auto operator<=>(const Element&) const = default;
+    bool operator==(const Element&) const = default;
 };
 
 struct Enumerator
 {
     std::string name;
 
-    auto operator<=>(const Enumerator&) const = default;
+    bool operator==(const Enumerator&) const = default;
 };
 
 struct Type
@@ -81,7 +81,7 @@ struct Type
     std::list<std::string> base;
     std::vector<Type> templateParams;
 
-    auto operator<=>(const Type&) const = default;
+    bool operator==(const Type&) const = default;
 };
 
 struct Parameter
@@ -90,7 +90,7 @@ struct Parameter
     Type type;
     bool isConst;
 
-    auto operator<=>(const Parameter&) const = default;
+    bool operator==(const Parameter&) const = default;
 };
 
 struct Method
@@ -103,7 +103,7 @@ struct Method
     bool isConst;
     bool isStatic;
 
-    auto operator<=>(const Method&) const = default;
+    bool operator==(const Method&) const = default;
 };
 
 struct Note
@@ -112,7 +112,7 @@ struct Note
     std::list<std::string> relatesTo;
     std::string text;
 
-    auto operator<=>(const Note&) const = default;
+    bool operator==(const Note&) const = default;
 };
 
 struct Relationship
@@ -125,14 +125,14 @@ struct Relationship
     bool hidden;
     RelationshipType type;
 
-    auto operator<=>(const Relationship&) const = default;
+    bool operator==(const Relationship&) const = default;
 };
 
 struct Separator
 {
     std::string text;
 
-    auto operator<=>(const Separator&) const = default;
+    bool operator==(const Separator&) const = default;
 };
 
 struct Variable
@@ -144,14 +144,14 @@ struct Variable
     bool isConst;
     bool isStatic;
 
-    auto operator<=>(const Variable&) const = default;
+    bool operator==(const Variable&) const = default;
 };
 
 struct End
 {
     EndType type;
 
-    auto operator<=>(const End&) const = default;
+    bool operator==(const End&) const = default;
 };
 
 using ModelElement = std::variant<std::string,
