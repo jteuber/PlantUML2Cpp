@@ -12,18 +12,19 @@ namespace Class {
 
 ClassGenerator::ClassGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
-    , m_translator(m_config)
     , m_postProcessor(m_config)
     , m_headerGenerator(m_config)
     , m_sourceGenerator(m_config)
-{}
+{
+}
 
 std::vector<File> ClassGenerator::generate(PlantUml::SyntaxNode root)
 {
     std::vector<File> files;
 
-    root.visit(m_translator);
-    auto classes = std::move(m_translator).results();
+    Translator translator(m_config);
+    root.visit(translator);
+    auto classes = std::move(translator).results();
 
     m_postProcessor.process(classes);
 

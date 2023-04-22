@@ -54,7 +54,7 @@ bool PlantUML2Cpp::run(fs::path path)
 
     fs::directory_entry modelsDir(modelPath);
     if (!modelsDir.exists()) {
-        std::cout << "No 'models'-directory found in " << modelPath << "! Abort" << std::endl;
+        std::cout << "No 'models'-directory found in " << path << "! Abort" << std::endl;
         return false;
     }
 

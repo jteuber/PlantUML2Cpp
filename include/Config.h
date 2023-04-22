@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Cpp/Class/Class.h"
-
 #include <array>
 #include <string>
 #include <unordered_map>

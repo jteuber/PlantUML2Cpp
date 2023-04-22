@@ -13,12 +13,11 @@ class VariantGenerator : public Generator
 {
 public:
     explicit VariantGenerator(std::shared_ptr<Config> config);
-    std::vector<File> generate(PlantUml::SyntaxNode root);
+    std::vector<File> generate(PlantUml::SyntaxNode root) override;
 
 private:
     std::shared_ptr<Config> m_config;
 
-    Translator m_translator;
     HeaderGenerator m_headerGenerator;
 };
 } // namespace Cpp::Variant

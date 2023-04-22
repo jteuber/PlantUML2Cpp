@@ -9,16 +9,17 @@ namespace Cpp::Variant {
 
 VariantGenerator::VariantGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
-    , m_translator(m_config)
     , m_headerGenerator(m_config)
-{}
+{
+}
 
 std::vector<File> VariantGenerator::generate(PlantUml::SyntaxNode root)
 {
     std::vector<File> files;
 
-    root.visit(m_translator);
-    auto classes = std::move(m_translator).results();
+    Translator translator(m_config);
+    root.visit(translator);
+    auto classes = std::move(translator).results();
 
     for (const auto& c : classes) {
         auto nsPath =
