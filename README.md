@@ -81,6 +81,7 @@ Additions to the syntax:
 
 Currently, only class diagrams are supported. The plan is to support more diagrams in the future to make it possible to generate an entire project at once.
 To check what kind of syntax can be parsed, you can have a look in the test directory. Especially the ParserTest.cpp contains a lot of plantUML example code that can already be parsed.
+
 ### Class Diagram
 
 | PlantUML syntax element | Can be parsed | Generates code |
@@ -99,6 +100,8 @@ To check what kind of syntax can be parsed, you can have a look in the test dire
 
 This is a loose list of features that range from 'essential' to 'might be nice'. If there is a feature you want, either on here or not, please let me know.
 
+* declare small structs that are only needed by one client (variant or similar) in the file of the client
+* Generate test frameworks and mocks
 * Entity-Component-System: generate code for an ECS like entt
 * Component diagrams: might be useful to generate makefiles or for C++20 modules
 * Sequence diagrams: generate implementation of functions or comments inside them
