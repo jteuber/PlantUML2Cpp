@@ -27,7 +27,7 @@ std::string HeaderGenerator::generate(const Enum& in)
             ++in.enumerators.begin(),
             in.enumerators.end(),
             m_config->indent + in.enumerators.front().name,
-            [this](const std::string& l, const Enumerator& r) { return l + ",/n" + m_config->indent + r.name; });
+            [this](const std::string& l, const Enumerator& r) { return l + ",\n" + m_config->indent + r.name; });
     }
 
     ret += "\n};";

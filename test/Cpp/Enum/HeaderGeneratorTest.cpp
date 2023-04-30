@@ -29,7 +29,7 @@ TEST(EnumHeaderGenerator, Empty)
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
 
-TEST(EnumHeaderGenerator, SingleType)
+TEST(EnumHeaderGenerator, SingleEnumerator)
 {
     // Arrange
     auto config = std::make_shared<Config>();
@@ -45,6 +45,27 @@ TEST(EnumHeaderGenerator, SingleType)
     // Assert
     std::string regex = header;
     regex += "enum class[ \t]*Simple" + ws + R"(\{)" + ws + "Contained" + ws + R"(\};(.|\n)*)";
+    std::regex classRegex(regex);
+    EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
+}
+
+TEST(EnumHeaderGenerator, MultipleEnumerators)
+{
+    // Arrange
+    auto config = std::make_shared<Config>();
+    HeaderGenerator sut(config);
+
+    Enum input;
+    input.name = "Simple";
+    input.enumerators.push_back(Enumerator{"Contained1"});
+    input.enumerators.push_back(Enumerator{"Contained2"});
+
+    // Act
+    auto output = sut.generate(input);
+
+    // Assert
+    std::string regex = header;
+    regex += "enum class[ \t]*Simple" + ws + R"(\{)" + ws + "Contained1," + ws + "Contained2" + ws + R"(\};(.|\n)*)";
     std::regex classRegex(regex);
     EXPECT_TRUE(std::regex_match(output, classRegex)) << output;
 }
