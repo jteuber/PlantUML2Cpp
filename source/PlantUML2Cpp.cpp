@@ -1,6 +1,7 @@
 #include "PlantUML2Cpp.h"
 #include "Cpp/Class/ClassGenerator.h"
 #include "Cpp/Variant/VariantGenerator.h"
+#include "Cpp/Enum/EnumGenerator.h"
 #include "peg_parser/interpreter.h"
 
 #include <array>
@@ -46,6 +47,7 @@ PlantUML2Cpp::PlantUML2Cpp()
 {
     m_generators.emplace_back(std::make_unique<Cpp::Class::ClassGenerator>(m_config));
     m_generators.emplace_back(std::make_unique<Cpp::Variant::VariantGenerator>(m_config));
+    m_generators.emplace_back(std::make_unique<Cpp::Enum::EnumGenerator>(m_config));
 }
 
 bool PlantUML2Cpp::run(fs::path path)
