@@ -117,9 +117,13 @@ To get a general overview in case you want to dive into the code, have a look in
 
 In general, PlantUML2Cpp takes a .puml-file in the models directory and creates an abstract syntax tree (AST) from it. If that succeeds and no errors were encountered, it passes the AST to various generators (currently implemented are class and variant generators with enum being worked on).
 Those generators first translate the AST into a representation that makes sense for the use case using the visitor pattern. Then they can some post-processing on the gathered data and finally generate files. And then it continues with the next .puml-file.
+
 ## Motivation
 
 There are several existing projects that turn (C++) code into PlantUML files, but as far as I could tell none that can do it the other way around.
 
 Personally, I like my development to be model driven, not my models to be development driven. It is easier to gain and keep oversight of a software design using a visual model. But I also don't like fiddling around with visual editors where you can never really align anything and it always ends up looking like a mess but you can't tell if that's because you didn't arrange it properly or if the model is just too big. Therefore I really like the idea of PlantUML. Models are text, they are automatically turned into images and if they look too cluttered it is very likely time to split the model into two (or more) components.
 
+## License
+
+PlantUML2CPP is licensed under the MIT license. See LICENSE.md.
