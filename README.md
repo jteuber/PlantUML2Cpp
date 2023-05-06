@@ -11,16 +11,16 @@ PlantUML2Cpp is a command line tool written in C++, using CMake as build tool.
 Currently there are no real releases yet, so if you want to use this tool you have to build it yourself. You will need the following tools:
 
 * A modern compiler: I'm developing using gcc12. I tried clang up to version 15 but it never worked well for me.
-* Cmake >= 3.0.0 (I'm using 3.22.1, if you use anything below and it doesn't work please tell me)
+* Cmake >= 3.14 (I'm using 3.22.1, if you use anything below and it doesn't work please tell me)
 
 #### Dependencies
 
-Cmake will download all necessary dependencies for you using the CPM.cmake script.
+Cmake will download all necessary dependencies for you using the [https://github.com/cpm-cmake/CPM.cmake](CPM.cmake) script.
 
 These dependencies are:
-* PEGParser
-* fmt
-* googletest for testing
+* [https://github.com/TheLartians/PEGParser](PEGParser)
+* [https://github.com/fmtlib/fmt](fmt)
+* [https://github.com/google/googletest](googletest)
 
 #### Building on Debian derivates
 

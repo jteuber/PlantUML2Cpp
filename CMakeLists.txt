@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.14)
 project(PlantUML2Cpp VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -25,20 +25,12 @@ add_library(PlantUML2Cpp-static STATIC ${SRC_FILES})
 # add dependencies
 include(cmake/CPM.cmake)
 
-CPMAddPackage(
-  NAME PEGParser
-  VERSION 2.2.0
-  GITHUB_REPOSITORY TheLartians/PEGParser
-)
+CPMAddPackage("gh:TheLartians/PEGParser@2.2.0")
 include_directories(${PEGParser_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC PEGParser)
 
-CPMAddPackage(
-  NAME fmt
-  GIT_TAG 6.1.2
-  GITHUB_REPOSITORY fmtlib/fmt
-)
+CPMAddPackage("gh:fmtlib/fmt#7.1.3")
 include_directories(${fmt_SOURCE_DIR}/include)
-target_link_libraries(PlantUML2Cpp PUBLIC fmt)
+target_link_libraries(PlantUML2Cpp PUBLIC fmt::fmt)
 
 add_subdirectory(test)
