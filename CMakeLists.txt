@@ -33,4 +33,8 @@ CPMAddPackage("gh:fmtlib/fmt#7.1.3")
 include_directories(${fmt_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC fmt::fmt)
 
+CPMAddPackage("gh:CLIUtils/CLI11@2.3.2")
+include_directories(${CLI11_SOURCE_DIR}/include)
+target_link_libraries(PlantUML2Cpp PUBLIC CLI11::CLI11)
+
 add_subdirectory(test)
