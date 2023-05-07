@@ -14,7 +14,7 @@ CodeGeneratorUtils::CodeGeneratorUtils(std::shared_ptr<Config> config)
 std::string CodeGeneratorUtils::openNamespaces(const std::list<std::string>& namespaces)
 {
     std::string ret;
-    if (m_config->concatenateNamespaces) {
+    if (m_config->concatenateNamespaces()) {
         if (!namespaces.empty()) {
             ret = "namespace ";
             ret += std::accumulate(++namespaces.begin(),
@@ -35,7 +35,7 @@ std::string CodeGeneratorUtils::openNamespaces(const std::list<std::string>& nam
 std::string CodeGeneratorUtils::closeNamespaces(const std::list<std::string>& namespaces)
 {
     std::string ret;
-    if (m_config->concatenateNamespaces) {
+    if (m_config->concatenateNamespaces()) {
         if (!namespaces.empty()) {
             ret = "} // namespace ";
             ret += std::accumulate(++namespaces.begin(),

@@ -9,7 +9,8 @@ namespace Cpp::Class {
 
 IncludeGatherer::IncludeGatherer(std::shared_ptr<Config> config)
     : m_config(std::move(config))
-{}
+{
+}
 
 void IncludeGatherer::gather(Class& c)
 {
@@ -44,7 +45,7 @@ void IncludeGatherer::gather(Class& c)
     usedTypes.erase("unsigned int");
 
     for (const auto& type : usedTypes) {
-        if (const auto& it = m_config->typeToIncludeMap.find(type); it != m_config->typeToIncludeMap.end()) {
+        if (const auto& it = m_config->typeToIncludeMap().find(type); it != m_config->typeToIncludeMap().end()) {
             c.externalIncludes.insert(it->second);
         } else {
             size_t pos       = 0;

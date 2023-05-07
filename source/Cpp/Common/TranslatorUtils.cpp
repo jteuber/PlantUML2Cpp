@@ -20,8 +20,8 @@ Type TranslatorUtils::umlToCppType(PlantUml::Type umlType)
         out.base = ns + "::" + out.base;
     }
 
-    auto it = m_config->umlToCppTypeMap.find(out.base);
-    if (it != m_config->umlToCppTypeMap.end()) {
+    auto it = m_config->umlToCppTypeMap().find(out.base);
+    if (it != m_config->umlToCppTypeMap().end()) {
         out.base = it->second;
     }
 

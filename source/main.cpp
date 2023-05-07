@@ -1,23 +1,15 @@
-#include <filesystem>
 
-#include "CLI/App.hpp"
-#include "CLI/Formatter.hpp"
-#include "CLI/Config.hpp"
 
+#include "Config.h"
 #include "PlantUML2Cpp.h"
 
 int main(int argc, char** argv)
 {
-    CLI::App app{"App description"};
+    auto config = std::make_shared<Config>();
+    if (!config->parseAndLoad(argc, argv)) {
+        return -1;
+    }
 
-    std::filesystem::path path = std::filesystem::current_path();
-    std::string pathString = path.string();
-    app.add_option("path", pathString, "Path of project directory containing the models in a folder called models");
-
-    CLI11_PARSE(app, argc, argv);
-
-    path = pathString;
-
-    PlantUML2Cpp p;
-    return p.run(path) ? 0 : -1;
+    PlantUML2Cpp puml2cpp(config);
+    return puml2cpp.run() ? 0 : -2;
 }

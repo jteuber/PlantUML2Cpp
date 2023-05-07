@@ -16,7 +16,8 @@ namespace Cpp::Class {
 Translator::Translator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_utils(m_config)
-{}
+{
+}
 
 std::vector<Class> Translator::results() &&
 {
@@ -94,8 +95,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
         case PlantUml::RelationshipType::Composition: {
             Variable var;
-            if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
-                containerIt != m_config->containerByCardinalityComposition.end()) {
+            if (auto containerIt = m_config->containerByCardinalityComposition().find(r.objectCardinality);
+                containerIt != m_config->containerByCardinalityComposition().end()) {
                 var.type =
                     m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {
@@ -112,8 +113,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
         }
         case PlantUml::RelationshipType::Aggregation: {
             Variable var;
-            if (auto containerIt = m_config->containerByCardinalityAggregation.find(r.objectCardinality);
-                containerIt != m_config->containerByCardinalityAggregation.end()) {
+            if (auto containerIt = m_config->containerByCardinalityAggregation().find(r.objectCardinality);
+                containerIt != m_config->containerByCardinalityAggregation().end()) {
                 var.type =
                     m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {

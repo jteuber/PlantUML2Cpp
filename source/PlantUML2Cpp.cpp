@@ -1,7 +1,7 @@
 #include "PlantUML2Cpp.h"
 #include "Cpp/Class/ClassGenerator.h"
-#include "Cpp/Variant/VariantGenerator.h"
 #include "Cpp/Enum/EnumGenerator.h"
+#include "Cpp/Variant/VariantGenerator.h"
 #include "peg_parser/interpreter.h"
 
 #include <array>
@@ -43,30 +43,26 @@ bool writeFile(const File& file)
     return false;
 }
 
-PlantUML2Cpp::PlantUML2Cpp()
+PlantUML2Cpp::PlantUML2Cpp(std::shared_ptr<Config> config)
+    : m_config(std::move(config))
 {
     m_generators.emplace_back(std::make_unique<Cpp::Class::ClassGenerator>(m_config));
     m_generators.emplace_back(std::make_unique<Cpp::Variant::VariantGenerator>(m_config));
     m_generators.emplace_back(std::make_unique<Cpp::Enum::EnumGenerator>(m_config));
 }
 
-bool PlantUML2Cpp::run(fs::path path)
+bool PlantUML2Cpp::run()
 {
-    auto modelPath = path / "models";
+    auto modelPath = m_config->modelsPath();
 
     fs::directory_entry modelsDir(modelPath);
     if (!modelsDir.exists()) {
-        std::cout << "No 'models'-directory found in " << path << "! Abort" << std::endl;
+        std::cout << "No models-directory found in " << modelPath << "! Abort" << std::endl;
         return false;
     }
 
-    auto configFile = modelPath / "config.json";
-    if (fs::directory_entry(configFile).exists()) {
-        std::cout << "found config file" << std::endl;
-    }
-
-    fs::create_directory(path / m_config->includeFolderName);
-    fs::create_directory(path / m_config->sourceFolderName);
+    fs::create_directory(m_config->headersPath());
+    fs::create_directory(m_config->sourcesPath());
 
     for (const auto& file : fs::directory_iterator(modelPath)) {
         if (file.is_regular_file() && file.path().extension() == ".puml") {

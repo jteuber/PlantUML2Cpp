@@ -10,10 +10,10 @@
 class PlantUML2Cpp
 {
 public:
-    PlantUML2Cpp();
-    bool run(std::filesystem::path path = std::filesystem::current_path());
+    PlantUML2Cpp(std::shared_ptr<Config> config);
+    bool run();
 
 private:
-    std::shared_ptr<Config> m_config = std::make_shared<Config>();
+    std::shared_ptr<Config> m_config;
     std::vector<std::unique_ptr<Generator>> m_generators;
 };
