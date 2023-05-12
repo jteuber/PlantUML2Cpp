@@ -21,6 +21,7 @@ public:
     const std::string& memberPrefix() const;
     const std::string& indent() const;
     bool noMemberPrefixForStructs() const;
+    bool concatenateNamespaces() const;
 
     const std::unordered_map<std::string, std::string>& containerByCardinalityComposition() const;
     const std::unordered_map<std::string, std::string>& containerByCardinalityAggregation() const;
@@ -28,9 +29,8 @@ public:
     const std::unordered_map<std::string, std::string>& typeToIncludeMap() const;
     const std::unordered_map<std::string, std::string>& umlToCppTypeMap() const;
 
-    bool concatenateNamespaces() const;
-
 private:
+    // project and file generation settings
     std::filesystem::path m_projectPath = std::filesystem::current_path();
     std::string m_configFolderName      = "models";
     std::string m_modelFolderName       = "models";
@@ -38,11 +38,15 @@ private:
     std::string m_sourceFolderName      = "source";
     std::string m_headerFileExtention   = ".h";
     std::string m_sourceFileExtention   = ".cpp";
+    bool m_overwriteExistingFiles       = false;
 
-    std::string m_memberPrefix      = "m_";
-    std::string m_indent            = "    ";
-    bool m_noMemberPrefixForStructs = true;
+    // code generation settings
+    std::string m_memberPrefix    = "m_";
+    std::string m_indent          = "    ";
+    bool m_memberPrefixForStructs = false;
+    bool m_concatenateNamespaces  = false;
 
+    // translation settings
     std::unordered_map<std::string, std::string> m_containerByCardinalityComposition = {{"0..*", "std::vector<{}>"}};
     std::unordered_map<std::string, std::string> m_containerByCardinalityAggregation = {
         {"", "std::shared_ptr<{}>"}, {"1", "std::shared_ptr<{}>"}, {"0..*", "std::vector<std::shared_ptr<{}>>"}};
@@ -61,6 +65,4 @@ private:
                                                                       {"list", "std::list"},
                                                                       {"umap", "std::unordered_map"},
                                                                       {"path", "std::filesystem::path"}};
-
-    bool m_concatenateNamespaces = true;
 };

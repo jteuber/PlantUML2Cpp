@@ -1,5 +1,3 @@
-
-
 #include "Config.h"
 #include "PlantUML2Cpp.h"
 

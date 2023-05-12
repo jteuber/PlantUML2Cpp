@@ -6,10 +6,14 @@
 
 bool Config::parseAndLoad(int argc, char** argv)
 {
-    CLI::App app{"App description"};
+    CLI::App app{"PlantUML2Cpp -- translate PlantUML class diagrams to C++ code"};
 
+    // Parse the command line arguments for only the config location
     std::string pathString = m_projectPath.string();
     app.add_option("path", pathString, "Path to project directory");
+    app.add_option("-c,--config",
+                   m_configFolderName,
+                   "Path to the folder containing the config.json. Relative to project directory.");
 
     try {
         app.parse((argc), (argv));
@@ -19,6 +23,32 @@ bool Config::parseAndLoad(int argc, char** argv)
     }
 
     m_projectPath = pathString;
+
+    // TODO: read config.json from configPath()
+
+    // now parse the rest of the command line arguments
+    app.add_flag("-f", m_overwriteExistingFiles, "Overwrite existing files when generating code");
+
+    app.add_option("-m,--models", m_modelFolderName, "Folder containing the PlantUML files");
+    app.add_option("-i,--includeDir", m_includeFolderName, "Folder to generate the header files into");
+    app.add_option("-s,--sourceDir", m_sourceFolderName, "Folder to generate the source files into");
+    app.add_option("-h,--headerExt", m_headerFileExtention, "Extension to use for generating header files");
+    app.add_option("-c,--sourceExt", m_sourceFileExtention, "Extension to use for generating source files");
+
+    app.add_option("-p,--memberPrefix", m_memberPrefix, "Prefix used for member variables in classes(default: \"m_\")");
+    app.add_option("-t,--indent", m_indent, "String to use as indent (default: \"    \" (4 spaces))");
+    app.add_flag("--memberPrefixForStruct",
+                 m_memberPrefixForStructs,
+                 "Use the member prefix also in structs (default: only use member prefix in classes)");
+
+    app.add_flag("--concatenateNamespaces", m_concatenateNamespaces, "Use C++17's nested namespaces (default: false)");
+
+    try {
+        app.parse((argc), (argv));
+    } catch (const CLI::ParseError& e) {
+        app.exit(e);
+        return false;
+    }
 
     return true;
 }
@@ -62,7 +92,7 @@ const std::string& Config::indent() const
 }
 bool Config::noMemberPrefixForStructs() const
 {
-    return m_noMemberPrefixForStructs;
+    return !m_memberPrefixForStructs;
 }
 
 const std::unordered_map<std::string, std::string>& Config::containerByCardinalityComposition() const
