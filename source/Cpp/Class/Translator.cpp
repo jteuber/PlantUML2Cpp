@@ -1,4 +1,5 @@
 #include "Cpp/Class/Translator.h"
+#include "Cpp/Common/TranslatorUtils.h"
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
@@ -35,7 +36,7 @@ bool Translator::visit(const PlantUml::Variable& v)
         auto& c = *m_lastEncounteredClass;
 
         if (v.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{m_utils.visibilityToString(v.visibility)});
+            c.body.emplace_back(VisibilityKeyword{Common::TranslatorUtils::visibilityToString(v.visibility)});
             m_lastVisibility = v.visibility;
         }
 
@@ -66,7 +67,7 @@ bool Translator::visit(const PlantUml::Method& m)
         auto& c = *m_lastEncounteredClass;
 
         if (m.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{m_utils.visibilityToString(m.visibility)});
+            c.body.emplace_back(VisibilityKeyword{Common::TranslatorUtils::visibilityToString(m.visibility)});
             m_lastVisibility = m.visibility;
         }
 
