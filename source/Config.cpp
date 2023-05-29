@@ -10,10 +10,11 @@ bool Config::parseAndLoad(int argc, char** argv)
 
     // Parse the command line arguments for only the config location
     std::string pathString = m_projectPath.string();
-    app.add_option("path", pathString, "Path to project directory");
-    app.add_option("-c,--config",
-                   m_configFolderName,
-                   "Path to the folder containing the config.json. Relative to project directory.");
+    app.add_option("path", pathString, "Path to project directory (default: current path)");
+    app.add_option(
+        "-c,--config",
+        m_configFolderName,
+        "Path to the folder containing the config.json, relative to project directory (default: \"models\")");
 
     try {
         app.parse((argc), (argv));
@@ -29,25 +30,34 @@ bool Config::parseAndLoad(int argc, char** argv)
     // now parse the rest of the command line arguments
     app.add_flag("-f", m_overwriteExistingFiles, "Overwrite existing files when generating code");
 
-    app.add_option("-m,--models", m_modelFolderName, "Folder containing the PlantUML files");
-    app.add_option("-i,--includeDir", m_includeFolderName, "Folder to generate the header files into");
-    app.add_option("-s,--sourceDir", m_sourceFolderName, "Folder to generate the source files into");
-    app.add_option("-h,--headerExt", m_headerFileExtention, "Extension to use for generating header files");
-    app.add_option("-c,--sourceExt", m_sourceFileExtention, "Extension to use for generating source files");
+    app.add_option("-m,--models", m_modelFolderName, "Folder containing the PlantUML files (default: \"models\")");
+    app.add_option(
+        "-i,--includeDir", m_includeFolderName, "Folder to generate the header files into (default: \"include\")");
+    app.add_option(
+        "-s,--sourceDir", m_sourceFolderName, "Folder to generate the source files into (default: \"source\")");
+    app.add_option(
+        "-h,--headerExt", m_headerFileExtention, "Extension to use for generating header files (default: \".h\")");
+    app.add_option(
+        "-c,--sourceExt", m_sourceFileExtention, "Extension to use for generating source files (default: \".cpp\")");
 
     app.add_option("-p,--memberPrefix", m_memberPrefix, "Prefix used for member variables in classes(default: \"m_\")");
     app.add_option("-t,--indent", m_indent, "String to use as indent (default: \"    \" (4 spaces))");
-    app.add_flag("--memberPrefixForStruct",
-                 m_memberPrefixForStructs,
-                 "Use the member prefix also in structs (default: only use member prefix in classes)");
 
-    app.add_flag("--concatenateNamespaces", m_concatenateNamespaces, "Use C++17's nested namespaces (default: false)");
+    app.add_flag("-m,--memberPrefixForStruct", m_memberPrefixForStructs, "Use the member prefix also in structs");
+    app.add_flag("-n,--concatenateNamespaces", m_concatenateNamespaces, "Use C++17's nested namespaces");
+    bool writeConfig = false;
+    app.add_flag(
+        "-C,--writeConfig", writeConfig, "Write config file to config directory with the settings given as arguments");
 
     try {
         app.parse((argc), (argv));
     } catch (const CLI::ParseError& e) {
         app.exit(e);
         return false;
+    }
+
+    if (writeConfig) {
+        // TODO: write config to configPath()
     }
 
     return true;
