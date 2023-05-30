@@ -1,4 +1,5 @@
 #include "Cpp/Class/Translator.h"
+#include "Cpp/Common/TranslatorUtils.h"
 #include "PlantUml/ModelElement.h"
 
 #include <algorithm>
@@ -16,7 +17,8 @@ namespace Cpp::Class {
 Translator::Translator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_utils(m_config)
-{}
+{
+}
 
 std::vector<Class> Translator::results() &&
 {
@@ -34,7 +36,7 @@ bool Translator::visit(const PlantUml::Variable& v)
         auto& c = *m_lastEncounteredClass;
 
         if (v.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{m_utils.visibilityToString(v.visibility)});
+            c.body.emplace_back(VisibilityKeyword{Common::TranslatorUtils::visibilityToString(v.visibility)});
             m_lastVisibility = v.visibility;
         }
 
@@ -65,7 +67,7 @@ bool Translator::visit(const PlantUml::Method& m)
         auto& c = *m_lastEncounteredClass;
 
         if (m.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{m_utils.visibilityToString(m.visibility)});
+            c.body.emplace_back(VisibilityKeyword{Common::TranslatorUtils::visibilityToString(m.visibility)});
             m_lastVisibility = m.visibility;
         }
 
@@ -94,8 +96,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
         case PlantUml::RelationshipType::Composition: {
             Variable var;
-            if (auto containerIt = m_config->containerByCardinalityComposition.find(r.objectCardinality);
-                containerIt != m_config->containerByCardinalityComposition.end()) {
+            if (auto containerIt = m_config->containerByCardinalityComposition().find(r.objectCardinality);
+                containerIt != m_config->containerByCardinalityComposition().end()) {
                 var.type =
                     m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {
@@ -112,8 +114,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
         }
         case PlantUml::RelationshipType::Aggregation: {
             Variable var;
-            if (auto containerIt = m_config->containerByCardinalityAggregation.find(r.objectCardinality);
-                containerIt != m_config->containerByCardinalityAggregation.end()) {
+            if (auto containerIt = m_config->containerByCardinalityAggregation().find(r.objectCardinality);
+                containerIt != m_config->containerByCardinalityAggregation().end()) {
                 var.type =
                     m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
             } else {

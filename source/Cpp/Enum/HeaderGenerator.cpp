@@ -7,7 +7,8 @@ namespace Cpp::Enum {
 HeaderGenerator::HeaderGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_genUtils(m_config)
-{}
+{
+}
 
 std::string HeaderGenerator::generate(const Enum& in)
 {
@@ -26,8 +27,8 @@ std::string HeaderGenerator::generate(const Enum& in)
         ret += std::accumulate(
             ++in.enumerators.begin(),
             in.enumerators.end(),
-            m_config->indent + in.enumerators.front().name,
-            [this](const std::string& l, const Enumerator& r) { return l + ",\n" + m_config->indent + r.name; });
+            m_config->indent() + in.enumerators.front().name,
+            [this](const std::string& l, const Enumerator& r) { return l + ",\n" + m_config->indent() + r.name; });
     }
 
     ret += "\n};";
