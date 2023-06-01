@@ -17,6 +17,7 @@ public:
     std::filesystem::path sourcesPath() const;
     const std::string& headerFileExtention() const;
     const std::string& sourceFileExtention() const;
+    bool overwriteExistingFiles() const;
 
     const std::string& memberPrefix() const;
     const std::string& indent() const;
@@ -36,8 +37,8 @@ private:
     std::string m_modelFolderName       = "models";
     std::string m_includeFolderName     = "include";
     std::string m_sourceFolderName      = "source";
-    std::string m_headerFileExtention   = ".h";
-    std::string m_sourceFileExtention   = ".cpp";
+    std::string m_headerFileExtention   = "h";
+    std::string m_sourceFileExtention   = "cpp";
     bool m_overwriteExistingFiles       = false;
 
     // code generation settings
