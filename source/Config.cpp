@@ -4,6 +4,9 @@
 #include "CLI/Config.hpp"
 #include "CLI/Formatter.hpp"
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 bool Config::parseAndLoad(int argc, char** argv)
 {
     CLI::App app{"PlantUML2Cpp -- translate PlantUML class diagrams to C++ code"};
@@ -16,8 +19,6 @@ bool Config::parseAndLoad(int argc, char** argv)
         m_configFolderName,
         "Path to the folder containing the config.json, relative to project directory (default: \"models\")");
 
-
-    // TODO: read config.json from configPath()
     app.add_flag("-f", m_overwriteExistingFiles, "Overwrite existing files when generating code");
 
     app.add_option("-m,--models", m_modelFolderName, "Folder containing the PlantUML files (default: \"models\")");
@@ -40,8 +41,8 @@ bool Config::parseAndLoad(int argc, char** argv)
     app.add_flag(
         "-w,--writeConfig", writeConfig, "Write config file to config directory with the settings given as arguments");
 
-    // First parse the command line arguments just to get the config location
-    // (in case of -h or exception we want all options to be set)
+    // first parse the command line args to extract the project and config path
+    // (all options and flags need to be present in case of -h or parser exception)
     try {
         app.parse((argc), (argv));
     } catch (const CLI::ParseError& e) {
@@ -51,6 +52,9 @@ bool Config::parseAndLoad(int argc, char** argv)
 
     m_projectPath = pathString;
 
+    // read config.json from configPath()
+    readConfigFrom(configPath());
+
     // now parse the command line arguments again to overwrite anything set by the config
     try {
         app.parse((argc), (argv));
@@ -59,8 +63,9 @@ bool Config::parseAndLoad(int argc, char** argv)
         return false;
     }
 
+    // write config to configPath() if requested
     if (writeConfig) {
-        // TODO: write config to configPath()
+        writeConfigTo(configPath());
     }
 
     return true;
@@ -113,6 +118,11 @@ bool Config::noMemberPrefixForStructs() const
     return !m_memberPrefixForStructs;
 }
 
+bool Config::concatenateNamespaces() const
+{
+    return m_concatenateNamespaces;
+}
+
 const std::unordered_map<std::string, std::string>& Config::containerByCardinalityComposition() const
 {
     return m_containerByCardinalityComposition;
@@ -131,7 +141,81 @@ const std::unordered_map<std::string, std::string>& Config::umlToCppTypeMap() co
     return m_umlToCppTypeMap;
 }
 
-bool Config::concatenateNamespaces() const
+void Config::readConfigFrom(std::filesystem::path configFilePath)
 {
-    return m_concatenateNamespaces;
+    std::ifstream i(configFilePath);
+    if (i.fail())
+        return;
+
+    json config;
+    i >> config;
+    if (!config.is_object())
+        return;
+
+    if (config.contains("modelFolderName"))
+        m_modelFolderName = config["modelFolderName"].get<std::string>();
+
+    if (config.contains("includeFolderName"))
+        m_includeFolderName = config["includeFolderName"].get<std::string>();
+
+    if (config.contains("sourceFolderName"))
+        m_sourceFolderName = config["sourceFolderName"].get<std::string>();
+
+    if (config.contains("headerFileExtention"))
+        m_headerFileExtention = config["headerFileExtention"].get<std::string>();
+
+    if (config.contains("sourceFileExtention"))
+        m_sourceFileExtention = config["sourceFileExtention"].get<std::string>();
+
+    if (config.contains("overwriteExistingFiles"))
+        m_overwriteExistingFiles = config["overwriteExistingFiles"].get<bool>();
+
+    if (config.contains("memberPrefix"))
+        m_memberPrefix = config["memberPrefix"].get<std::string>();
+
+    if (config.contains("indent"))
+        m_indent = config["indent"].get<std::string>();
+
+    if (config.contains("memberPrefixForStructs"))
+        m_memberPrefixForStructs = config["memberPrefixForStructs"].get<bool>();
+
+    if (config.contains("concatenateNamespaces"))
+        m_concatenateNamespaces = config["concatenateNamespaces"].get<bool>();
+
+    if (config.contains("containerByCardinalityComposition"))
+        m_containerByCardinalityComposition =
+            config["containerByCardinalityComposition"].get<std::unordered_map<std::string, std::string>>();
+
+    if (config.contains("containerByCardinalityAggregation"))
+        m_containerByCardinalityAggregation =
+            config["containerByCardinalityAggregation"].get<std::unordered_map<std::string, std::string>>();
+
+    if (config.contains("typeToIncludeMap"))
+        m_typeToIncludeMap = config["typeToIncludeMap"].get<std::unordered_map<std::string, std::string>>();
+
+    if (config.contains("umlToCppTypeMap"))
+        m_umlToCppTypeMap = config["umlToCppTypeMap"].get<std::unordered_map<std::string, std::string>>();
+}
+
+void Config::writeConfigTo(std::filesystem::path configFilePath)
+{
+    json config;
+
+    config["modelFolderName"]        = m_modelFolderName;
+    config["includeFolderName"]      = m_includeFolderName;
+    config["sourceFolderName"]       = m_sourceFolderName;
+    config["headerFileExtention"]    = m_headerFileExtention;
+    config["sourceFileExtention"]    = m_sourceFileExtention;
+    config["overwriteExistingFiles"] = m_overwriteExistingFiles;
+
+    config["memberPrefix"] = m_memberPrefix;
+    config["indent"]       = m_indent;
+
+    config["memberPrefixForStructs"] = m_memberPrefixForStructs;
+    config["concatenateNamespaces"]  = m_concatenateNamespaces;
+
+    config["containerByCardinalityComposition"] = m_containerByCardinalityComposition;
+    config["containerByCardinalityAggregation"] = m_containerByCardinalityAggregation;
+    config["typeToIncludeMap"]                  = m_typeToIncludeMap;
+    config["umlToCppTypeMap"]                   = m_umlToCppTypeMap;
 }
