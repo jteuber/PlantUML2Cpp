@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include <filesystem>
 
 #include "Config.h"
 
@@ -45,6 +46,36 @@ TEST(ConfigTest, parseAllArgs)
     EXPECT_EQ(sut.modelsPath(), "path/to/project/mo");
     EXPECT_EQ(sut.headersPath(), "path/to/project/in");
     EXPECT_EQ(sut.sourcesPath(), "path/to/project/src");
+    EXPECT_EQ(sut.headerFileExtention(), "hpp");
+    EXPECT_EQ(sut.sourceFileExtention(), "cp");
+    EXPECT_EQ(sut.memberPrefix(), "pre");
+    EXPECT_EQ(sut.indent(), "t");
+}
+
+TEST(ConfigTest, configFileReading)
+{
+    // Arrange
+    Config sut{};
+
+    std::filesystem::path thisFile(__FILE__);
+    auto testDir = thisFile.parent_path().parent_path();
+
+    std::vector<std::string> arguments = {"test", "-c", "Common", testDir};
+    std::vector<char*> argv;
+    for (const auto& arg : arguments)
+        argv.push_back((char*) arg.data());
+    argv.push_back(nullptr);
+
+    // Act
+    sut.parseAndLoad(argv.size() - 1, argv.data());
+
+    // Assert
+    EXPECT_TRUE(sut.overwriteExistingFiles());
+    EXPECT_FALSE(sut.noMemberPrefixForStructs());
+    EXPECT_TRUE(sut.concatenateNamespaces());
+    EXPECT_EQ(sut.modelsPath(), testDir / "mo");
+    EXPECT_EQ(sut.headersPath(), testDir / "in");
+    EXPECT_EQ(sut.sourcesPath(), testDir / "src");
     EXPECT_EQ(sut.headerFileExtention(), "hpp");
     EXPECT_EQ(sut.sourceFileExtention(), "cp");
     EXPECT_EQ(sut.memberPrefix(), "pre");
