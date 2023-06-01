@@ -29,7 +29,7 @@ std::vector<File> EnumGenerator::generate(PlantUml::SyntaxNode root)
 
         File header;
         header.content = m_headerGenerator.generate(c);
-        header.path    = m_config->headersPath() / nsPath / (c.name + m_config->headerFileExtention());
+        header.path    = m_config->headersPath() / nsPath / (c.name + "." + m_config->headerFileExtention());
         files.emplace_back(std::move(header));
     }
 
