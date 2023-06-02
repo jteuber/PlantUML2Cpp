@@ -85,6 +85,14 @@ TEST(ConfigTest, configFileReading)
     EXPECT_EQ(sut.sourceFileExtention(), "cp");
     EXPECT_EQ(sut.memberPrefix(), "pre");
     EXPECT_EQ(sut.indent(), "t");
+    EXPECT_EQ(sut.containerByCardinalityComposition().size(), 1);
+    EXPECT_EQ(sut.containerByCardinalityComposition().at("test"), "test");
+    EXPECT_EQ(sut.containerByCardinalityAggregation().size(), 1);
+    EXPECT_EQ(sut.containerByCardinalityAggregation().at("test"), "test");
+    EXPECT_EQ(sut.typeToIncludeMap().size(), 1);
+    EXPECT_EQ(sut.typeToIncludeMap().at("test"), "test");
+    EXPECT_EQ(sut.umlToCppTypeMap().size(), 1);
+    EXPECT_EQ(sut.umlToCppTypeMap().at("test"), "test");
 }
 
 TEST(ConfigTest, configFileWriting)

@@ -8,5 +8,17 @@
     "memberPrefix": "pre",
     "indent": "t",
     "memberPrefixForStructs": true,
-    "concatenateNamespaces": true
+    "concatenateNamespaces": true,
+    "containerByCardinalityComposition": {
+        "test": "test"
+    },
+    "containerByCardinalityAggregation": {
+        "test": "test"
+    },
+    "typeToIncludeMap": {
+        "test": "test"
+    },
+    "umlToCppTypeMap": {
+        "test": "test"
+    }
 }
