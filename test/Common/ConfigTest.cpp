@@ -1,5 +1,10 @@
 #include "gtest/gtest.h"
+
 #include <filesystem>
+#include <fstream>
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 #include "Config.h"
 
@@ -80,4 +85,44 @@ TEST(ConfigTest, configFileReading)
     EXPECT_EQ(sut.sourceFileExtention(), "cp");
     EXPECT_EQ(sut.memberPrefix(), "pre");
     EXPECT_EQ(sut.indent(), "t");
+}
+
+TEST(ConfigTest, configFileWriting)
+{
+    // Arrange
+    Config sut{};
+
+    std::filesystem::path thisFile(__FILE__);
+    auto testDir = thisFile.parent_path().parent_path();
+    std::filesystem::create_directory(testDir / "tmp");
+
+    std::vector<std::string> arguments = {
+        "test", "-c", "tmp", "-fMnw", "-mmo", "-iin", "-ssrc", "-Hhpp", "-Ccp", "-ppre", "-tt", testDir};
+    std::vector<char*> argv;
+    for (const auto& arg : arguments)
+        argv.push_back((char*) arg.data());
+    argv.push_back(nullptr);
+
+    // Act
+    sut.parseAndLoad(argv.size() - 1, argv.data());
+
+    // Assert
+    std::ifstream genFile(testDir / "tmp" / "config.json");
+    json generatedJson;
+    genFile >> generatedJson;
+
+    EXPECT_TRUE(generatedJson["overwriteExistingFiles"]);
+    EXPECT_TRUE(generatedJson["memberPrefixForStructs"]);
+    EXPECT_TRUE(generatedJson["concatenateNamespaces"]);
+    EXPECT_EQ(generatedJson["modelFolderName"], "mo");
+    EXPECT_EQ(generatedJson["includeFolderName"], "in");
+    EXPECT_EQ(generatedJson["sourceFolderName"], "src");
+    EXPECT_EQ(generatedJson["headerFileExtention"], "hpp");
+    EXPECT_EQ(generatedJson["sourceFileExtention"], "cp");
+    EXPECT_EQ(generatedJson["memberPrefix"], "pre");
+    EXPECT_EQ(generatedJson["indent"], "t");
+    genFile.close();
+
+    std::filesystem::remove(testDir / "tmp" / "config.json");
+    std::filesystem::remove(testDir / "tmp");
 }

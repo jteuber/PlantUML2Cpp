@@ -218,4 +218,8 @@ void Config::writeConfigTo(std::filesystem::path configFilePath)
     config["containerByCardinalityAggregation"] = m_containerByCardinalityAggregation;
     config["typeToIncludeMap"]                  = m_typeToIncludeMap;
     config["umlToCppTypeMap"]                   = m_umlToCppTypeMap;
+
+    std::ofstream o(configFilePath);
+    o << std::setw(4) << config << std::endl;
+    o.close();
 }
