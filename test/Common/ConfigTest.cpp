@@ -129,6 +129,16 @@ TEST(ConfigTest, configFileWriting)
     EXPECT_EQ(generatedJson["sourceFileExtention"], "cp");
     EXPECT_EQ(generatedJson["memberPrefix"], "pre");
     EXPECT_EQ(generatedJson["indent"], "t");
+    // because the default of these maps can't be changed from the outside (maybe that's something to change) I'll keep
+    // it to checks if the maps are present and are objects
+    EXPECT_TRUE(generatedJson.contains("containerByCardinalityComposition"));
+    EXPECT_TRUE(generatedJson["containerByCardinalityComposition"].is_object());
+    EXPECT_TRUE(generatedJson.contains("containerByCardinalityAggregation"));
+    EXPECT_TRUE(generatedJson["containerByCardinalityAggregation"].is_object());
+    EXPECT_TRUE(generatedJson.contains("typeToIncludeMap"));
+    EXPECT_TRUE(generatedJson["typeToIncludeMap"].is_object());
+    EXPECT_TRUE(generatedJson.contains("umlToCppTypeMap"));
+    EXPECT_TRUE(generatedJson["umlToCppTypeMap"].is_object());
     genFile.close();
 
     std::filesystem::remove(testDir / "tmp" / "config.json");
