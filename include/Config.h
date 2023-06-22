@@ -31,6 +31,10 @@ public:
     const std::unordered_map<std::string, std::string>& umlToCppTypeMap() const;
 
 private:
+    void readConfigFrom(std::filesystem::path configFilePath);
+    void writeConfigTo(std::filesystem::path configFilePath);
+
+private:
     // project and file generation settings
     std::filesystem::path m_projectPath = std::filesystem::current_path();
     std::string m_configFolderName      = "models";
