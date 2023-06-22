@@ -29,7 +29,7 @@ std::vector<File> VariantGenerator::generate(PlantUml::SyntaxNode root)
 
         File header;
         header.content = m_headerGenerator.generate(c);
-        header.path    = m_config->includeFolderName / nsPath / (c.name + ".h");
+        header.path    = m_config->headersPath() / nsPath / (c.name + "." + m_config->headerFileExtention());
         files.emplace_back(std::move(header));
     }
 

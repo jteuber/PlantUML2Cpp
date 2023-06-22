@@ -17,7 +17,7 @@ public:
     std::string generate(const Class& in);
 
 private:
-    std::string generateIncludes(const Class& in);
+    static std::string generateIncludes(const Class& in);
 
     std::string toString(const std::string& s);
     std::string toString(const Variable& var);

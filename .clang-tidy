@@ -1,7 +1,9 @@
 ---
-Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc*,-altera*,-misc-non-private-member-variables-in-classes'
+Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc*,-altera*,-misc-non-private-member-variables-in-classes,-readability-identifier-length,-misc-no-recursion'
+CheckOptions:
+    readability-identifier-length.MinimumParameterNameLength: 0
+    readability-identifier-length.MinimumLoopCounterNameLength: 0
+    readability-identifier-length.MinimumExceptionNameLength: 0
 WarningsAsErrors: '*'
 HeaderFilterRegex: '*Test.cpp'
 FormatStyle:     none
-
-

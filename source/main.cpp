@@ -1,14 +1,13 @@
-#include <filesystem>
-
+#include "Config.h"
 #include "PlantUML2Cpp.h"
 
 int main(int argc, char** argv)
 {
-    std::filesystem::path path = std::filesystem::current_path();
-    if (argc >= 2) {
-        path = std::filesystem::path(argv[1]);
+    auto config = std::make_shared<Config>();
+    if (!config->parseAndLoad(argc, argv)) {
+        return -1;
     }
 
-    PlantUML2Cpp p;
-    return p.run(path) ? 0 : -1;
+    PlantUML2Cpp puml2cpp(config);
+    return puml2cpp.run() ? 0 : -2;
 }

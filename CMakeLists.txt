@@ -33,4 +33,12 @@ CPMAddPackage("gh:fmtlib/fmt#7.1.3")
 include_directories(${fmt_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC fmt::fmt)
 
+CPMAddPackage("gh:CLIUtils/CLI11@2.3.2")
+include_directories(${CLI11_SOURCE_DIR}/include)
+target_link_libraries(PlantUML2Cpp PUBLIC CLI11::CLI11)
+
+CPMAddPackage("gh:nlohmann/json@3.11.2")
+include_directories(${json_SOURCE_DIR}/include)
+target_link_libraries(PlantUML2Cpp PUBLIC nlohmann_json::nlohmann_json)
+
 add_subdirectory(test)

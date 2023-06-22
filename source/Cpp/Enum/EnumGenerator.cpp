@@ -11,7 +11,8 @@ EnumGenerator::EnumGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_translator(m_config)
     , m_headerGenerator(m_config)
-{}
+{
+}
 
 std::vector<File> EnumGenerator::generate(PlantUml::SyntaxNode root)
 {
@@ -28,7 +29,7 @@ std::vector<File> EnumGenerator::generate(PlantUml::SyntaxNode root)
 
         File header;
         header.content = m_headerGenerator.generate(c);
-        header.path    = m_config->includeFolderName / nsPath / (c.name + ".h");
+        header.path    = m_config->headersPath() / nsPath / (c.name + "." + m_config->headerFileExtention());
         files.emplace_back(std::move(header));
     }
 

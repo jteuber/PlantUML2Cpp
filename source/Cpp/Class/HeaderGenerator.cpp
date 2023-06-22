@@ -26,12 +26,13 @@ namespace Cpp::Class {
 HeaderGenerator::HeaderGenerator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_genUtils(m_config)
-{}
+{
+}
 
 std::string HeaderGenerator::generate(const Class& in)
 {
     // setup
-    m_variablePrefix = in.isStruct && m_config->noMemberPrefixForStructs ? "" : m_config->memberPrefix;
+    m_variablePrefix = in.isStruct && m_config->noMemberPrefixForStructs() ? "" : m_config->memberPrefix();
 
     std::string ret;
 
@@ -103,12 +104,12 @@ std::string HeaderGenerator::toString(const std::string& s)
 std::string HeaderGenerator::toString(const Variable& var)
 {
     std::string varName = m_variablePrefix + var.name;
-    return m_config->indent + typeToString(var.type) + " " + varName + ";";
+    return m_config->indent() + typeToString(var.type) + " " + varName + ";";
 }
 
 std::string HeaderGenerator::toString(const Method& m)
 {
-    std::string ret = m_config->indent;
+    std::string ret = m_config->indent();
     if (m.isAbstract) {
         ret += "virtual ";
     }
