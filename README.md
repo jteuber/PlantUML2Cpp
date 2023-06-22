@@ -86,12 +86,12 @@ To check what kind of syntax can be parsed, you can have a look in the test dire
 
 | PlantUML syntax element | Can be parsed | Generates code |
 |-------------------------|---------------|----------------|
-| abstract (class) | yes | ? |
-| annotation | yes | ? |
-| class | yes | ? |
-| entity | yes | ? |
-| enum | yes | ? |
-| interface | yes | ? |
+| abstract (class) | yes | yes (translates to normal class) |
+| annotation | yes | no |
+| class | yes | yes |
+| entity | yes | yes (translates to struct) |
+| enum | yes | yes |
+| interface | yes | yes |
 | circle | yes | no |
 | diamond | yes | no |
 | to | be | extended |
