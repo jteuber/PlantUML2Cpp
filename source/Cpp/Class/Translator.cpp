@@ -90,7 +90,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
     if (m_lastEncounteredClass != m_classes.end()) {
         switch (r.type) {
         case PlantUml::RelationshipType::Extension: {
-            m_lastEncounteredClass->inherits.push_back(m_utils.toNamespacedString(r.object));
+            m_lastEncounteredClass->inherits.push_back(Common::toNamespacedString(r.object));
             break;
         }
 
@@ -99,9 +99,9 @@ bool Translator::visit(const PlantUml::Relationship& r)
             if (auto containerIt = m_config->containerByCardinalityComposition().find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityComposition().end()) {
                 var.type =
-                    m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
+                    m_utils.stringToCppType(fmt::format(containerIt->second, Common::toNamespacedString(r.object)));
             } else {
-                var.type = Common::Type{m_utils.toNamespacedString(r.object)};
+                var.type = Common::Type{Common::toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -117,9 +117,9 @@ bool Translator::visit(const PlantUml::Relationship& r)
             if (auto containerIt = m_config->containerByCardinalityAggregation().find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityAggregation().end()) {
                 var.type =
-                    m_utils.stringToCppType(fmt::format(containerIt->second, m_utils.toNamespacedString(r.object)));
+                    m_utils.stringToCppType(fmt::format(containerIt->second, Common::toNamespacedString(r.object)));
             } else {
-                var.type = Common::Type{m_utils.toNamespacedString(r.object)};
+                var.type = Common::Type{Common::toNamespacedString(r.object)};
             }
 
             var.name = r.label;
@@ -173,10 +173,10 @@ bool Translator::visit(const PlantUml::Element& e)
     c.namespaces.insert(c.namespaces.end(), e.name.begin(), e.name.end());
     c.namespaces.pop_back();
     if (!e.implements.empty()) {
-        c.inherits.push_back(m_utils.toNamespacedString(e.implements));
+        c.inherits.push_back(Common::toNamespacedString(e.implements));
     }
     if (!e.extends.empty()) {
-        c.inherits.push_back(m_utils.toNamespacedString(e.extends));
+        c.inherits.push_back(Common::toNamespacedString(e.extends));
     }
 
     m_classes.push_back(c);
