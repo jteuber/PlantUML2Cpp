@@ -30,7 +30,9 @@ jobs:
     
     - name: Setup MSVC
       # Use latest gcc because clang still has problems with views and pipes
-      uses: TheMrMilchmann/setup-msvc-dev@v2.0.0
+      uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: 'x64'
       if: runner.os == 'Windows'
 
     - name: Configure CMake
