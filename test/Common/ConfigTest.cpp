@@ -65,7 +65,7 @@ TEST(ConfigTest, configFileReading)
     std::filesystem::path thisFile(__FILE__);
     auto testDir = thisFile.parent_path().parent_path();
 
-    std::vector<std::string> arguments = {"test", "-c", "Common", testDir};
+    std::vector<std::string> arguments = {"test", "-c", "Common", testDir.string()};
     std::vector<char*> argv;
     for (const auto& arg : arguments)
         argv.push_back((char*) arg.data());
@@ -105,7 +105,7 @@ TEST(ConfigTest, configFileWriting)
     std::filesystem::create_directory(testDir / "tmp");
 
     std::vector<std::string> arguments = {
-        "test", "-c", "tmp", "-fMnw", "-mmo", "-iin", "-ssrc", "-Hhpp", "-Ccp", "-ppre", "-tt", testDir};
+        "test", "-c", "tmp", "-fMnw", "-mmo", "-iin", "-ssrc", "-Hhpp", "-Ccp", "-ppre", "-tt", testDir.string()};
     std::vector<char*> argv;
     for (const auto& arg : arguments)
         argv.push_back((char*) arg.data());
