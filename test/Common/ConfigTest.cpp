@@ -2,6 +2,8 @@
 
 #include <filesystem>
 #include <fstream>
+#include <string>
+using namespace std::string_literals;
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -65,7 +67,7 @@ TEST(ConfigTest, configFileReading)
     std::filesystem::path thisFile(__FILE__);
     auto testDir = thisFile.parent_path().parent_path();
 
-    std::vector<std::string> arguments = {"test", "-c", "Common", testDir.string()};
+    std::vector<std::string> arguments = {"test"s, "-c"s, "Common"s, testDir.string()};
     std::vector<char*> argv;
     for (const auto& arg : arguments)
         argv.push_back((char*) arg.data());
@@ -104,8 +106,18 @@ TEST(ConfigTest, configFileWriting)
     auto testDir = thisFile.parent_path().parent_path();
     std::filesystem::create_directory(testDir / "tmp");
 
-    std::vector<std::string> arguments = {
-        "test", "-c", "tmp", "-fMnw", "-mmo", "-iin", "-ssrc", "-Hhpp", "-Ccp", "-ppre", "-tt", testDir.string()};
+    std::vector<std::string> arguments = {"test"s,
+                                          "-c"s,
+                                          "tmp"s,
+                                          "-fMnw"s,
+                                          "-mmo"s,
+                                          "-iin"s,
+                                          "-ssrc"s,
+                                          "-Hhpp"s,
+                                          "-Ccp"s,
+                                          "-ppre"s,
+                                          "-tt"s,
+                                          testDir.string()};
     std::vector<char*> argv;
     for (const auto& arg : arguments)
         argv.push_back((char*) arg.data());
