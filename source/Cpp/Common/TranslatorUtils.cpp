@@ -1,6 +1,7 @@
 #include "Cpp/Common/TranslatorUtils.h"
 
 #include <cassert>
+#include <iterator>
 #include <numeric>
 #include <ranges>
 #include <utility>
@@ -95,18 +96,16 @@ std::list<std::string> getEffectiveNamespace(std::list<std::string> umlTypename,
     // not interested in the name
     umlTypename.pop_back();
 
-    // if there was only the name, return an empty list
+    // if there was only the name, return the current namespace
     if (umlTypename.empty()) {
-        return {};
+        return namespaceStack;
     }
 
     // uml typename starts with a dot => global namespace
     if (umlTypename.front().empty()) {
         umlTypename.pop_front();
     } else {
-        for (const auto& ns : namespaceStack | std::views::reverse) {
-            umlTypename.push_front(ns);
-        }
+        std::copy(namespaceStack.rbegin(), namespaceStack.rend(), std::front_inserter(umlTypename));
     }
 
     return umlTypename;
