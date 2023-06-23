@@ -26,6 +26,12 @@ jobs:
     - name: Setup GCC
       # Use latest gcc because clang still has problems with views and pipes
       uses: Dup4/actions-setup-gcc@v1
+      if: runner.os != 'Windows'
+    
+    - name: Setup MSVC
+      # Use latest gcc because clang still has problems with views and pipes
+      uses: TheMrMilchmann/setup-msvc-dev@v2.0.0
+      if: runner.os == 'Windows'
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
