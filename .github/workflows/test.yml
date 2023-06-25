@@ -44,7 +44,18 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
+    - name: Test unix
+      working-directory: ${{github.workspace}}/build/test
       # Execute tests (build with the google test framework)
-      run: test/tests
+      run: ./tests
+      if: runner.os != 'Windows'
+      
+    - name: Test windows
+
+      working-directory: ${{github.workspace}}/build/release/test
+
+      # Execute tests (build with the google test framework)
+
+      run: ./tests
+
+      if: runner.os == 'Windows'
