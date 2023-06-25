@@ -1,0 +1,61 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macOS-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup GCC
+      # Use latest gcc on unix because clang still has problems with views and pipes
+      uses: Dup4/actions-setup-gcc@v1
+      if: runner.os != 'Windows'
+    
+    - name: Setup MSVC
+      # Use latest msvc compiler on windows
+      uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: 'x64'
+      if: runner.os == 'Windows'
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test unix
+      working-directory: ${{github.workspace}}/build/test
+      # Execute tests (build with the google test framework)
+      run: ./tests
+      if: runner.os != 'Windows'
+      
+    - name: Test windows
+
+      working-directory: ${{github.workspace}}/build/test/Release
+
+      # Execute tests (build with the google test framework)
+
+      run: ./tests.exe
+
+      if: runner.os == 'Windows'
