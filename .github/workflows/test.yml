@@ -24,12 +24,12 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Setup GCC
-      # Use latest gcc because clang still has problems with views and pipes
+      # Use latest gcc on unix because clang still has problems with views and pipes
       uses: Dup4/actions-setup-gcc@v1
       if: runner.os != 'Windows'
     
     - name: Setup MSVC
-      # Use latest gcc because clang still has problems with views and pipes
+      # Use latest msvc compiler on windows
       uses: TheMrMilchmann/setup-msvc-dev@v2
       with:
         arch: 'x64'
@@ -46,6 +46,5 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      # Execute tests (build with the google test framework)
       run: test/tests
