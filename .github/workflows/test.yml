@@ -52,10 +52,10 @@ jobs:
       
     - name: Test windows
 
-      working-directory: ${{github.workspace}}/build/release/test
+      working-directory: ${{github.workspace}}/build/test/Release
 
       # Execute tests (build with the google test framework)
 
-      run: ./tests
+      run: ./tests.exe
 
       if: runner.os == 'Windows'
