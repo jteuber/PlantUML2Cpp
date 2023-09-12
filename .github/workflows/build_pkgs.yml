@@ -33,10 +33,6 @@ jobs:
 
       - name: create sample script
         run: |
-      
-
-      - name: create sample script
-        run: |
           mkdir -p .debpkg/usr/bin
           mkdir -p .rpmpkg/usr/bin
           cp ${{github.workspace}}/build/PlantUML2Cpp .debpkg/usr/bin/plantuml2cpp

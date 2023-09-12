@@ -7,10 +7,14 @@ namespace puml = PlantUml;
 
 namespace Cpp::Class {
 
-void act(PlantUml::Parser& parser, Translator& sut, std::string_view puml)
+auto act(std::string_view puml)
 {
-    ASSERT_TRUE(parser.parse(puml));
+    Translator sut{std::make_shared<Config>()};
+    PlantUml::Parser parser;
+    EXPECT_TRUE(parser.parse(puml));
     parser.getAST().visit(sut);
+
+    return std::move(sut).results();
 }
 
 TEST(ClassTranslatorTest, EmptyDiagram)
@@ -59,9 +63,6 @@ TEST(ClassTranslatorTest, SingleAbstract)
 TEST(ClassTranslatorTest, AllSimpleContainers)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
     abstract        abstract
@@ -75,10 +76,9 @@ TEST(ClassTranslatorTest, AllSimpleContainers)
     @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 4);
 
     EXPECT_EQ(classes[0].name, "abstract");
@@ -98,19 +98,15 @@ TEST(ClassTranslatorTest, AllSimpleContainers)
 TEST(ClassTranslatorTest, EntityWithEmptyBody)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
     entity test { }
     @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "test");
@@ -122,9 +118,6 @@ TEST(ClassTranslatorTest, EntityWithEmptyBody)
 TEST(ClassTranslatorTest, EntityWithSingleVariable)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
     entity test {
@@ -133,10 +126,9 @@ TEST(ClassTranslatorTest, EntityWithSingleVariable)
     @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "test");
@@ -151,9 +143,6 @@ TEST(ClassTranslatorTest, EntityWithSingleVariable)
 TEST(ClassTranslatorTest, ClassWithTwoMethods)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class test {
@@ -163,10 +152,9 @@ TEST(ClassTranslatorTest, ClassWithTwoMethods)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "test");
@@ -187,9 +175,6 @@ TEST(ClassTranslatorTest, ClassWithTwoMethods)
 TEST(ClassTranslatorTest, Inheritance)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Class02
@@ -197,10 +182,9 @@ TEST(ClassTranslatorTest, Inheritance)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "Class02");
@@ -211,9 +195,6 @@ TEST(ClassTranslatorTest, Inheritance)
 TEST(ClassTranslatorTest, Composition)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Class03
@@ -221,10 +202,9 @@ TEST(ClassTranslatorTest, Composition)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "Class03");
@@ -236,9 +216,6 @@ TEST(ClassTranslatorTest, Composition)
 TEST(ClassTranslatorTest, Aggregation)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Class05
@@ -246,10 +223,9 @@ TEST(ClassTranslatorTest, Aggregation)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "Class05");
@@ -261,9 +237,6 @@ TEST(ClassTranslatorTest, Aggregation)
 TEST(ClassTranslatorTest, LabelsOnRelations)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Class01
@@ -276,10 +249,9 @@ TEST(ClassTranslatorTest, LabelsOnRelations)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 4);
 
     EXPECT_EQ(classes[0].name, "Class01");
@@ -300,9 +272,6 @@ TEST(ClassTranslatorTest, LabelsOnRelations)
 TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Object
@@ -314,10 +283,9 @@ TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 2);
 
     EXPECT_EQ(classes[0].name, "Object");
@@ -339,9 +307,6 @@ TEST(ClassTranslatorTest, ExternalMethodsAndVariables)
 TEST(ClassTranslatorTest, Namespaces)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
 
@@ -355,10 +320,9 @@ TEST(ClassTranslatorTest, Namespaces)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 3);
 
     EXPECT_EQ(classes[0].name, "BaseClass");
@@ -380,9 +344,6 @@ TEST(ClassTranslatorTest, Namespaces)
 TEST(ClassTranslatorTest, NamespaceSeperator)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
 
@@ -394,10 +355,9 @@ TEST(ClassTranslatorTest, NamespaceSeperator)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     Class foo = classes[0];
@@ -411,9 +371,6 @@ TEST(ClassTranslatorTest, NamespaceSeperator)
 TEST(ClassTranslatorTest, NestedNamespaces)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
 
@@ -426,10 +383,9 @@ TEST(ClassTranslatorTest, NestedNamespaces)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     Class foo = classes[0];
@@ -443,9 +399,6 @@ TEST(ClassTranslatorTest, NestedNamespaces)
 TEST(ClassTranslatorTest, InheritFromOtherNamespace)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
 
@@ -460,10 +413,9 @@ TEST(ClassTranslatorTest, InheritFromOtherNamespace)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 2);
 
     Class foo = classes[0];
@@ -482,9 +434,6 @@ TEST(ClassTranslatorTest, InheritFromOtherNamespace)
 TEST(ClassTranslatorTest, Stereotypes)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
 
@@ -493,10 +442,9 @@ TEST(ClassTranslatorTest, Stereotypes)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     Class system = classes[0];
@@ -549,9 +497,6 @@ TEST(ClassTranslatorTest, Templates)
 TEST(ClassTranslatorTest, Interface)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
     interface test {
@@ -561,10 +506,9 @@ TEST(ClassTranslatorTest, Interface)
     @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "test");
@@ -587,9 +531,6 @@ TEST(ClassTranslatorTest, Interface)
 TEST(ClassTranslatorTest, Visibility)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
     class test {
@@ -599,10 +540,9 @@ TEST(ClassTranslatorTest, Visibility)
     @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     EXPECT_EQ(classes[0].name, "test");
@@ -618,9 +558,6 @@ TEST(ClassTranslatorTest, Visibility)
 TEST(ClassTranslatorTest, SameClassNameDifferentNamespace)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class BaseClass
@@ -635,10 +572,9 @@ TEST(ClassTranslatorTest, SameClassNameDifferentNamespace)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 3);
 
     EXPECT_EQ(classes[0].name, "BaseClass");
@@ -655,9 +591,6 @@ TEST(ClassTranslatorTest, SameClassNameDifferentNamespace)
 TEST(ClassTranslatorTest, ClassWithSpotSIsStruct)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
 
@@ -672,10 +605,9 @@ TEST(ClassTranslatorTest, ClassWithSpotSIsStruct)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 2);
 
     Class type = classes[0];
@@ -686,9 +618,6 @@ TEST(ClassTranslatorTest, ClassWithSpotSIsStruct)
 TEST(ClassTranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Singleton << (S,#FFAA55) Singleton >>
@@ -696,10 +625,9 @@ TEST(ClassTranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     Class type = classes[0];
@@ -710,9 +638,6 @@ TEST(ClassTranslatorTest, ClassWithSpotSButStereotypeNotStructIsNotStruct)
 TEST(ClassTranslatorTest, ClassWithSpotSAndStereotypeStructIsStruct)
 {
     // Arrange
-    Translator sut{std::make_shared<Config>()};
-    PlantUml::Parser parser;
-
     static constexpr auto puml =
         R"(@startuml
         class Struct << (S,#FFAA55) Struct >>
@@ -720,10 +645,9 @@ TEST(ClassTranslatorTest, ClassWithSpotSAndStereotypeStructIsStruct)
         @enduml)";
 
     // Act
-    act(parser, sut, puml);
+    auto classes = act(puml);
 
     // Assert
-    auto classes = std::move(sut).results();
     ASSERT_EQ(classes.size(), 1);
 
     Class type = classes[0];
