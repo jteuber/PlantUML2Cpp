@@ -51,11 +51,7 @@ jobs:
       if: runner.os != 'Windows'
       
     - name: Test windows
-
       working-directory: ${{github.workspace}}/build/test/Release
-
       # Execute tests (build with the google test framework)
-
       run: ./tests.exe
-
       if: runner.os == 'Windows'
