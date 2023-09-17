@@ -29,7 +29,7 @@ std::vector<Class> Translator::results() &&
 
 bool Translator::visit(const PlantUml::Variable& v)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     if (!v.element.empty()) {
         m_lastEncounteredClass = std::ranges::find(m_classes, v.element.back(), &Class::name);
@@ -61,7 +61,7 @@ bool Translator::visit(const PlantUml::Variable& v)
 
 bool Translator::visit(const PlantUml::Method& m)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     if (!m.element.empty()) {
         m_lastEncounteredClass     = std::ranges::find(m_classes, m.element.back(), &Class::name);
@@ -69,21 +69,20 @@ bool Translator::visit(const PlantUml::Method& m)
     }
 
     if (m_lastEncounteredClass != m_classes.end()) {
-        Method method;
-        auto& c = *m_lastEncounteredClass;
-
         if (m.visibility != m_lastVisibility) {
-            c.body.emplace_back(VisibilityKeyword{Common::TranslatorUtils::visibilityToString(m.visibility)});
+            m_lastEncounteredClass->body.emplace_back(
+                VisibilityKeyword{Common::TranslatorUtils::visibilityToString(m.visibility)});
             m_lastVisibility = m.visibility;
         }
 
+        Method method;
         method.name       = m.name;
         method.returnType = m_utils.umlToCppType(m.returnType);
         method.isAbstract = m.isAbstract || m_lastEncounteredClass->isInterface;
         method.isConst    = m.isConst;
         method.isStatic   = m.isStatic;
 
-        c.body.emplace_back(method);
+        m_lastEncounteredClass->body.emplace_back(method);
     }
 
     return true;
@@ -91,7 +90,7 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     m_lastEncounteredClass = Common::findClass<Class>(r.subject, m_classes, m_namespaceStack);
 
@@ -148,7 +147,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
 bool Translator::visit(const PlantUml::Container& c)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
@@ -160,7 +159,7 @@ bool Translator::visit(const PlantUml::Container& c)
 
 bool Translator::visit(const PlantUml::Element& e)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     bool process = true;
     if (e.type != PlantUml::ElementType::Class && e.type != PlantUml::ElementType::Entity &&
@@ -222,7 +221,7 @@ bool Translator::visit(const PlantUml::Type& /*t*/)
 
 bool Translator::visit(const PlantUml::Parameter& p)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
@@ -236,7 +235,7 @@ bool Translator::visit(const PlantUml::Parameter& p)
 
 bool Translator::visit(const PlantUml::End& e)
 {
-    auto f__ = FuncTracer();
+    FuncTracer f__;
 
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
