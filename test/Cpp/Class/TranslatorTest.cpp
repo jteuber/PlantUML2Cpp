@@ -2,6 +2,7 @@
 
 #include "Cpp/Class/Translator.h"
 #include "PlantUml/Parser.h"
+#include "spdlog/spdlog.h"
 
 namespace puml = PlantUml;
 
@@ -9,6 +10,7 @@ namespace Cpp::Class {
 
 auto act(std::string_view puml)
 {
+    spdlog::set_level(spdlog::level::trace);
     Translator sut{std::make_shared<Config>()};
     PlantUml::Parser parser;
     EXPECT_TRUE(parser.parse(puml));
