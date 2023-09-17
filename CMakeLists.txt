@@ -7,12 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include/)
 file(GLOB SRC_FILES
     "source/*.cpp"
+    "source/Common/*.cpp"
     "source/PlantUml/*.cpp"
     "source/Cpp/*.cpp"
     "source/Cpp/*/*.cpp"
 )
 file(GLOB HEADER_FILES
     "include/*.h"
+    "source/Common/*.h"
     "include/PlantUml/*.h"
     "include/Cpp/*.h"
     "include/Cpp/*/*.h"
