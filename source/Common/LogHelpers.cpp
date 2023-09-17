@@ -2,12 +2,21 @@
 
 #include <spdlog/spdlog.h>
 
-void logFuncEntry(const std::source_location location)
+FuncTracer::FuncTracer(const std::source_location location)
+    : m_location(location)
 {
-    spdlog::trace("Entering: {}", location.function_name());
+    spdlog::trace("Entering: {} ({}, line {},{})",
+                  m_location.function_name(),
+                  m_location.file_name(),
+                  m_location.line(),
+                  m_location.column());
 }
 
-void logFuncExit(const std::source_location location)
+FuncTracer::~FuncTracer()
 {
-    spdlog::trace("Exiting: {}", location.function_name());
+    spdlog::trace("Exiting: {} ({}, line {},{})",
+                  m_location.function_name(),
+                  m_location.file_name(),
+                  m_location.line(),
+                  m_location.column());
 }

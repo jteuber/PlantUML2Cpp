@@ -24,7 +24,7 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     auto lastEncountered = Common::findClass<Variant>(r.subject, m_results, m_namespaceStack);
 
@@ -37,7 +37,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
 bool Translator::visit(const PlantUml::Container& c)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
@@ -49,7 +49,7 @@ bool Translator::visit(const PlantUml::Container& c)
 
 bool Translator::visit(const PlantUml::Element& e)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     bool process = false;
     if (e.spotLetter == 'V' && (e.stereotype == "Variant" || e.stereotype.empty())) {
@@ -65,7 +65,6 @@ bool Translator::visit(const PlantUml::Element& e)
         process = true;
     }
 
-    logFuncExit();
     return process;
 }
 
@@ -81,13 +80,12 @@ bool Translator::visit(const PlantUml::Separator& s)
 
 bool Translator::visit(const PlantUml::Enumerator& e)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     if (m_lastEncountered != m_results.end()) {
         m_lastEncountered->containedTypes.emplace_back(e.name);
     }
 
-    logFuncExit();
     return false;
 }
 
@@ -98,7 +96,7 @@ bool Translator::visit(const PlantUml::Parameter& p)
 
 bool Translator::visit(const PlantUml::End& e)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
@@ -108,7 +106,6 @@ bool Translator::visit(const PlantUml::End& e)
         m_namespaceSizes.pop_back();
     }
 
-    logFuncExit();
     return true;
 }
 

@@ -27,20 +27,19 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
 bool Translator::visit(const PlantUml::Container& c)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
         m_namespaceStack.insert(m_namespaceStack.end(), c.name.begin(), c.name.end());
     }
 
-    logFuncExit();
     return true;
 }
 
 bool Translator::visit(const PlantUml::Element& e)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     bool process = false;
     if (e.type == PlantUml::ElementType::Enum) {
@@ -56,7 +55,6 @@ bool Translator::visit(const PlantUml::Element& e)
         process = true;
     }
 
-    logFuncExit();
     return process;
 }
 
@@ -72,13 +70,12 @@ bool Translator::visit(const PlantUml::Separator& s)
 
 bool Translator::visit(const PlantUml::Enumerator& e)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     if (m_lastEncountered != m_results.end()) {
         m_lastEncountered->enumerators.emplace_back(e.name);
     }
 
-    logFuncExit();
     return false;
 }
 
@@ -89,7 +86,7 @@ bool Translator::visit(const PlantUml::Parameter& p)
 
 bool Translator::visit(const PlantUml::End& e)
 {
-    logFuncEntry();
+    auto f__ = FuncTracer();
 
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
@@ -99,7 +96,6 @@ bool Translator::visit(const PlantUml::End& e)
         m_namespaceSizes.pop_back();
     }
 
-    logFuncExit();
     return true;
 }
 
