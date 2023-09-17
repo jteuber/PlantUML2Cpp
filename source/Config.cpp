@@ -7,6 +7,8 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
+#include <spdlog/spdlog.h>
+
 bool Config::parseAndLoad(int argc, char** argv)
 {
     CLI::App app{"PlantUML2Cpp -- translate PlantUML class diagrams to C++ code"};
@@ -41,6 +43,11 @@ bool Config::parseAndLoad(int argc, char** argv)
     app.add_flag(
         "-w,--writeConfig", writeConfig, "Write config file to config directory with the settings given as arguments");
 
+    bool verboseLogging = false;
+    app.add_flag("-v,--debug", verboseLogging, "Enable debug logging");
+    bool tracing = false;
+    app.add_flag("--trace", tracing, "Enable tracing on top of debug logging");
+
     // first parse the command line args to extract the project and config path
     // (all options and flags need to be present in case of -h or parser exception)
     try {
@@ -48,6 +55,13 @@ bool Config::parseAndLoad(int argc, char** argv)
     } catch (const CLI::ParseError& e) {
         app.exit(e);
         return false;
+    }
+
+    // immediately set debug or trace logging if requested
+    if (tracing) {
+        spdlog::set_level(spdlog::level::trace);
+    } else if (verboseLogging) {
+        spdlog::set_level(spdlog::level::debug);
     }
 
     m_projectPath = pathString;
