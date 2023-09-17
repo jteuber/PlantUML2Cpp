@@ -98,8 +98,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityComposition().find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityComposition().end()) {
-                var.type =
-                    m_utils.stringToCppType(fmt::format(containerIt->second, Common::toNamespacedString(r.object)));
+                var.type = m_utils.stringToCppType(
+                    fmt::format(fmt::runtime(containerIt->second), Common::toNamespacedString(r.object)));
             } else {
                 var.type = Common::Type{Common::toNamespacedString(r.object)};
             }
@@ -116,8 +116,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
             Variable var;
             if (auto containerIt = m_config->containerByCardinalityAggregation().find(r.objectCardinality);
                 containerIt != m_config->containerByCardinalityAggregation().end()) {
-                var.type =
-                    m_utils.stringToCppType(fmt::format(containerIt->second, Common::toNamespacedString(r.object)));
+                var.type = m_utils.stringToCppType(
+                    fmt::format(fmt::runtime(containerIt->second), Common::toNamespacedString(r.object)));
             } else {
                 var.type = Common::Type{Common::toNamespacedString(r.object)};
             }
