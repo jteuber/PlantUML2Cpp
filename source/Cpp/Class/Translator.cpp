@@ -12,6 +12,8 @@
 
 #include <fmt/core.h>
 
+#include "Common/LogHelpers.h"
+
 namespace Cpp::Class {
 
 Translator::Translator(std::shared_ptr<Config> config)
@@ -27,6 +29,8 @@ std::vector<Class> Translator::results() &&
 
 bool Translator::visit(const PlantUml::Variable& v)
 {
+    logFuncEntry();
+
     if (!v.element.empty()) {
         m_lastEncounteredClass = std::ranges::find(m_classes, v.element.back(), &Class::name);
     }
@@ -52,11 +56,14 @@ bool Translator::visit(const PlantUml::Variable& v)
         m_lastEncounteredClass = m_classes.end();
     }
 
+    logFuncExit();
     return true;
 }
 
 bool Translator::visit(const PlantUml::Method& m)
 {
+    logFuncEntry();
+
     if (!m.element.empty()) {
         m_lastEncounteredClass     = std::ranges::find(m_classes, m.element.back(), &Class::name);
         m_lastClassFromExternalDef = true;
@@ -80,11 +87,14 @@ bool Translator::visit(const PlantUml::Method& m)
         c.body.emplace_back(method);
     }
 
+    logFuncExit();
     return true;
 }
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
+    logFuncEntry();
+
     m_lastEncounteredClass = Common::findClass<Class>(r.subject, m_classes, m_namespaceStack);
 
     if (m_lastEncounteredClass != m_classes.end()) {
@@ -135,54 +145,64 @@ bool Translator::visit(const PlantUml::Relationship& r)
         }
     }
 
+    logFuncExit();
     return true;
 }
 
 bool Translator::visit(const PlantUml::Container& c)
 {
+    logFuncEntry();
+
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
         m_namespaceStack.insert(m_namespaceStack.end(), c.name.begin(), c.name.end());
     }
 
+    logFuncExit();
     return true;
 }
 
 bool Translator::visit(const PlantUml::Element& e)
 {
+    logFuncEntry();
+
+    bool process = true;
     if (e.type != PlantUml::ElementType::Class && e.type != PlantUml::ElementType::Entity &&
         e.type != PlantUml::ElementType::Interface && e.type != PlantUml::ElementType::Abstract) {
-        return false;
+        process = false;
     }
 
     // don't process variants
     if (e.spotLetter == 'V' && (e.stereotype == "Variant" || e.stereotype.empty())) {
-        return false;
+        process = false;
     }
 
-    Class c;
-    if (e.type == PlantUml::ElementType::Interface) {
-        c.isInterface = true;
-    } else if ((e.spotLetter == 'S' && (e.stereotype == "Struct" || e.stereotype.empty())) ||
-               e.type == PlantUml::ElementType::Entity) {
-        c.isStruct = true;
+    if (process) {
+        Class c;
+        if (e.type == PlantUml::ElementType::Interface) {
+            c.isInterface = true;
+        } else if ((e.spotLetter == 'S' && (e.stereotype == "Struct" || e.stereotype.empty())) ||
+                   e.type == PlantUml::ElementType::Entity) {
+            c.isStruct = true;
+        }
+
+        c.name       = e.name.back();
+        c.namespaces = m_namespaceStack;
+        c.namespaces.insert(c.namespaces.end(), e.name.begin(), e.name.end());
+        c.namespaces.pop_back();
+        if (!e.implements.empty()) {
+            c.inherits.push_back(Common::toNamespacedString(e.implements));
+        }
+        if (!e.extends.empty()) {
+            c.inherits.push_back(Common::toNamespacedString(e.extends));
+        }
+
+        m_classes.push_back(c);
+        m_lastEncounteredClass = --m_classes.end();
     }
 
-    c.name       = e.name.back();
-    c.namespaces = m_namespaceStack;
-    c.namespaces.insert(c.namespaces.end(), e.name.begin(), e.name.end());
-    c.namespaces.pop_back();
-    if (!e.implements.empty()) {
-        c.inherits.push_back(Common::toNamespacedString(e.implements));
-    }
-    if (!e.extends.empty()) {
-        c.inherits.push_back(Common::toNamespacedString(e.extends));
-    }
-
-    m_classes.push_back(c);
-    m_lastEncounteredClass = --m_classes.end();
-
-    return true;
+    logFuncExit();
+    return process;
 }
 
 bool Translator::visit(const PlantUml::Note& /*n*/)
@@ -207,6 +227,8 @@ bool Translator::visit(const PlantUml::Type& /*t*/)
 
 bool Translator::visit(const PlantUml::Parameter& p)
 {
+    logFuncEntry();
+
     if (m_lastEncounteredClass != m_classes.end()) {
         Parameter param;
         param.name = p.name;
@@ -214,11 +236,14 @@ bool Translator::visit(const PlantUml::Parameter& p)
         std::get<Method>(m_lastEncounteredClass->body.back()).parameters.push_back(param);
     }
 
+    logFuncExit();
     return true;
 }
 
 bool Translator::visit(const PlantUml::End& e)
 {
+    logFuncEntry();
+
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
         while (m_namespaceStack.size() > size) {
@@ -234,6 +259,7 @@ bool Translator::visit(const PlantUml::End& e)
         }
     }
 
+    logFuncExit();
     return true;
 }
 
