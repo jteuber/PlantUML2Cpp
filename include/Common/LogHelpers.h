@@ -5,8 +5,14 @@
 class FuncTracer
 {
 public:
-    FuncTracer(const std::source_location location = std::source_location::current());
+    explicit FuncTracer(std::source_location location = std::source_location::current());
     ~FuncTracer();
+
+    // copying or moving not allowed
+    FuncTracer(const FuncTracer& other)            = delete;
+    FuncTracer operator=(const FuncTracer& other)  = delete;
+    FuncTracer(const FuncTracer&& other)           = delete;
+    FuncTracer operator=(const FuncTracer&& other) = delete;
 
 private:
     std::source_location m_location;
