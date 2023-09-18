@@ -15,17 +15,14 @@
 namespace Cpp::Common {
 
 template <typename T>
-concept NamespacedElement = requires(T a)
-{
-    {
-        a.namespaces
-    }
-    ->std::convertible_to<std::list<std::string>>;
-    {
-        a.name
-    }
-    ->std::convertible_to<std::string>;
-};
+concept NamespacedElement = requires(T a) {
+                                {
+                                    a.namespaces
+                                    } -> std::convertible_to<std::list<std::string>>;
+                                {
+                                    a.name
+                                    } -> std::convertible_to<std::string>;
+                            };
 
 class TranslatorUtils
 {
@@ -34,12 +31,13 @@ public:
 
     Type umlToCppType(PlantUml::Type umlType);
     Type stringToCppType(std::string_view typeString);
-    std::string toNamespacedString(std::list<std::string> namespacedType);
     static std::string visibilityToString(PlantUml::Visibility vis);
 
 private:
     std::shared_ptr<Config> m_config;
 };
+
+std::string toNamespacedString(std::list<std::string> namespacedType);
 
 std::list<std::string> getEffectiveNamespace(std::list<std::string> umlTypename,
                                              const std::list<std::string>& namespaceStack);
@@ -49,10 +47,11 @@ typename std::vector<E>::iterator findClass(const std::list<std::string>& umlTyp
                                             std::vector<E>& classes,
                                             const std::list<std::string>& namespaceStack)
 {
-    return std::ranges::find_if(classes, [namespaceStack, subject = umlTypename](const E& c) {
+    auto subjectNamespace = getEffectiveNamespace(umlTypename, namespaceStack);
+
+    return std::ranges::find_if(classes, [&subjectNamespace, subject = umlTypename](const E& c) {
         if (c.name == subject.back()) {
-            auto subjectNamespace = getEffectiveNamespace(subject, namespaceStack);
-            auto it               = subjectNamespace.begin();
+            auto it = subjectNamespace.begin();
             for (const auto& nc : c.namespaces) {
                 if (it == subjectNamespace.end() || nc != *it) {
                     return false;

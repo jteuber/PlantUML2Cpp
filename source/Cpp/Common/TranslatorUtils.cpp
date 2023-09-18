@@ -1,5 +1,7 @@
 #include "Cpp/Common/TranslatorUtils.h"
 
+#include <cassert>
+#include <iterator>
 #include <numeric>
 #include <ranges>
 #include <utility>
@@ -58,19 +60,6 @@ Type TranslatorUtils::stringToCppType(std::string_view typeString)
     return ret;
 }
 
-std::string TranslatorUtils::toNamespacedString(std::list<std::string> namespacedType)
-{
-    auto ret = std::accumulate(
-        namespacedType.begin(), namespacedType.end(), std::string(), [](const auto& a, const auto& b) -> std::string {
-            return a + (a.empty() ? "" : "::") + b;
-        });
-    if (namespacedType.front().empty()) {
-        ret = "::" + ret;
-    }
-
-    return ret;
-}
-
 std::string TranslatorUtils::visibilityToString(PlantUml::Visibility vis)
 {
     switch (vis) {
@@ -85,19 +74,38 @@ std::string TranslatorUtils::visibilityToString(PlantUml::Visibility vis)
     }
 }
 
+std::string toNamespacedString(std::list<std::string> namespacedType)
+{
+    auto ret = std::accumulate(
+        namespacedType.begin(), namespacedType.end(), std::string(), [](const auto& a, const auto& b) -> std::string {
+            return a + (a.empty() ? "" : "::") + b;
+        });
+    if (namespacedType.front().empty()) {
+        ret = "::" + ret;
+    }
+
+    return ret;
+}
+
 std::list<std::string> getEffectiveNamespace(std::list<std::string> umlTypename,
                                              const std::list<std::string>& namespaceStack)
 {
+    // pre-condition: umlTypename must at least have one element (the name)
+    assert(umlTypename.size() > 0);
+
     // not interested in the name
     umlTypename.pop_back();
+
+    // if there was only the name, return the current namespace
+    if (umlTypename.empty()) {
+        return namespaceStack;
+    }
 
     // uml typename starts with a dot => global namespace
     if (umlTypename.front().empty()) {
         umlTypename.pop_front();
     } else {
-        for (const auto& ns : namespaceStack | std::views::reverse) {
-            umlTypename.push_front(ns);
-        }
+        std::copy(namespaceStack.rbegin(), namespaceStack.rend(), std::front_inserter(umlTypename));
     }
 
     return umlTypename;

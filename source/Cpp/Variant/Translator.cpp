@@ -2,12 +2,15 @@
 
 #include <utility>
 
+#include "Common/LogHelpers.h"
+
 namespace Cpp::Variant {
 
 Translator::Translator(std::shared_ptr<Config> config)
     : m_config(std::move(config))
     , m_utils(m_config)
-{}
+{
+}
 
 bool Translator::visit(const PlantUml::Variable& v)
 {
@@ -21,6 +24,8 @@ bool Translator::visit(const PlantUml::Method& m)
 
 bool Translator::visit(const PlantUml::Relationship& r)
 {
+    FuncTracer f_;
+
     auto lastEncountered = Common::findClass<Variant>(r.subject, m_results, m_namespaceStack);
 
     if (lastEncountered != m_results.end()) {
@@ -32,6 +37,8 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
 bool Translator::visit(const PlantUml::Container& c)
 {
+    FuncTracer f_;
+
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
         m_namespaceStack.insert(m_namespaceStack.end(), c.name.begin(), c.name.end());
@@ -42,6 +49,9 @@ bool Translator::visit(const PlantUml::Container& c)
 
 bool Translator::visit(const PlantUml::Element& e)
 {
+    FuncTracer f_;
+
+    bool process = false;
     if (e.spotLetter == 'V' && (e.stereotype == "Variant" || e.stereotype.empty())) {
         Variant v;
         v.name       = e.name.back();
@@ -52,10 +62,10 @@ bool Translator::visit(const PlantUml::Element& e)
         m_results.emplace_back(std::move(v));
         m_lastEncountered = --m_results.end();
 
-        return true;
+        process = true;
     }
 
-    return false;
+    return process;
 }
 
 bool Translator::visit(const PlantUml::Note& n)
@@ -70,9 +80,12 @@ bool Translator::visit(const PlantUml::Separator& s)
 
 bool Translator::visit(const PlantUml::Enumerator& e)
 {
+    FuncTracer f_;
+
     if (m_lastEncountered != m_results.end()) {
         m_lastEncountered->containedTypes.emplace_back(e.name);
     }
+
     return false;
 }
 
@@ -83,6 +96,8 @@ bool Translator::visit(const PlantUml::Parameter& p)
 
 bool Translator::visit(const PlantUml::End& e)
 {
+    FuncTracer f_;
+
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
         while (m_namespaceStack.size() > size) {

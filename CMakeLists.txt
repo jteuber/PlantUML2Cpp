@@ -7,12 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include/)
 file(GLOB SRC_FILES
     "source/*.cpp"
+    "source/Common/*.cpp"
     "source/PlantUml/*.cpp"
     "source/Cpp/*.cpp"
     "source/Cpp/*/*.cpp"
 )
 file(GLOB HEADER_FILES
     "include/*.h"
+    "source/Common/*.h"
     "include/PlantUml/*.h"
     "include/Cpp/*.h"
     "include/Cpp/*/*.h"
@@ -29,7 +31,7 @@ CPMAddPackage("gh:TheLartians/PEGParser@2.2.0")
 include_directories(${PEGParser_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC PEGParser)
 
-CPMAddPackage("gh:fmtlib/fmt#7.1.3")
+CPMAddPackage("gh:fmtlib/fmt#10.1.1")
 include_directories(${fmt_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC fmt::fmt)
 
@@ -40,5 +42,13 @@ target_link_libraries(PlantUML2Cpp PUBLIC CLI11::CLI11)
 CPMAddPackage("gh:nlohmann/json@3.11.2")
 include_directories(${json_SOURCE_DIR}/include)
 target_link_libraries(PlantUML2Cpp PUBLIC nlohmann_json::nlohmann_json)
+
+CPMAddPackage(
+  GITHUB_REPOSITORY gabime/spdlog 
+  VERSION 1.12.0
+  OPTIONS "SPDLOG_FMT_EXTERNAL 1" 
+)
+include_directories(${spdlog_SOURCE_DIR}/include)
+target_link_libraries(PlantUML2Cpp PUBLIC spdlog::spdlog)
 
 add_subdirectory(test)

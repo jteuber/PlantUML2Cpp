@@ -4,7 +4,6 @@
 #include "PlantUml/SyntaxNode.h"
 
 #include <algorithm>
-#include <bits/ranges_algobase.h>
 #include <iostream>
 #include <iterator>
 #include <ranges>
