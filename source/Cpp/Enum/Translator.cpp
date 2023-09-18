@@ -27,7 +27,7 @@ bool Translator::visit(const PlantUml::Relationship& r)
 
 bool Translator::visit(const PlantUml::Container& c)
 {
-    FuncTracer f__;
+    FuncTracer f_;
 
     if (c.type == PlantUml::ContainerType::Namespace) {
         m_namespaceSizes.push_back(m_namespaceStack.size());
@@ -39,7 +39,7 @@ bool Translator::visit(const PlantUml::Container& c)
 
 bool Translator::visit(const PlantUml::Element& e)
 {
-    FuncTracer f__;
+    FuncTracer f_;
 
     bool process = false;
     if (e.type == PlantUml::ElementType::Enum) {
@@ -70,7 +70,7 @@ bool Translator::visit(const PlantUml::Separator& s)
 
 bool Translator::visit(const PlantUml::Enumerator& e)
 {
-    FuncTracer f__;
+    FuncTracer f_;
 
     if (m_lastEncountered != m_results.end()) {
         m_lastEncountered->enumerators.emplace_back(e.name);
@@ -86,7 +86,7 @@ bool Translator::visit(const PlantUml::Parameter& p)
 
 bool Translator::visit(const PlantUml::End& e)
 {
-    FuncTracer f__;
+    FuncTracer f_;
 
     if (e.type == PlantUml::EndType::Namespace) {
         auto size = m_namespaceSizes.back();
