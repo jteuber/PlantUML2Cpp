@@ -20,6 +20,7 @@ Cmake will download all necessary dependencies for you using the [https://github
 These dependencies are:
 * [https://github.com/TheLartians/PEGParser](PEGParser)
 * [https://github.com/fmtlib/fmt](fmt)
+* [https://github.com/gabime/spdlog](spdlog)
 * [https://github.com/google/googletest](googletest)
 
 #### Building on Debian derivates
